@@ -1,0 +1,24 @@
+(* EBNF grammar for instaparse *)
+<INPUT> = RULES | QUERY ;
+
+
+QUERY = <'query'> NAME;
+
+<RULES> = [DISCOUNT | PROMOTION]+
+    PROMOTION = <'promotion'> NAME PROMOTIONTYPE <'when'> CONDITION [<'and'> CONDITION]* <';'>;
+    DISCOUNT = <'discount'> NAME PERCENT <'when'> CONDITION [<'and'> CONDITION]* <';'>;
+    <PERCENT> = NUMBER ;
+    PROMOTIONTYPE = STRING ;
+    
+    <NAME> = STRING ;
+
+    NUMBER = #'[0-9]+' ;
+    
+    (* <STRING> = #'[A-Za-z][A-Za-z0-9_-]+' ; *)
+    <STRING> = #'[A-Za-z][A-Za-z0-9\/\._-]+' ;
+    
+    CONDITION = FACTTYPE FIELD OPERATOR VALUE ;
+    FACTTYPE = 'customer' | 'total' | 'order' ;
+    <FIELD> = STRING ;
+    OPERATOR = 'is' | '>' | '<' | '=' ;
+    <VALUE> = STRING | NUMBER ;
