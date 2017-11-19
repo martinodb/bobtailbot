@@ -38,6 +38,6 @@ So, to get started quickly (for Ubuntu and similar):
  2. `cd ./bobtailbot`
  3. `lein run`, or `lein repl` and then `(-main)`.
 ## 3. Edit the [configuration file](bobtailbot/src/bobtailbot/config.clj) to explore other options.
-    If you are using `lein repl`, then after editing `config.clj` or any other file, do `(user/refresh)`, and then again `(-main)`.
+ - If you are using `lein repl`, then after editing `config.clj` or any other file, do `(user/refresh)`, and then again `(-main)`.
  - To make it run as a repl instead of connecting to irc, comment the line `(def user-interface :irc)` and uncomment the line `(def user-interface :repl)`
  - To connect to Freenode instead of Localnet, comment the line `(def host "127.0.0.1")` and uncomment the line `;(def host "chat.freenode.net")`.
