@@ -2,7 +2,7 @@
   (:require 
   
             [user :as u]
-            [bobtailbot.insta-clara-shopping :as ic-shopping]
+            [bobtailbot.brains.example-shopping.brain :as shopbr]
             
             [bobtailbot.config :as cf]
             [bobtailbot.repl :as repl]
@@ -18,14 +18,14 @@
 (defn qd-respond [text]
   (if (question-mark? text) "Nice question."  "I see.") )
 
-(defn ic-shopping-respond [text]
-  (ic-shopping/respond text))
+(defn shopbr-respond [text]
+  (shopbr/respond text))
 
 
 (defn respond [text]
   (case cf/parsemode
     :quickanddirty (qd-respond text)
-    :insta-clara-shopping (ic-shopping-respond text)
+    :example-shopping (shopbr-respond text)
     (qd-respond text)
     )
   )
@@ -40,12 +40,12 @@
            (irc/write-privmsg socket "chiming in every 3 seconds!" irc-channel)
            (recur))))
 
-(defn ic-shopping-irc-speakup [socket irc-channel] (ic-shopping/irc-speakup socket irc-channel))
+(defn shopbr-irc-speakup [socket irc-channel] (shopbr/irc-speakup socket irc-channel))
 
 (defn speakup [socket irc-channel]
   (case [cf/user-interface cf/parsemode]
     [:irc :quickanddirty] (qd-irc-speakup socket irc-channel)
-    [:irc :insta-clara-shopping] (ic-shopping-irc-speakup socket irc-channel)
+    [:irc :example-shopping] (shopbr-irc-speakup socket irc-channel)
     ()
     )
   )

@@ -1,7 +1,7 @@
 (ns bobtailbot.config)
 
 ;(def parsemode :quickanddirty)
-(def parsemode :insta-clara-shopping)
+(def parsemode :example-shopping)
 
 ;(def user-interface :repl)
 (def user-interface :irc)

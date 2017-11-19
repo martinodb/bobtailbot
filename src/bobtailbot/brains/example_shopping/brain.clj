@@ -1,7 +1,7 @@
 ;;; CREDIT:
 ;;; https://github.com/cerner/clara-examples/blob/master/src/main/clojure/clara/examples/insta.clj
 
-(ns bobtailbot.insta-clara-shopping
+(ns bobtailbot.brains.example-shopping.brain
   "Instantly create a rule-based DSL"
   (:require [instaparse.core :as insta]
             [clara.rules.accumulators :as acc]
@@ -17,7 +17,15 @@
             [bobtailbot.irc :as irc]))
 
 
-(def ns-prefix "bobtailbot.insta-clara-shopping/")
+;; IMPORTANT!!!
+;; Change this prefix if you change this file's name (or path).
+;;Also remember to change the ns declaration.
+(def dir-prefix "./src/bobtailbot/brains/example_shopping/")
+(def ns-prefix-noslash "bobtailbot.brains.example-shopping.brain")
+(def ns-prefix (str ns-prefix-noslash "/"))
+
+
+
 
 
 ;;;; Facts used in the examples below.
@@ -35,7 +43,9 @@
 (defrecord Promotion [reason type])
 
 (def shopping-grammar
-  (insta/parser  (slurp "./resources/grammars/shopping/shopping_grammar.ebnf") :auto-whitespace :standard ))
+  ;(insta/parser  (slurp "./resources/grammars/shopping/shopping_grammar.ebnf") :auto-whitespace :standard )
+  (insta/parser  (slurp (str dir-prefix "grammar.ebnf")) :auto-whitespace :standard )
+  )
 
 
 (def operators {"is" `=
@@ -164,7 +174,7 @@
 
 
 
-(def default-session-01 (-> (mk-session 'bobtailbot.insta-clara-shopping (load-user-rules @rule-list))
+(def default-session-01 (-> (mk-session 'bobtailbot.brains.example-shopping.brain (load-user-rules @rule-list))
                     ( #(apply insert %1 %2) @fact-list)
                     (fire-rules)))
 
@@ -175,7 +185,7 @@
 
 
 ;; this one is useful for the REPL
-(def text-01 "query bobtailbot.insta-clara-shopping/get-discounts")
+(def text-01 (str "query " ns-prefix "get-discounts"))
 (def text-02 "query get-discounts")
 
 (def text-rule-01 "discount gold-summer-discount 20 when customer status is gold and order month is august;")
@@ -189,25 +199,17 @@ Dynamic rules is something I wouldn't mind adding to Clara, although that comes 
 -Ryan
 ")
 
+;(comment 'bobtailbot.insta-clara-shopping)
 
 (defn respond
   "Respond to text"
   [text]
-  (let [
-  
-        ;session-02 (-> (mk-session 'bobtailbot.insta-clara-shopping (load-user-rules @rule-list))
-                    ;( #(apply insert %1 %2) @fact-list)
-                    ;(fire-rules))
-                    
-         parsetree  (shopping-grammar text)
-                    
-                    ]
-
+  (let [parsetree  (shopping-grammar text)]
      (case (first (first parsetree))
        :QUERY  ((first (insta/transform shopping-transforms parsetree)) @session-01-a )
        (or :DISCOUNT :PROMOTION) 
            (do (swap! rule-list #(str % text))
-           (let [session-03 (-> (mk-session 'bobtailbot.insta-clara-shopping (load-user-rules @rule-list))
+           (let [session-03 (-> (mk-session (symbol ns-prefix-noslash) (load-user-rules @rule-list))
                                      ( #(apply insert %1 %2) @fact-list)
                                      (fire-rules))]               
                   (swap! session-01-a (constantly session-03)))
