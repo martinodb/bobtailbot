@@ -59,7 +59,8 @@
           reply-msg (apply str (respond-fn msg-content))]
               (cond 
                 (re-find #"^quit" msg-content) (write socket "QUIT")
-                 :else (write-privmsg socket reply-msg irc-channel :print)))))
+                 :else (do (write-privmsg socket reply-msg irc-channel :print)
+                            (Thread/sleep 2000))))))
 
 (defn message-listener [socket irc-channel respond-fn]
   (async/go-loop []
@@ -76,7 +77,9 @@
       
        (message-listener socket irc-channel respond-fn)
       
-       (Thread/sleep 7000)
+       ;(Thread/sleep 7000)
+       (Thread/sleep 15000)
+       
        (write socket (str "JOIN " irc-channel) true)
        (Thread/sleep 1000)
        (write socket (str "PRIVMSG " irc-channel " :" greeting) true)
