@@ -2,14 +2,16 @@
   (:require 
   
             [user :as u]
-            [bobtailbot.brains.example-shopping.brain :as shopbr]
             
+            [bobtailbot.brains.example-shopping.brain :as shopbr]
+            [bobtailbot.brains.quick-and-dirty.brain :as qdbr]
             
             [bobtailbot.repl :as repl]
             [bobtailbot.irc :as irc]
             [clojure.core.async :as async :refer [go-loop <! >! close!]]
             
             [outpace.config :refer [defconfig]]))
+
 
 
 (defconfig parsemode :example-shopping)
@@ -22,38 +24,22 @@
 
 
 
-(defn question-mark? [text] (re-find  #"\?$" text) )
-(defn qd-respond [text]
-  (if (question-mark? text) "Nice question."  "I see.") )
-
-(defn shopbr-respond [text]
-  (shopbr/respond text))
-
 
 (defn respond [text]
   (case parsemode
-    :quickanddirty (qd-respond text)
-    :example-shopping (shopbr-respond text)
-    (qd-respond text)
+    :quickanddirty (qdbr/respond text)
+    :example-shopping (shopbr/respond text)
+    (qdbr/respond text)
     )
   )
 
 
 
 
-(defn qd-irc-speakup [socket irc-channel]
-     (go-loop[] 
-       (do 
-           (<! (async/timeout 3000))
-           (irc/write-privmsg socket "chiming in every 3 seconds!" irc-channel)
-           (recur))))
-
-(defn shopbr-irc-speakup [socket irc-channel] (shopbr/irc-speakup socket irc-channel))
-
 (defn speakup [socket irc-channel]
   (case [user-interface parsemode]
-    [:irc :quickanddirty] (qd-irc-speakup socket irc-channel)
-    [:irc :example-shopping] (shopbr-irc-speakup socket irc-channel)
+    [:irc :quickanddirty] (qdbr/irc-speakup socket irc-channel)
+    [:irc :example-shopping] (shopbr/irc-speakup socket irc-channel)
     ()
     )
   )

@@ -37,9 +37,11 @@ So, to get started quickly (for Ubuntu and similar):
  1. Clone this repo: `git clone https://github.com/martinodb/bobtailbot`
  2. `cd ./bobtailbot`
  3. `lein run`, or `lein repl` and then `(-main)`.
-## 3. Edit the [configuration file](src/bobtailbot/config.clj) to explore other options.
- - To make it run as a repl instead of connecting to irc, comment the line `(def user-interface :irc)` and uncomment the line `(def user-interface :repl)`
- - To connect to Freenode instead of Localnet, comment the line `(def host "127.0.0.1")` and uncomment the line `;(def host "chat.freenode.net")`.
+## 3. Edit the [configuration file](config.edn) to explore other options. Uncomment and replace as needed, as described in the documentation of [the outspace.config library](https://github.com/outpace/config).
+ - By default, there will be a number of commented entries such as `#_bobtailbot.core/greeting #_"Hello.  Let's chat."`.
+ - To make it run as a repl instead of connecting to irc, replace the line `#_bobtailbot.core/user-interface #_:irc` with `bobtailbot.core/user-interface :repl #_:irc`. Notice that the default value `:irc` is left commented. You can remove it if you prefer.
+ - To connect to Freenode instead of Localnet, replace the line `#_bobtailbot.core/host #_"127.0.0.1"` with `bobtailbot.core/host "chat.freenode.net"`.
+ - If the config file gets garbled and you need to regenerate it with default values, do `lein config`.
 
-If you are using `lein repl`, then after editing `config.clj` or any other file,
-   do `(user/refresh)`, and then again `(-main)`.
+If you are using `lein repl`, then after editing `config.edn` or any other file,
+   do `(user/refresh)`, and then again `(-main)`. Sometimes, if you edit namespace names and things like that, it's better to do `quit` and `lein repl` again, though.
