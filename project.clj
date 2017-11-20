@@ -9,6 +9,7 @@
                  ;[clj-http "2.0.0"]
                  ;[hickory "0.5.4"]
                  
+                 [com.outpace/config "0.10.0"]
                  
                  [com.cerner/clara-rules "0.16.0"]
                  [instaparse "1.4.8"]
@@ -24,7 +25,7 @@
   {:dev {:source-paths ["dev" "src" "test"]
          :dependencies [[org.clojure/tools.namespace "0.2.11"]]}}
                  
-                 
+  :aliases {"config" ["run" "-m" "outpace.config.generate"]}
                  )
 
 

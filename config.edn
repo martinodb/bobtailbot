@@ -1,0 +1,19 @@
+{
+
+;; CONFIG ENTRIES:
+
+#_bobtailbot.core/greeting #_"Hello.  Let's chat."
+
+#_bobtailbot.core/host #_"127.0.0.1"
+
+#_bobtailbot.core/irc-channel #_"#whateverhey"
+
+#_bobtailbot.core/nick #_"bobtailbot"
+
+#_bobtailbot.core/parsemode #_:example-shopping
+
+#_bobtailbot.core/port #_6667
+
+#_bobtailbot.core/user-interface #_:irc
+
+}
