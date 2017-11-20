@@ -9,6 +9,7 @@
             
             ;;[clara.tools.inspect :as cti]
             
+            [clojure.string :as string]
             [clojure.core.async :as async 
                :refer [go-loop <! <!! >! >!!  close! chan pub sub]]
             
@@ -20,9 +21,16 @@
 ;; IMPORTANT!!!
 ;; Change this prefix if you change this file's name (or path).
 ;;Also remember to change the ns declaration.
-(def dir-prefix "./src/bobtailbot/brains/example_shopping/")
-(def ns-prefix-noslash "bobtailbot.brains.example-shopping.brain")
-(def ns-prefix (str ns-prefix-noslash "/"))
+
+(def parent-ns "bobtailbot.brains.example-shopping")
+(def this-ns-unqual "brain")
+
+
+(def this-ns (str parent-ns "." this-ns-unqual))
+(def ns-prefix (str this-ns "/"))
+
+(def this-dir (str "./src/" (-> parent-ns (string/replace #"\." "/" ) (string/replace #"-" "_")) ))
+(def dir-prefix (str this-dir "/" ))
 
 
 
@@ -209,7 +217,7 @@ Dynamic rules is something I wouldn't mind adding to Clara, although that comes 
        :QUERY  ((first (insta/transform shopping-transforms parsetree)) @session-01-a )
        (or :DISCOUNT :PROMOTION) 
            (do (swap! rule-list #(str % text))
-           (let [session-03 (-> (mk-session (symbol ns-prefix-noslash) (load-user-rules @rule-list))
+           (let [session-03 (-> (mk-session (symbol this-ns) (load-user-rules @rule-list))
                                      ( #(apply insert %1 %2) @fact-list)
                                      (fire-rules))]               
                   (swap! session-01-a (constantly session-03)))
@@ -237,4 +245,5 @@ Dynamic rules is something I wouldn't mind adding to Clara, although that comes 
            ;(<! (async/timeout 10000))
            ;(irc/write-privmsg socket "chiming in, smartly, every 10 seconds!" irc-channel)
            ;(recur))))
+
 
