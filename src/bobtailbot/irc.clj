@@ -40,10 +40,6 @@
       
       (recur))))
 
-;; this is really embarrassing.
-;;Geany goes crazy with this regex, so I put it in the end.
-;; But I must (at least) declare it before use.
-(declare sillyregex  )
 
 (defn handle-line [socket line irc-channel respond-fn]
   (println line)
@@ -55,7 +51,9 @@
     (re-find #"PRIVMSG" line)
        (let [
           msg-user (second (re-find #"^\:(\S+)\!" line))
-          msg-content (second (sillyregex line))
+          msg-content (second (re-find (re-pattern "^:.+:(.*)") line))
+          ;;Geany goes crazy with this regex, so I use "re-pattern" instead.
+          
           reply-msg (apply str (respond-fn msg-content))]
               (cond 
                 (re-find #"^quit" msg-content) (write socket "QUIT")
@@ -124,6 +122,3 @@
 ;)))
 
 
-
-
-(defn sillyregex [line] (re-find #"^:.+:(.*)" line) )
