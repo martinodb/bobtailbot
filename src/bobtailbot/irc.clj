@@ -7,6 +7,10 @@
             [clojure.core.async :as async]
             [com.gearswithingears.async-sockets :refer :all]))
 
+
+(def connected (atom false))
+
+
 (defn write
   ([socket message]
    (write socket message false))
@@ -48,6 +52,8 @@
        (close-socket-client socket)
     (re-find #"^PING" line)
        (write socket (str "PONG " (re-find #":.*" line)) :print)
+    (re-find (re-pattern ":Current Global Users:") line)
+      (swap! connected (constantly true))
     (re-find #"PRIVMSG" line)
        (let [
           msg-user (second (re-find #"^\:(\S+)\!" line))
@@ -56,9 +62,9 @@
           
           reply-msg (apply str (respond-fn msg-content))]
               (cond 
-                (re-find #"^quit" msg-content) (write socket "QUIT")
+                (re-find #"^quit" msg-content) (swap! connected (constantly false))
                  :else (do (write-privmsg socket reply-msg irc-channel :print)
-                            (Thread/sleep 2000))))))
+                            (Thread/sleep 500))))))
 
 (defn message-listener [socket irc-channel respond-fn]
   (async/go-loop []
@@ -66,59 +72,43 @@
       (handle-line socket line irc-channel respond-fn)
       (recur))))
 
+
+
 (defn connect [nick host port irc-channel greeting respond-fn speakup-fn]
   (println "Connecting...")
   (try
     (let [socket (socket-client port host)]
       (println (str "Connected to " host ":" port))
-       (login-as-guest socket nick)
+       
       
        (message-listener socket irc-channel respond-fn)
+       (Thread/sleep 1000)
+       (login-as-guest socket nick)
+       ;(Thread/sleep 500)
       
-       ;(Thread/sleep 7000)
-       (Thread/sleep 15000)
+       (println (str "connected? :" @connected))
+       (while (= @connected false) (Thread/sleep 100))
+       (println (str "connected? :" @connected))
        
+       (Thread/sleep 500)
        (write socket (str "JOIN " irc-channel) true)
        (Thread/sleep 1000)
        (write socket (str "PRIVMSG " irc-channel " :" greeting) true)
-       
+       (Thread/sleep 500)
        (speakup-fn socket irc-channel)
        
-       (Thread/sleep 30000)
-       ;(write socket "QUIT")
        
-       (Thread/sleep 1000)
+       (when (= @connected true)
+        (do ))
+       
+       (while (= @connected true) (Thread/sleep 100))
+       
+       (when (= @connected false) (do (println "disconnecting now") (write socket "QUIT")))
        
        
-       
-       ; it's a loop, so put it last.
-       ;(input-listener socket)
        
        )
     (catch Exception e
-      (println (str "Failed to connect to " host ":" port)))))
-
-
-
-
-
-;(def cli-usage
-  ;[["-n" "--nick NICK" "Nickname" :default "examplenickdonotuse"]
-   ;["-h" "--host HOST" "Hostname" :default "127.0.0.1"]
-   ;["-p" "--port PORT" "Port number" :parse-fn #(Integer/parseInt %) :default 6667]])
-
-;(defn -main [& args]
-  ;(let [{:keys [options summary]} (cli/parse-opts args cli-usage)
-           ;]
-    ;(if (or (not (:nick options)) (not (:port options)) (not (:host options)))
-      ;(println summary)
-      ;(do 
-        ;(connect
-          ;(-> options :nick string/trim)
-          ;(-> options :host string/trim)
-          ;(:port options))
-
-      ;)
-;)))
+      (println (str "Failed to connect to " host ":" port "\n" (str e))))))
 
 
