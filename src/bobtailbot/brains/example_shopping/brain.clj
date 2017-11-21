@@ -232,10 +232,10 @@ Dynamic rules is something I wouldn't mind adding to Clara, although that comes 
       ))
 
 
-(defn irc-speakup [socket irc-channel]
+(defn speakup [speakup-chan]
   (go-loop []
     (let [{:keys [text]} (<! output-chan)]
-      (irc/write-privmsg socket text irc-channel)
+      (>! speakup-chan text )
       (recur))))
 
 

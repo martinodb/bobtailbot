@@ -72,6 +72,14 @@
       (handle-line socket line irc-channel respond-fn)
       (recur))))
 
+(defn speaker-up [socket irc-channel speakup-fn]
+  (let [speakup-chan (async/chan)]
+    (do (speakup-fn speakup-chan)
+        (async/go-loop []
+             (let [privmsg (async/<! speakup-chan)]
+             (write-privmsg socket privmsg irc-channel)
+             (recur))))))
+
 
 
 (defn connect [nick host port irc-channel greeting respond-fn speakup-fn]
@@ -95,7 +103,9 @@
        (Thread/sleep 1000)
        (write socket (str "PRIVMSG " irc-channel " :" greeting) true)
        (Thread/sleep 500)
-       (speakup-fn socket irc-channel)
+       
+       ;(speakup-fn socket irc-channel)
+       (speaker-up socket irc-channel speakup-fn)
        
        (while (= @connected true) (Thread/sleep 100))
        (println "disconnecting now")

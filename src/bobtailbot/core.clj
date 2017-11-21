@@ -36,10 +36,10 @@
 
 
 
-(defn speakup [socket irc-channel]
-  (case [user-interface parsemode]
-    [:irc :quickanddirty] (qdbr/irc-speakup socket irc-channel)
-    [:irc :example-shopping] (shopbr/irc-speakup socket irc-channel)
+(defn speakup [speakup-chan]
+  (case parsemode
+    :quickanddirty (qdbr/speakup speakup-chan)
+    :example-shopping (shopbr/speakup speakup-chan)
     ()
     )
   )

@@ -34,9 +34,9 @@
   (if (question-mark? text) "Nice question."  "I see.") )
 
 
-(defn irc-speakup [socket irc-channel]
+(defn speakup [speakup-chan]
      (go-loop[] 
        (do 
            (<! (async/timeout 5000))
-           (irc/write-privmsg socket "chiming in every 5 seconds!" irc-channel)
+           (>! speakup-chan "chiming in every 5 seconds!" )
            (recur))))
