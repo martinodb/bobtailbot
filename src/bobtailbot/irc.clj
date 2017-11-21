@@ -60,7 +60,7 @@
           msg-content (second (re-find (re-pattern "^:.+:(.*)") line))
           ;;Geany goes crazy with this regex, so I use "re-pattern" instead.
           
-          reply-msg (apply str (respond-fn msg-content))]
+          reply-msg (respond-fn msg-content)]
               (cond 
                 (re-find #"^quit" msg-content) (swap! connected (constantly false))
                  :else (do (write-privmsg socket reply-msg irc-channel :print)
