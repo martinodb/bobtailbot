@@ -222,7 +222,7 @@ Dynamic rules is something I wouldn't mind adding to Clara, although that comes 
                                      (fire-rules))]               
                   (swap! session-01-a (constantly session-03)))
                   
-               ["rules loaded: " (load-user-rules text)] )
+               (str "rules loaded: " (apply str (load-user-rules text))) )
         "unknown input")
      
      

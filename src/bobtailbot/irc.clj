@@ -9,6 +9,13 @@
 
 
 (def connected (atom false))
+(def curr-host (atom "127.0.0.1"))
+
+(def ready-server-msg 
+ (delay 
+  (case @curr-host
+  "127.0.0.1" ":Current Global Users:"
+  "chat.freenode.net" "End of /MOTD command.")))
 
 
 (defn write
@@ -45,6 +52,9 @@
       (recur))))
 
 
+
+
+
 (defn handle-line [socket line irc-channel respond-fn]
   (println line)
   (cond
@@ -52,7 +62,7 @@
        (close-socket-client socket)
     (re-find #"^PING" line)
        (write socket (str "PONG " (re-find #":.*" line)) :print)
-    (re-find (re-pattern ":Current Global Users:") line)
+    (re-find (re-pattern @ready-server-msg) line)
       (swap! connected (constantly true))
     (re-find #"PRIVMSG" line)
        (let [
@@ -60,7 +70,7 @@
           msg-content (second (re-find (re-pattern "^:.+:(.*)") line))
           ;;Geany goes crazy with this regex, so I use "re-pattern" instead.
           
-          reply-msg (respond-fn msg-content)]
+          reply-msg (apply str (respond-fn msg-content))]
               (cond 
                 (re-find #"^quit" msg-content) (swap! connected (constantly false))
                  :else (do (write-privmsg socket reply-msg irc-channel :print)
@@ -84,6 +94,7 @@
 
 (defn connect [nick host port irc-channel greeting respond-fn speakup-fn]
   (println "Connecting...")
+  (swap! curr-host (constantly host))
   (try
     (let [socket (socket-client port host)]
       (println (str "Connected to " host ":" port))
