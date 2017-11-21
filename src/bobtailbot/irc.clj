@@ -97,17 +97,9 @@
        (Thread/sleep 500)
        (speakup-fn socket irc-channel)
        
-       
-       (when (= @connected true)
-        (do ))
-       
        (while (= @connected true) (Thread/sleep 100))
-       
-       (when (= @connected false) (do (println "disconnecting now") (write socket "QUIT")))
-       
-       
-       
-       )
+       (println "disconnecting now")
+       (write socket "QUIT"))
     (catch Exception e
       (println (str "Failed to connect to " host ":" port "\n" (str e))))))
 
