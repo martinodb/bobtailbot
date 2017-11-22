@@ -140,11 +140,11 @@
 (sub our-pub :alert-purchase-gizmo output-chan)
 
 
-;(defrule alert-gizmo-purchase
-  ;"Anyone who purchases a gizmo gets a free lunch."
-  ;[Purchase (= item :gizmo)]
-  ;=>
-  ;(>!! input-chan {:msg-type :alert-purchase-gizmo :text "someone bought a gizmo!"}))
+(defrule alert-gizmo-purchase
+  "Anyone who purchases a gizmo gets a free lunch."
+  [Purchase (= item :gizmo)]
+  =>
+  (>!! input-chan {:msg-type :alert-purchase-gizmo :text "someone bought a gizmo!"}))
 
 
 
@@ -237,16 +237,16 @@ Dynamic rules is something I wouldn't mind adding to Clara, although that comes 
 
 
 
-(def output-chan2 (chan))
-(sub our-pub :response output-chan2)
+;(def output-chan2 (chan))
+;(sub our-pub :response output-chan2)
 
-
+(sub our-pub :response output-chan)
 
 
 (defn speakup2 [speakup-chan]
   (go-loop []
-    (let [{:keys [text]} (<! output-chan2)]
-      (>! speakup-chan text )
+    (let [{:keys [text msg-type]} (<! output-chan)]
+      (if (= msg-type :response) (>! speakup-chan text )) 
       (recur))))
 
 
