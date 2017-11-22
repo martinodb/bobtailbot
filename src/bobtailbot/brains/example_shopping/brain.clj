@@ -237,15 +237,9 @@ Dynamic rules is something I wouldn't mind adding to Clara, although that comes 
 
 
 
-
-
-
-
-(def input-chan2 (chan))
-(def our-pub2 (pub input-chan2 :msg-type))
-
 (def output-chan2 (chan))
-(sub our-pub2 :response output-chan2)
+(sub our-pub :response output-chan2)
+
 
 
 
@@ -263,7 +257,7 @@ Dynamic rules is something I wouldn't mind adding to Clara, although that comes 
     (let [ parsetree  (shopping-grammar text)]
       (case (first (first parsetree))
         :QUERY  (let [response ((first (insta/transform shopping-transforms parsetree)) @session-01-a )]
-                     (>!! input-chan2 {:msg-type :response :text response}))
+                     (>!! input-chan {:msg-type :response :text response}))
          (or :DISCOUNT :PROMOTION) 
            (do (swap! rule-list #(str % text))
               (let [session-03 (-> (mk-session (symbol this-ns) (load-user-rules @rule-list))
@@ -271,8 +265,8 @@ Dynamic rules is something I wouldn't mind adding to Clara, although that comes 
                                      (fire-rules))]               
                  (swap! session-01-a (constantly session-03)))
                  (let [response (str "rules loaded: " (apply str (load-user-rules text)))]
-                      (>!! input-chan2 {:msg-type :response :text response})))
-          (>!! input-chan2 {:msg-type :response :text "unknown input"}))
+                      (>!! input-chan {:msg-type :response :text response})))
+          (>!! input-chan {:msg-type :response :text "unknown input"}))
           ))
 
 
