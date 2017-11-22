@@ -90,10 +90,6 @@
                  
                  
     :QUERY  (fn [name] (fn [session-name] (query session-name (if (.contains name ns-prefix) name (str ns-prefix name)))))
-   ;; :QUERY (fn [name] (partial (fn [name2 session-name2] (query session-name2 name2)) name))
-    
-    ; This one ONLY WORKS IN THE REPL, after reloading, otherwise it says session-01 is undefined.
-    ;; :QUERY (fn [name] (query session-01 name))
                  
                  })
 
@@ -188,7 +184,7 @@
 
 
 (def session-01-a (atom default-session-01))
-;(def session-01 default-session-01)
+
 
 
 
@@ -207,7 +203,7 @@ Dynamic rules is something I wouldn't mind adding to Clara, although that comes 
 -Ryan
 ")
 
-;(comment 'bobtailbot.insta-clara-shopping)
+
 
 (defn  respond
   "Respond to text"
@@ -235,10 +231,6 @@ Dynamic rules is something I wouldn't mind adding to Clara, although that comes 
 
 
 
-
-
-;(def output-chan2 (chan))
-;(sub our-pub :response output-chan2)
 
 (sub our-pub :response output-chan)
 
