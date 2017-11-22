@@ -205,7 +205,7 @@ Dynamic rules is something I wouldn't mind adding to Clara, although that comes 
 
 
 
-(defn  respond
+(defn  respond-sync
   "Respond to text"
   [text]
   (let [parsetree  (shopping-grammar text)]
@@ -285,7 +285,7 @@ Dynamic rules is something I wouldn't mind adding to Clara, although that comes 
  (speaker-up2 resp-atom speakup2))
 
 
-(defn respond2
+(defn respond
  [text]
  (do 
       (if (not @initialized?) (do (init-response) (swap! initialized? (constantly true))) (do))
