@@ -55,11 +55,18 @@
   )
 
 
-
+(defn init-response []
+  (case parsemode
+    :quickanddirty (do)
+    :example-shopping (shopbr/init-response)
+    (do)
+    )
+  )
 
 
 
 (defn -main [& args]
+   (init-response)
    (case user-interface
      :repl (repl/launch-repl greeting respond)
      :irc (irc/connect nick host port irc-channel greeting respond speakup)

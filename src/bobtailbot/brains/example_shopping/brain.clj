@@ -133,7 +133,7 @@
 (def our-pub (pub input-chan :msg-type))
 
 (def output-chan (chan))
-(sub our-pub :alert-purchase-gizmo output-chan)
+
 
 
 (defrule alert-gizmo-purchase
@@ -232,7 +232,6 @@ Dynamic rules is something I wouldn't mind adding to Clara, although that comes 
 
 
 
-(sub our-pub :response output-chan)
 
 
 (defn speakup2 [speakup-chan]
@@ -281,8 +280,12 @@ Dynamic rules is something I wouldn't mind adding to Clara, although that comes 
 
 
 
-(defn init-response []
- (speaker-up2 resp-atom speakup2))
+(defn init-response [] (do (sub our-pub :alert-purchase-gizmo output-chan)
+                           (sub our-pub :response output-chan)
+                           (speaker-up2 resp-atom speakup2))
+ 
+ 
+ )
 
 
 (defn respond
