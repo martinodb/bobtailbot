@@ -247,6 +247,8 @@ Dynamic rules is something I wouldn't mind adding to Clara, although that comes 
 (def output-chan2 (chan))
 (sub our-pub2 :response output-chan2)
 
+
+
 (defn speakup2 [speakup-chan]
   (go-loop []
     (let [{:keys [text]} (<! output-chan2)]
