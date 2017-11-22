@@ -11,7 +11,7 @@
             
             [clojure.string :as string]
             [clojure.core.async :as async 
-               :refer [go-loop <! <!! >! >!!  close! chan pub sub]]
+               :refer [go-loop <! <!! >! >!!  close! chan pub sub go]]
             
             [schema.core :as s]
             
@@ -140,11 +140,11 @@
 (sub our-pub :alert-purchase-gizmo output-chan)
 
 
-(defrule alert-gizmo-purchase
-  "Anyone who purchases a gizmo gets a free lunch."
-  [Purchase (= item :gizmo)]
-  =>
-  (>!! input-chan {:msg-type :alert-purchase-gizmo :text "someone buyed a gizmo!"}))
+;(defrule alert-gizmo-purchase
+  ;"Anyone who purchases a gizmo gets a free lunch."
+  ;[Purchase (= item :gizmo)]
+  ;=>
+  ;(>!! input-chan {:msg-type :alert-purchase-gizmo :text "someone bought a gizmo!"}))
 
 
 
@@ -209,27 +209,20 @@ Dynamic rules is something I wouldn't mind adding to Clara, although that comes 
 
 ;(comment 'bobtailbot.insta-clara-shopping)
 
-(defn respond
+(defn  respond
   "Respond to text"
   [text]
   (let [parsetree  (shopping-grammar text)]
      (case (first (first parsetree))
        :QUERY  ((first (insta/transform shopping-transforms parsetree)) @session-01-a )
        (or :DISCOUNT :PROMOTION) 
-           (do (swap! rule-list #(str % text))
-           (let [session-03 (-> (mk-session (symbol this-ns) (load-user-rules @rule-list))
+          (do (swap! rule-list #(str % text))
+              (let [session-03 (-> (mk-session (symbol this-ns) (load-user-rules @rule-list))
                                      ( #(apply insert %1 %2) @fact-list)
                                      (fire-rules))]               
-                  (swap! session-01-a (constantly session-03)))
-                  
-               (str "rules loaded: " (apply str (load-user-rules text))) )
-        "unknown input")
-     
-     
-     
-     
-     
-      ))
+                 (swap! session-01-a (constantly session-03)))
+                 (str "rules loaded: " (apply str (load-user-rules text))) )
+        "unknown input")))
 
 
 (defn speakup [speakup-chan]
@@ -239,11 +232,79 @@ Dynamic rules is something I wouldn't mind adding to Clara, although that comes 
       (recur))))
 
 
-;(defn irc-speakup [socket irc-channel]
-     ;(go-loop[] 
-       ;(do 
-           ;(<! (async/timeout 10000))
-           ;(irc/write-privmsg socket "chiming in, smartly, every 10 seconds!" irc-channel)
-           ;(recur))))
 
+
+
+
+
+
+
+
+
+(def input-chan2 (chan))
+(def our-pub2 (pub input-chan2 :msg-type))
+
+(def output-chan2 (chan))
+(sub our-pub2 :response output-chan2)
+
+(defn speakup2 [speakup-chan]
+  (go-loop []
+    (let [{:keys [text]} (<! output-chan2)]
+      (>! speakup-chan text )
+      (recur))))
+
+
+(defn  hear
+  "hear text"
+  [text]
+  
+    (let [ parsetree  (shopping-grammar text)]
+      (case (first (first parsetree))
+        :QUERY  (let [response ((first (insta/transform shopping-transforms parsetree)) @session-01-a )]
+                     (>!! input-chan2 {:msg-type :response :text response}))
+         (or :DISCOUNT :PROMOTION) 
+           (do (swap! rule-list #(str % text))
+              (let [session-03 (-> (mk-session (symbol this-ns) (load-user-rules @rule-list))
+                                     ( #(apply insert %1 %2) @fact-list)
+                                     (fire-rules))]               
+                 (swap! session-01-a (constantly session-03)))
+                 (let [response (str "rules loaded: " (apply str (load-user-rules text)))]
+                      (>!! input-chan2 {:msg-type :response :text response})))
+          (>!! input-chan2 {:msg-type :response :text "unknown input"}))
+          ))
+
+
+
+
+
+
+(defn speaker-up2 [resp-atom speakup-fn]
+  (let [speakup-chan (async/chan)]
+    (do (speakup-fn speakup-chan)
+        (async/go-loop []
+             (let [privmsg (async/<! speakup-chan)]
+             (swap! resp-atom (constantly privmsg))
+             (recur))))))
+             
+
+
+
+(def resp-atom (atom ""))
+(def initialized? (atom false))
+
+(defn init-response []
+ (speaker-up2 resp-atom speakup2)
+)
+
+
+(defn respond2
+ [text]
+ (do 
+      (if (not @initialized?) (do (init-response) (swap! initialized? (constantly true))) (do))
+
+       (hear text)
+       (while (= @resp-atom "") (Thread/sleep 100))
+       (let [curr-resp @resp-atom]
+       (swap! resp-atom (constantly ""))
+       curr-resp)))
 

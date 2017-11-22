@@ -34,6 +34,16 @@
   )
 
 
+(defn respond2 [text]
+  (case parsemode
+    :quickanddirty (qdbr/respond text)
+    :example-shopping (shopbr/respond2 text)
+    (qdbr/respond text)
+    )
+  )
+
+
+
 
 
 (defn speakup [speakup-chan]
@@ -51,7 +61,7 @@
 
 (defn -main [& args]
    (case user-interface
-     :repl (repl/launch-repl greeting respond)
+     :repl (repl/launch-repl greeting respond2)
      :irc (irc/connect nick host port irc-channel greeting respond speakup)
      (repl/launch-repl greeting respond)
      

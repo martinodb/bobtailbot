@@ -4,7 +4,7 @@
 
 #_bobtailbot.core/greeting #_"Hello.  Let's chat."
 
-bobtailbot.core/host "chat.freenode.net" #_"127.0.0.1"
+#_bobtailbot.core/host #_"chat.freenode.net" #_"127.0.0.1"
 
 #_bobtailbot.core/irc-channel #_"#whateverhey"
 
