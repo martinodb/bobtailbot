@@ -263,7 +263,9 @@ Dynamic rules is something I wouldn't mind adding to Clara, although that comes 
 
 
 
-
+(def resp-available? (atom false))
+(def resp-atom (atom ""))
+(def initialized? (atom false))
 
 
 (defn speaker-up2 [resp-atom speakup-fn]
@@ -272,17 +274,15 @@ Dynamic rules is something I wouldn't mind adding to Clara, although that comes 
         (async/go-loop []
              (let [privmsg (async/<! speakup-chan)]
              (swap! resp-atom (constantly privmsg))
+             (swap! resp-available? (constantly true))
              (recur))))))
              
 
 
 
-(def resp-atom (atom ""))
-(def initialized? (atom false))
 
 (defn init-response []
- (speaker-up2 resp-atom speakup2)
-)
+ (speaker-up2 resp-atom speakup2))
 
 
 (defn respond2
@@ -291,8 +291,9 @@ Dynamic rules is something I wouldn't mind adding to Clara, although that comes 
       (if (not @initialized?) (do (init-response) (swap! initialized? (constantly true))) (do))
 
        (hear text)
-       (while (= @resp-atom "") (Thread/sleep 100))
+       (while (= @resp-available? false) (Thread/sleep 100))
        (let [curr-resp @resp-atom]
        (swap! resp-atom (constantly ""))
+       (swap! resp-available? (constantly false))
        curr-resp)))
 
