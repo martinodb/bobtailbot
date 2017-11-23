@@ -14,7 +14,7 @@
 
 
 
-(defconfig parsemode :example-shopping)
+(defconfig brain :example-shopping)
 (defconfig user-interface :irc)
 (defconfig greeting "Hello.  Let's chat.")
 (defconfig nick "bobtailbot")
@@ -33,7 +33,7 @@
 
 
 (defn respond [text]
-  (case parsemode
+  (case brain
     :quickanddirty (qdbr/respond text)
     :example-shopping (shopbr/respond text)
     (qdbr/respond text)
@@ -42,7 +42,7 @@
 
 
 (defn hear [text]
-  (case parsemode
+  (case brain
     :quickanddirty  (do);(qdbr/hear text) ; not implemented yet
     :example-shopping (shopbr/hear text)
     (qdbr/respond text)
@@ -54,7 +54,7 @@
 
 
 (defn speakup [speakup-chan]
-  (case parsemode
+  (case brain
     :quickanddirty (qdbr/speakup speakup-chan)
     :example-shopping (shopbr/speakup speakup-chan)
     ()
@@ -63,7 +63,7 @@
 
 
 (defn init-response [chatmode]
-  (case parsemode
+  (case brain
     :quickanddirty (do)
     :example-shopping (shopbr/init-response chatmode)
     (do)

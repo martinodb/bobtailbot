@@ -2,18 +2,18 @@
 
 ;; CONFIG ENTRIES:
 
+#_bobtailbot.core/brain #_:example-shopping
+
 #_bobtailbot.core/greeting #_"Hello.  Let's chat."
 
-#_bobtailbot.core/host #_"chat.freenode.net" #_"127.0.0.1"
+#_bobtailbot.core/host #_"127.0.0.1"
 
 #_bobtailbot.core/irc-channel #_"#whateverhey"
 
 #_bobtailbot.core/nick #_"bobtailbot"
 
-#_bobtailbot.core/parsemode #_:example-shopping
-
 #_bobtailbot.core/port #_6667
 
-bobtailbot.core/user-interface :repl #_:irc
+bobtailbot.core/user-interface #_:repl :irc
 
 }
