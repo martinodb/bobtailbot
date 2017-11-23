@@ -56,7 +56,7 @@
 (defn speakup [speakup-chan]
   (case parsemode
     :quickanddirty (qdbr/speakup speakup-chan)
-    :example-shopping (shopbr/speakup2 speakup-chan)
+    :example-shopping (shopbr/speakup speakup-chan)
     ()
     )
   )

@@ -140,7 +140,9 @@
   "Anyone who purchases a gizmo gets a free lunch."
   [Purchase (= item :gizmo)]
   =>
-  (>!! input-chan {:msg-type :alert-purchase-gizmo :text "someone bought a gizmo!"}))
+  (do (>!! input-chan {:msg-type :alert  :text "someone bought a gizmo!"})
+      (println "someone bought a gizmo!!")
+  ))
 
 
 
@@ -223,8 +225,19 @@ Dynamic rules is something I wouldn't mind adding to Clara, although that comes 
 
 (defn speakup [speakup-chan]
   (go-loop []
-    (let [{:keys [text]} (<! output-chan)]
-      (>! speakup-chan text )
+    (let [{:keys [msg-type text]} (<! output-chan)]
+    
+       ;(>! speakup-chan text )
+       
+       ; The following doesnt work. I dunno why.
+       ;(if (= msg-type (or :response :alert)) (do (println "it's a response or alert")
+                                                   ;(>! speakup-chan text ) ))
+       
+       ; Instead, I have to use both, like this:
+       (if (= msg-type :response) (>! speakup-chan text ))
+       (if (= msg-type :alert) (>! speakup-chan text ))
+       
+      (println "speakup function used. msg-type: " (str msg-type))
       (recur))))
 
 
@@ -237,7 +250,8 @@ Dynamic rules is something I wouldn't mind adding to Clara, although that comes 
 (defn speakup2 [speakup-chan]
   (go-loop []
     (let [{:keys [text msg-type]} (<! output-chan)]
-      (if (= msg-type :response) (>! speakup-chan text )) 
+      (if (= msg-type :response) (>! speakup-chan text ))
+      (println "speakup2 function used") 
       (recur))))
 
 
@@ -280,16 +294,14 @@ Dynamic rules is something I wouldn't mind adding to Clara, although that comes 
 
 
 
-(defn init-response [chatmode] (do (sub our-pub :alert-purchase-gizmo output-chan)
+(defn init-response [chatmode] (do 
+                           (sub our-pub :alert output-chan)
                            (sub our-pub :response output-chan)
                            (case chatmode
                            :single (speaker-up2 resp-atom speakup2)
-                           :group (do)
+                           :group  (do )
                            
-                           ))
- 
- 
- )
+                           )))
 
 
 (defn respond
