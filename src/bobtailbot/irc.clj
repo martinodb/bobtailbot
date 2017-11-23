@@ -55,7 +55,7 @@
 
 
 
-(defn handle-line [socket line irc-channel respond-fn]
+(defn handle-line [socket line irc-channel hear-fn]
   (println line)
   (cond
     (re-find #"^ERROR :Closing Link:" line)
@@ -70,16 +70,17 @@
           msg-content (second (re-find (re-pattern "^:.+:(.*)") line))
           ;;Geany goes crazy with this regex, so I use "re-pattern" instead.
           
-          reply-msg (apply str (respond-fn msg-content))]
+          ;reply-msg (apply str (respond-fn msg-content))
+          ]
               (cond 
                 (re-find #"^quit" msg-content) (swap! connected (constantly false))
-                 :else (do (write-privmsg socket reply-msg irc-channel :print)
+                 :else (do  (hear-fn msg-content);(write-privmsg socket reply-msg irc-channel :print)
                             (Thread/sleep 500))))))
 
-(defn message-listener [socket irc-channel respond-fn]
+(defn message-listener [socket irc-channel hear-fn]
   (async/go-loop []
     (when-let [line (async/<! (:in socket))]
-      (handle-line socket line irc-channel respond-fn)
+      (handle-line socket line irc-channel hear-fn)
       (recur))))
 
 (defn speaker-up [socket irc-channel speakup-fn]
@@ -92,7 +93,7 @@
 
 
 
-(defn connect [nick host port irc-channel greeting respond-fn speakup-fn]
+(defn connect [nick host port irc-channel greeting hear-fn speakup-fn]
   (println "Connecting...")
   (swap! curr-host (constantly host))
   (try
@@ -100,7 +101,7 @@
       (println (str "Connected to " host ":" port))
        
       
-       (message-listener socket irc-channel respond-fn)
+       (message-listener socket irc-channel hear-fn)
        (Thread/sleep 1000)
        (login-as-guest socket nick)
        ;(Thread/sleep 500)

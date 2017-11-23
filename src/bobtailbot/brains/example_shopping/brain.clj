@@ -247,7 +247,7 @@ Dynamic rules is something I wouldn't mind adding to Clara, although that comes 
   
     (let [ parsetree  (shopping-grammar text)]
       (case (first (first parsetree))
-        :QUERY  (let [response ((first (insta/transform shopping-transforms parsetree)) @session-01-a )]
+        :QUERY  (let [response (apply str ((first (insta/transform shopping-transforms parsetree)) @session-01-a ))]
                      (>!! input-chan {:msg-type :response :text response}))
          (or :DISCOUNT :PROMOTION) 
            (do (swap! rule-list #(str % text))
@@ -280,9 +280,13 @@ Dynamic rules is something I wouldn't mind adding to Clara, although that comes 
 
 
 
-(defn init-response [] (do (sub our-pub :alert-purchase-gizmo output-chan)
+(defn init-response [chatmode] (do (sub our-pub :alert-purchase-gizmo output-chan)
                            (sub our-pub :response output-chan)
-                           (speaker-up2 resp-atom speakup2))
+                           (case chatmode
+                           :single (speaker-up2 resp-atom speakup2)
+                           :group (do)
+                           
+                           ))
  
  
  )
@@ -291,11 +295,11 @@ Dynamic rules is something I wouldn't mind adding to Clara, although that comes 
 (defn respond
  [text]
  (do 
-      (if (not @initialized?) (do (init-response) (swap! initialized? (constantly true))) (do))
+      ;(if (not @initialized?) (do (init-response) (swap! initialized? (constantly true))) (do))
 
        (hear text)
        (while (= @resp-available? false) (Thread/sleep 100))
-       (let [curr-resp @resp-atom]
+       (let [curr-resp (apply str @resp-atom)]
        (swap! resp-atom (constantly ""))
        (swap! resp-available? (constantly false))
        curr-resp)))
