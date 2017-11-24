@@ -14,6 +14,6 @@
 
 #_bobtailbot.core/port #_6667
 
-bobtailbot.core/user-interface #_:repl :irc
+bobtailbot.core/user-interface :repl #_:irc
 
 }
