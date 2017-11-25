@@ -68,13 +68,11 @@
        (let [
           msg-user (second (re-find #"^\:(\S+)\!" line))
           msg-content (second (re-find (re-pattern "^:.+:(.*)") line))
-          ;;Geany goes crazy with this regex, so I use "re-pattern" instead.
-          
-          ;reply-msg (apply str (respond-fn msg-content))
+          ;;Geany regex bug, so I use "re-pattern" instead.
           ]
               (cond 
                 (re-find #"^quit" msg-content) (swap! connected (constantly false))
-                 :else (do  (hear-fn msg-content);(write-privmsg socket reply-msg irc-channel :print)
+                 :else (do  (hear-fn msg-content)
                             )))))
 
 (defn message-listener [socket irc-channel hear-fn]
@@ -105,21 +103,15 @@
        (message-listener socket irc-channel hear-fn)
        (Thread/sleep 1000)
        (login-as-guest socket nick)
-       ;(Thread/sleep 500)
-      
        (println (str "connected? :" @connected))
        (while (= @connected false) (Thread/sleep 100))
        (println (str "connected? :" @connected))
-       
        (Thread/sleep 500)
        (write socket (str "JOIN " irc-channel) true)
        (Thread/sleep 1000)
        (write socket (str "PRIVMSG " irc-channel " :" greeting) true)
        (Thread/sleep 500)
-       
-       ;(speakup-fn socket irc-channel)
        (speaker-up socket irc-channel speakup-fn)
-       
        (while (= @connected true) (Thread/sleep 100))
        (println "disconnecting now")
        (write socket "QUIT"))
