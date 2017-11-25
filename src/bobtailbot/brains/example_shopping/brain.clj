@@ -83,7 +83,7 @@
                  :rhs `(insert! (->Promotion ~name ~promotion-type))})
                  
                  
-    :QUERY  (fn [name] (fn [session-name] (query session-name (if (.contains name ns-prefix) name (str ns-prefix name)))))
+    :NQUERY  (fn [name] (fn [session-name] (query session-name (if (.contains name ns-prefix) name (str ns-prefix name)))))
                  
                  })
 
@@ -192,7 +192,7 @@ Dynamic rules is something I wouldn't mind adding to Clara, although that comes 
   [text]
   (let [parsetree  (shopping-grammar text)]
      (case (first (first parsetree))
-       :QUERY  (try
+       :NQUERY  (try
                  (apply str
                     ((first (insta/transform shopping-transforms parsetree)) @session-01-a ))
                  (catch Exception e (str "That's not a valid query. Error message: "
