@@ -114,7 +114,9 @@
        (speaker-up socket irc-channel speakup-fn)
        (while (= @connected true) (Thread/sleep 100))
        (println "disconnecting now")
-       (write socket "QUIT"))
+       (write socket "QUIT")
+       (close-socket-client socket)
+       )
     (catch Exception e
       (println (str "Failed to connect to " host ":" port "\n" (str e))))))
 
