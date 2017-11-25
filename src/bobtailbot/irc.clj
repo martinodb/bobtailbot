@@ -75,7 +75,7 @@
               (cond 
                 (re-find #"^quit" msg-content) (swap! connected (constantly false))
                  :else (do  (hear-fn msg-content);(write-privmsg socket reply-msg irc-channel :print)
-                            (Thread/sleep 500))))))
+                            )))))
 
 (defn message-listener [socket irc-channel hear-fn]
   (async/go-loop []
@@ -89,6 +89,7 @@
         (async/go-loop []
              (let [privmsg (async/<! speakup-chan)]
              (write-privmsg socket privmsg irc-channel)
+             (Thread/sleep 500) ; to avoid flood
              (recur))))))
 
 
