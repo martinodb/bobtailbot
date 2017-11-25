@@ -1,8 +1,9 @@
 (* EBNF grammar for instaparse *)
-<INPUT> = RULES | NQUERY ;
+<INPUT> = RULES | NQUERY | QUERY;
 
 
 NQUERY = <'query'> NAME;
+QUERY = <'match'> CONDITION [<'and'> CONDITION]* <';'>*;
 
 <RULES> = [DISCOUNT | PROMOTION]+
     PROMOTION = <'promotion'> NAME PROMOTIONTYPE <'when'> CONDITION [<'and'> CONDITION]* <';'>;

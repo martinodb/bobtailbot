@@ -84,6 +84,7 @@
                  
                  
     :NQUERY  (fn [name] (fn [session-name] (query session-name (if (.contains name ns-prefix) name (str ns-prefix name)))))
+    :QUERY   (fn [& conditions] (fn [session-name] (query session-name {:lhs conditions})))
                  
                  })
 
@@ -195,6 +196,20 @@ Dynamic rules is something I wouldn't mind adding to Clara, although that comes 
        :NQUERY  (try
                  (apply str
                     ((first (insta/transform shopping-transforms parsetree)) @curr-session ))
+                 (catch Exception e (str "That's not a valid query. Error message: "
+                                         (.getMessage e))))
+       :QUERY  (try
+                 (do "not implemented yet")
+                 #_(do (swap! rule-list #(str % text))
+                     (let [new-session
+                            (-> (mk-session (symbol this-ns) (load-user-rules @rule-list))
+                                ( #(apply insert %1 %2) @fact-list)
+                                (fire-rules))]               
+                     (reset! curr-session new-session))
+                     (apply str
+                        ((first (insta/transform shopping-transforms parsetree)) @curr-session ))
+                     
+                      )
                  (catch Exception e (str "That's not a valid query. Error message: "
                                          (.getMessage e))))
        (or :DISCOUNT :PROMOTION) 
