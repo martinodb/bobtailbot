@@ -192,7 +192,11 @@ Dynamic rules is something I wouldn't mind adding to Clara, although that comes 
   [text]
   (let [parsetree  (shopping-grammar text)]
      (case (first (first parsetree))
-       :QUERY  (apply str ((first (insta/transform shopping-transforms parsetree)) @session-01-a ))
+       :QUERY  (try
+                 (apply str
+                    ((first (insta/transform shopping-transforms parsetree)) @session-01-a ))
+                 (catch Exception e (str "That's not a valid query. Error message: "
+                                         (.getMessage e))))
        (or :DISCOUNT :PROMOTION) 
           (do (swap! rule-list #(str % text))
               (let [session-03 (-> (mk-session (symbol this-ns) (load-user-rules @rule-list))
