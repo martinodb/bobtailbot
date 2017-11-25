@@ -22,12 +22,7 @@
 (defconfig port 6667)
 (defconfig irc-channel "#whateverhey")
 
-(def chatmode 
-   (case user-interface 
-   :repl :single
-   :irc :group
-   
-   ))
+
 
 
 
@@ -43,9 +38,9 @@
 
 (defn hear [text]
   (case brain
-    :quickanddirty  (do);(qdbr/hear text) ; not implemented yet
+    :quickanddirty  (qdbr/hear text)
     :example-shopping (shopbr/hear text)
-    (qdbr/respond text)
+    (qdbr/hear text)
     )
   )
 
@@ -62,18 +57,11 @@
   )
 
 
-(defn init-response [chatmode]
-  (case brain
-    :quickanddirty (do)
-    :example-shopping (shopbr/init-response chatmode)
-    (do)
-    )
-  )
+
 
 
 
 (defn -main [& args]
-   (init-response chatmode)
    (case user-interface
      :repl (repl/launch-repl greeting respond)
      :irc (irc/connect nick host port irc-channel greeting hear speakup)

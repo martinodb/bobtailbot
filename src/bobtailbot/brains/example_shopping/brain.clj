@@ -21,14 +21,13 @@
 ;; IMPORTANT!!!
 ;; Change this prefix if you change this file's name (or path).
 ;;Also remember to change the ns declaration.
-
 (def parent-ns "bobtailbot.brains.example-shopping")
 (def this-ns-unqual "brain")
+;;;;;
 
 
 (def this-ns (str parent-ns "." this-ns-unqual))
 (def ns-prefix (str this-ns "/"))
-
 (def this-dir (str "./src/" (-> parent-ns (string/replace #"\." "/" ) (string/replace #"-" "_")) ))
 (def dir-prefix (str this-dir "/" ))
 
@@ -39,21 +38,16 @@
 ;;;; Facts used in the examples below.
 
 (defrecord Order [year month day])
-
 (defrecord Customer [status])
-
 (defrecord Purchase [cost item])
-
 (defrecord Discount [name percent])
-
 (defrecord Total [value])
-
 (defrecord Promotion [reason type])
+
 
 (def shopping-grammar
   ;(insta/parser  (slurp "./resources/grammars/shopping/shopping_grammar.ebnf") :auto-whitespace :standard )
-  (insta/parser  (slurp (str dir-prefix "grammar.ebnf")) :auto-whitespace :standard )
-  )
+  (insta/parser  (slurp (str dir-prefix "grammar.ebnf")) :auto-whitespace :standard ))
 
 
 (def operators {"is" `=
@@ -129,32 +123,14 @@
 
 ;; event rules
 
-(def input-chan (chan))
-(def our-pub (pub input-chan :msg-type))
-
-(def output-chan (chan))
-
-
-
-;(defrule alert-gizmo-purchase
-  ;"Anyone who purchases a gizmo gets a free lunch."
-  ;[Purchase (= item :gizmo)]
-  ;=>
-  ;(do (>!! input-chan {:msg-type :alert  :text "someone bought a gizmo!"})
-      ;(println "someone bought a gizmo!!")
-  ;))
-
 (def last-utterance (atom {}))
-
 
 (defrule alert-gizmo-purchase
   "Anyone who purchases a gizmo gets a free lunch."
   [Purchase (= item :gizmo)]
   =>
-  (dosync (reset! last-utterance
-                  {:type :alert , :text "someone bought a gizmo!"})
-      ;(println "someone bought a gizmo!!")
-  ))
+  (reset! last-utterance
+                  {:type :alert , :text "someone bought a gizmo!"}))
 
 
 
@@ -185,10 +161,6 @@
 
 
 
-    
-
-
-
 (def default-session-01 (-> (mk-session 'bobtailbot.brains.example-shopping.brain (load-user-rules @rule-list))
                     ( #(apply insert %1 %2) @fact-list)
                     (fire-rules)))
@@ -202,7 +174,6 @@
 ;; this one is useful for the REPL
 (def text-01 (str "query " ns-prefix "get-discounts"))
 (def text-02 "query get-discounts")
-
 (def text-rule-01 "discount gold-summer-discount 20 when customer status is gold and order month is august;")
 
 
@@ -233,115 +204,15 @@ Dynamic rules is something I wouldn't mind adding to Clara, although that comes 
 
 
 
-;;;;
-
-
-
+;;; Only use "hear" and "speakup" for multi-user interfaces like irc. The bot may report events asyncronously, not just respond to questions.
 (defn hear [text-in] (future 
                         (reset! last-utterance
                            {:type :response , :text (respond-sync text-in)} )))
 
-;; only use if you want events reported asyncronously
+
 (defn speakup [speakup-chan] (add-watch last-utterance :utt-ready
                                           (fn [k r old-state new-state]
                                                 (>!! speakup-chan (:text new-state) ))))
+
+;; Only use for repl and similar, single-user interfaces. It's syncronous (blocking). 
 (def respond respond-sync)
-
-;;;
-
-
-
-(defn speakup-old [speakup-chan]
-  (go-loop []
-    (let [{:keys [msg-type text]} (<! output-chan)]
-    
-       ;(>! speakup-chan text )
-       
-       ; The following doesnt work. I dunno why.
-       ;(if (= msg-type (or :response :alert)) (do (println "it's a response or alert")
-                                                   ;(>! speakup-chan text ) ))
-       
-       ; Instead, I have to use both, like this:
-       (if (= msg-type :response) (>! speakup-chan text ))
-       (if (= msg-type :alert) (>! speakup-chan text ))
-       
-      (println "speakup function used. msg-type: " (str msg-type))
-      (recur))))
-
-
-(defn speakup2 [speakup-chan]
-  (go-loop []
-    (let [{:keys [text msg-type]} (<! output-chan)]
-      (if (= msg-type :response) (>! speakup-chan text ))
-      (println "speakup2 function used") 
-      (recur))))
-
-
-
-
-
-
-
-
-
-(defn  hear-old
-  "hear text"
-  [text]
-  
-    (let [ parsetree  (shopping-grammar text)]
-      (case (first (first parsetree))
-        :QUERY  (let [response (apply str ((first (insta/transform shopping-transforms parsetree)) @session-01-a ))]
-                     (>!! input-chan {:msg-type :response :text response}))
-         (or :DISCOUNT :PROMOTION) 
-           (do (swap! rule-list #(str % text))
-              (let [session-03 (-> (mk-session (symbol this-ns) (load-user-rules @rule-list))
-                                     ( #(apply insert %1 %2) @fact-list)
-                                     (fire-rules))]               
-                 (swap! session-01-a (constantly session-03)))
-                 (let [response (str "rules loaded: " (apply str (load-user-rules text)))]
-                      (>!! input-chan {:msg-type :response :text response})))
-          (>!! input-chan {:msg-type :response :text "unknown input"}))
-          ))
-
-
-
-(def resp-available? (atom false))
-(def resp-atom (atom ""))
-(def initialized? (atom false))
-
-
-(defn speaker-up2 [resp-atom speakup-fn]
-  (let [speakup-chan (async/chan)]
-    (do (speakup-fn speakup-chan)
-        (async/go-loop []
-             (let [privmsg (async/<! speakup-chan)]
-             (swap! resp-atom (constantly privmsg))
-             (swap! resp-available? (constantly true))
-             (recur))))))
-             
-
-
-
-
-(defn init-response [chatmode] (do 
-                           (sub our-pub :alert output-chan)
-                           (sub our-pub :response output-chan)
-                           (case chatmode
-                           :single (speaker-up2 resp-atom speakup2)
-                           :group  (do )
-                           
-                           )))
-
-
-(defn respond-old
- [text]
- (do 
-      ;(if (not @initialized?) (do (init-response) (swap! initialized? (constantly true))) (do))
-
-       (hear text)
-       (while (= @resp-available? false) (Thread/sleep 100))
-       (let [curr-resp (apply str @resp-atom)]
-       (swap! resp-atom (constantly ""))
-       (swap! resp-available? (constantly false))
-       curr-resp)))
-
