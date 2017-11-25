@@ -161,12 +161,12 @@
 
 
 
-(def default-session-01 (-> (mk-session 'bobtailbot.brains.example-shopping.brain (load-user-rules @rule-list))
+(def default-session (-> (mk-session 'bobtailbot.brains.example-shopping.brain (load-user-rules @rule-list))
                     ( #(apply insert %1 %2) @fact-list)
                     (fire-rules)))
 
 
-(def session-01-a (atom default-session-01))
+(def curr-session (atom default-session))
 
 
 
@@ -194,15 +194,15 @@ Dynamic rules is something I wouldn't mind adding to Clara, although that comes 
      (case (first (first parsetree))
        :NQUERY  (try
                  (apply str
-                    ((first (insta/transform shopping-transforms parsetree)) @session-01-a ))
+                    ((first (insta/transform shopping-transforms parsetree)) @curr-session ))
                  (catch Exception e (str "That's not a valid query. Error message: "
                                          (.getMessage e))))
        (or :DISCOUNT :PROMOTION) 
           (do (swap! rule-list #(str % text))
-              (let [session-03 (-> (mk-session (symbol this-ns) (load-user-rules @rule-list))
+              (let [fresh-session (-> (mk-session (symbol this-ns) (load-user-rules @rule-list))
                                      ( #(apply insert %1 %2) @fact-list)
                                      (fire-rules))]               
-                 (reset! session-01-a session-03))
+                 (reset! curr-session fresh-session)) ;NOTICE: don't call it "new-session".
                  (str "rules loaded: " (apply str (load-user-rules text))) )
         "unknown input")))
 
