@@ -202,7 +202,7 @@ Dynamic rules is something I wouldn't mind adding to Clara, although that comes 
               (let [new-session (-> (mk-session (symbol this-ns) (load-user-rules @rule-list))
                                      ( #(apply insert %1 %2) @fact-list)
                                      (fire-rules))]               
-                 (reset! curr-session new-session)) ;NOTICE: don't call it "new-session".
+                 (reset! curr-session new-session))
                  (str "rules loaded: " (apply str (load-user-rules text))) )
         "unknown input")))
 
