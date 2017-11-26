@@ -7,13 +7,18 @@
             [clara.rules.accumulators :as acc]
             [clara.rules :refer :all]
             
-            ;;[clara.tools.inspect :as cti]
+            ;; just for development
+            [clara.tools.inspect :as cti :refer [inspect]]
+            ;[clara.macros :as cm :refer [get-productions-from-namespace]] ; error. private.
+            [clara.macros :as cm ]
+            ;; /just for development
+            
             
             [clojure.string :as string]
             [clojure.core.async :as async 
                :refer [go-loop <! <!! >! >!!  close! chan pub sub go]]
             
-            [schema.core :as s]
+            [schema.core :as sc]
             
             [bobtailbot.irc :as irc]))
 
@@ -32,8 +37,10 @@
 (def dir-prefix (str this-dir "/" ))
 
 
-
-
+;; just for development
+(def get-productions-from-namespace #'clara.macros/get-productions-from-namespace)
+(def get-productions #'clara.macros/get-productions)
+;; /just for development
 
 ;;;; Facts used in the examples below.
 
@@ -158,9 +165,9 @@
 
 ;;;; Example code to load and validate rules.
 
-(s/defn ^:always-validate load-user-rules-safe :- [clara.rules.schema/Production]
+(sc/defn ^:always-validate load-user-rules-safe :- [clara.rules.schema/Production]
   "Converts a business rule string into Clara productions. Safe version."
-  [business-rules :- s/Str]
+  [business-rules :- sc/Str]
 
   (let [parse-tree (shopping-grammar business-rules)]
 
