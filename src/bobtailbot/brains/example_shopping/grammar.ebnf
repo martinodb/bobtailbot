@@ -8,7 +8,7 @@ NQUERY = <'query'> NAME;
 <RULES-QUERIES> = [DISCOUNT | PROMOTION | QUERY]+
     PROMOTION = <'promotion'> NAME PROMOTIONTYPE <'when'> CONDITION [<'and'> CONDITION]* <';'>;
     DISCOUNT = <'discount'> NAME PERCENT <'when'> CONDITION [<'and'> CONDITION]* <';'>;
-    QUERY = <'match'> CONDITION [<'and'> CONDITION]* <';'>;
+    QUERY = <'match'> QCONDITION [<'and'> QCONDITION]* <';'>;
     <PERCENT> = NUMBER ;
     PROMOTIONTYPE = STRING ;
     
@@ -20,6 +20,7 @@ NQUERY = <'query'> NAME;
     <STRING> = #'[A-Za-z][A-Za-z0-9\/\._-]+' ;
     
     CONDITION = FACTTYPE FIELD OPERATOR VALUE ;
+    QCONDITION = FACTTYPE FIELD OPERATOR VALUE ;
     FACTTYPE = 'customer' | 'total' | 'order' ;
     <FIELD> = STRING ;
     OPERATOR = 'is' | '>' | '<' | '=' ;

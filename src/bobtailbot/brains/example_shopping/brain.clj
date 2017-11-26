@@ -68,8 +68,13 @@
    :FACTTYPE fact-types
    :CONDITION (fn [fact-type field operator value]
                 {:type fact-type
-                 :constraints [(list operator (symbol field) value)]})
-
+                 :constraints [(list operator (symbol field) value)]
+                 })
+   :QCONDITION (fn [fact-type field operator value]
+                {:type fact-type
+                 :constraints [(list operator (symbol field) value)]
+                 :fact-binding :?thing
+                 })
    ;; Convert promotion strings to keywords.
    :PROMOTIONTYPE keyword
 
@@ -87,8 +92,9 @@
                  
     :NQUERY  (fn [name] (fn [session-name] (query session-name (if (.contains name ns-prefix) name (str ns-prefix name)))))
     :QUERY   (fn [& conditions]
-                 {:name "my-query"
+                 {:name "anon-query"
                   :lhs conditions
+                  
                   :params #{}
                   })
                  
@@ -247,12 +253,12 @@ Dynamic rules is something I wouldn't mind adding to Clara, although that comes 
                                                  (load-user-rules new-rule-list))
                                               ( #(apply insert %1 %2) @fact-list)
                                               (fire-rules))
-                            my-query  (first (insta/transform shopping-transforms parsetree))
+                            anon-query  (first (insta/transform shopping-transforms parsetree))
                                               
                                               ]               
                         ;(reset! curr-session new-session)
                         (apply str
-                           (query new-session my-query))
+                           (query new-session anon-query))
                         
                         ))
                   (catch Exception e (do (println (.getMessage e))

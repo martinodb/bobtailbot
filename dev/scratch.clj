@@ -44,6 +44,9 @@ match customer status is gold;
 
 (def d-parsetree (shopping-grammar default-rule-list))
 
+(def nq-parsetree (shopping-grammar "query get-discounts"))
+
+
 #_(load-user-rules default-rule-list)
 
 (def p-text "match customer status is gold;")
