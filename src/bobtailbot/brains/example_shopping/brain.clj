@@ -190,8 +190,8 @@
 
     (insta/transform shopping-transforms parse-tree)))
 
-;(def load-user-rules load-user-rules-safe)
-(def load-user-rules load-user-rules-unsafe)
+(def load-user-rules load-user-rules-safe)
+;(def load-user-rules load-user-rules-unsafe)
 
 
 
@@ -244,7 +244,7 @@ Dynamic rules is something I wouldn't mind adding to Clara, although that comes 
                      
                      (let [ new-rule-list (str @rule-list text)
                             new-session   (-> (mk-session (symbol this-ns)
-                                                 (load-user-rules-safe new-rule-list))
+                                                 (load-user-rules new-rule-list))
                                               ( #(apply insert %1 %2) @fact-list)
                                               (fire-rules))
                             my-query  (first (insta/transform shopping-transforms parsetree))
