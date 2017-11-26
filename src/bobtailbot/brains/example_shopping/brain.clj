@@ -9,8 +9,6 @@
             
             ;; just for development
             [clara.tools.inspect :as cti :refer [inspect]]
-            ;[clara.macros :as cm :refer [get-productions-from-namespace]] ; error. private.
-            [clara.macros :as cm ]
             ;; /just for development
             
             
@@ -37,10 +35,7 @@
 (def dir-prefix (str this-dir "/" ))
 
 
-;; just for development
-(def get-productions-from-namespace #'clara.macros/get-productions-from-namespace)
-(def get-productions #'clara.macros/get-productions)
-;; /just for development
+
 
 ;;;; Facts used in the examples below.
 
@@ -91,9 +86,16 @@
                  
                  
     :NQUERY  (fn [name] (fn [session-name] (query session-name (if (.contains name ns-prefix) name (str ns-prefix name)))))
-    :QUERY   (fn [& conditions] (fn [session-name] (query session-name {:lhs conditions})))
+    :QUERY   (fn [& conditions]
+                 {:name "my-query"
+                  :lhs conditions
+                  :params #{}
+                  })
                  
                  })
+
+
+
 
 
 (def default-fact-list
@@ -234,20 +236,23 @@ Dynamic rules is something I wouldn't mind adding to Clara, although that comes 
        :NQUERY  (try
                  (apply str
                     ((first (insta/transform shopping-transforms parsetree)) @curr-session ))
-                 (catch Exception e (str "That's not a valid query. Error message: "
-                                         (.getMessage e))))
+                 (catch Exception e (do (println (.getMessage e))
+                                         "That's not a valid query." )))
        :QUERY  (try
                  ;(do "not implemented yet")
                  (do 
                      
                      (let [ new-rule-list (str @rule-list text)
                             new-session   (-> (mk-session (symbol this-ns)
-                                                 (load-user-rules new-rule-list))
+                                                 (load-user-rules-safe new-rule-list))
                                               ( #(apply insert %1 %2) @fact-list)
-                                              (fire-rules))]               
+                                              (fire-rules))
+                            my-query  (first (insta/transform shopping-transforms parsetree))
+                                              
+                                              ]               
                         ;(reset! curr-session new-session)
                         (apply str
-                           ((first (insta/transform shopping-transforms parsetree)) new-session ))
+                           (query new-session my-query))
                         
                         ))
                   (catch Exception e (do (println (.getMessage e))
