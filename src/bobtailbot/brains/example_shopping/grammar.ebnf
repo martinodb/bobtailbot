@@ -1,13 +1,14 @@
 (* EBNF grammar for instaparse *)
-<INPUT> = RULES | NQUERY | QUERY;
+<INPUT> = RULES-QUERIES | NQUERY ;
 
 
 NQUERY = <'query'> NAME;
-QUERY = <'match'> CONDITION [<'and'> CONDITION]* <';'>*;
 
-<RULES> = [DISCOUNT | PROMOTION]+
+
+<RULES-QUERIES> = [DISCOUNT | PROMOTION | QUERY]+
     PROMOTION = <'promotion'> NAME PROMOTIONTYPE <'when'> CONDITION [<'and'> CONDITION]* <';'>;
     DISCOUNT = <'discount'> NAME PERCENT <'when'> CONDITION [<'and'> CONDITION]* <';'>;
+    QUERY = <'match'> CONDITION [<'and'> CONDITION]* <';'>;
     <PERCENT> = NUMBER ;
     PROMOTIONTYPE = STRING ;
     

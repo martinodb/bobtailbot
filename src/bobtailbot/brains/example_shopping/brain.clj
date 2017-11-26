@@ -147,10 +147,19 @@
   []
   [?discount <- Promotion])
 
+
+
+
+
+
+
+
+
+
 ;;;; Example code to load and validate rules.
 
-(s/defn ^:always-validate load-user-rules :- [clara.rules.schema/Production]
-  "Converts a business rule string into Clara productions."
+(s/defn ^:always-validate load-user-rules-safe :- [clara.rules.schema/Production]
+  "Converts a business rule string into Clara productions. Safe version."
   [business-rules :- s/Str]
 
   (let [parse-tree (shopping-grammar business-rules)]
@@ -159,6 +168,28 @@
       (throw (ex-info (print-str parse-tree) {:failure parse-tree})))
 
     (insta/transform shopping-transforms parse-tree)))
+
+
+(defn load-user-rules-unsafe 
+  "Converts a business rule string into Clara productions. Unsafe version."
+  [business-rules]
+
+  (let [parse-tree (shopping-grammar business-rules)]
+
+    (when (insta/failure? parse-tree)
+      (throw (ex-info (print-str parse-tree) {:failure parse-tree})))
+
+    (insta/transform shopping-transforms parse-tree)))
+
+;(def load-user-rules load-user-rules-safe)
+(def load-user-rules load-user-rules-unsafe)
+
+
+
+
+
+
+
 
 
 
@@ -199,24 +230,27 @@ Dynamic rules is something I wouldn't mind adding to Clara, although that comes 
                  (catch Exception e (str "That's not a valid query. Error message: "
                                          (.getMessage e))))
        :QUERY  (try
-                 (do "not implemented yet")
-                 #_(do (swap! rule-list #(str % text))
-                     (let [new-session
-                            (-> (mk-session (symbol this-ns) (load-user-rules @rule-list))
-                                ( #(apply insert %1 %2) @fact-list)
-                                (fire-rules))]               
-                     (reset! curr-session new-session))
-                     (apply str
-                        ((first (insta/transform shopping-transforms parsetree)) @curr-session ))
+                 ;(do "not implemented yet")
+                 (do 
                      
-                      )
-                 (catch Exception e (str "That's not a valid query. Error message: "
-                                         (.getMessage e))))
+                     (let [ new-rule-list (str @rule-list text)
+                            new-session   (-> (mk-session (symbol this-ns)
+                                                 (load-user-rules new-rule-list))
+                                              ( #(apply insert %1 %2) @fact-list)
+                                              (fire-rules))]               
+                        ;(reset! curr-session new-session)
+                        (apply str
+                           ((first (insta/transform shopping-transforms parsetree)) new-session ))
+                        
+                        ))
+                  (catch Exception e (do (println (.getMessage e))
+                                         "That's not a valid query." )))
        (or :DISCOUNT :PROMOTION) 
           (do (swap! rule-list #(str % text))
-              (let [new-session (-> (mk-session (symbol this-ns) (load-user-rules @rule-list))
-                                     ( #(apply insert %1 %2) @fact-list)
-                                     (fire-rules))]               
+              (let [new-session (-> (mk-session (symbol this-ns)
+                                        (load-user-rules @rule-list))
+                                    ( #(apply insert %1 %2) @fact-list)
+                                    (fire-rules))]               
                  (reset! curr-session new-session))
                  (str "rules loaded: " (apply str (load-user-rules text))) )
         "unknown input")))
