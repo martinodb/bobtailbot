@@ -20,7 +20,7 @@
            [bobtailbot.irc :as irc]
            
            
-           [duratom.core :as dac :refer [duratom destroy]]
+           ;[duratom.core :as dac :refer [duratom destroy]]
            
            [clojure.edn :as edn]
  

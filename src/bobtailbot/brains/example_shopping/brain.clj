@@ -21,7 +21,7 @@
             [bobtailbot.irc :as irc]
             
             ;[duratom.core :as dac :refer [duratom destroy]]
-            [bobtailbot.tools :as tools :refer [disk-atom]]
+            [bobtailbot.tools :as tools :refer :all]
             
             
             [clojure.edn :as edn]))
