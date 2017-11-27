@@ -245,7 +245,6 @@ Dynamic rules is something I wouldn't mind adding to Clara, although that comes 
                  (catch Exception e (do (println (.getMessage e))
                                          "That's not a valid query." )))
        :QUERY  (try
-                 ;(do "not implemented yet")
                  (do 
                      
                      (let [ new-rule-list (str @rule-list text)
@@ -256,7 +255,6 @@ Dynamic rules is something I wouldn't mind adding to Clara, although that comes 
                             anon-query  (first (insta/transform shopping-transforms parsetree))
                                               
                                               ]               
-                        ;(reset! curr-session new-session)
                         (apply str
                            (query new-session anon-query))
                         
