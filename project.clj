@@ -19,6 +19,8 @@
                  [org.clojure/core.async "0.2.395"]
                  [com.gearswithingears/async-sockets "0.1.0"]
                  
+                 [duratom "0.3.5"]
+                 
                  ]
                  
   :profiles

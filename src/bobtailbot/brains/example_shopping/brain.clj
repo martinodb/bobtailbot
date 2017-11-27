@@ -18,7 +18,8 @@
             
             [schema.core :as sc]
             
-            [bobtailbot.irc :as irc]))
+            [bobtailbot.irc :as irc]
+            [duratom.core :as dac :refer [duratom destroy]]))
 
 
 ;; IMPORTANT!!!
@@ -111,9 +112,10 @@
      (->Purchase 120 :widget)
      (->Purchase 90 :widget)])
 
-(def fact-list (atom default-fact-list))
-
-
+;(def fact-list (atom default-fact-list))
+(def fact-list (duratom :local-file
+                        :file-path (str dir-prefix "store/fact_list.edn")
+                        :init default-fact-list))
 
 
 ;; These rules may be stored in an external file or database.
@@ -124,8 +126,10 @@
    promotion free-widget-month free-widget when customer status is gold and order month is august;")
 
 
-(def rule-list (atom default-rule-list))
-
+;(def rule-list (atom default-rule-list))
+(def rule-list (duratom :local-file
+                        :file-path (str dir-prefix "store/rule_list.edn")
+                        :init default-rule-list))
 
 
 ;;;; Rules written in Clojure and combined with externally-defined rules.
