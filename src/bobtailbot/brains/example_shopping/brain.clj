@@ -115,7 +115,10 @@
      (->Order 2013 "august" 20)
      (->Purchase 20 :gizmo)
      (->Purchase 120 :widget)
-     (->Purchase 90 :widget)])
+     (->Purchase 90 :widget)] )
+
+;(def default-fact-list "patata")
+
 
 ;(def fact-list (atom default-fact-list))
 (def fact-list (disk-atom (str dir-prefix "store/fact_list.edn") default-fact-list))

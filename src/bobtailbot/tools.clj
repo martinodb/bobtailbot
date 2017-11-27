@@ -34,6 +34,6 @@
      
    ([path init]
    (let [state (atom init)]
-     (if (empty? (trim (load-from-path path))) (dump-to-path path init))
+     (if (empty? (load-from-path path)) (dump-to-path path init))
      (add-watch state :persist-watcher (persist-fn path))
      state)))
