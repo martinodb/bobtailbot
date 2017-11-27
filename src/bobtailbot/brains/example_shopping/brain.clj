@@ -19,7 +19,12 @@
             [schema.core :as sc]
             
             [bobtailbot.irc :as irc]
-            [duratom.core :as dac :refer [duratom destroy]]))
+            
+            ;[duratom.core :as dac :refer [duratom destroy]]
+            [bobtailbot.tools :as tools :refer [disk-atom]]
+            
+            
+            [clojure.edn :as edn]))
 
 
 ;; IMPORTANT!!!
@@ -113,9 +118,8 @@
      (->Purchase 90 :widget)])
 
 ;(def fact-list (atom default-fact-list))
-(def fact-list (duratom :local-file
-                        :file-path (str dir-prefix "store/fact_list.edn")
-                        :init default-fact-list))
+(def fact-list (disk-atom (str dir-prefix "store/fact_list.edn") default-fact-list))
+
 
 
 ;; These rules may be stored in an external file or database.
@@ -127,10 +131,7 @@
 
 
 ;(def rule-list (atom default-rule-list))
-(def rule-list (duratom :local-file
-                        :file-path (str dir-prefix "store/rule_list.edn")
-                        :init default-rule-list))
-
+(def rule-list (disk-atom (str dir-prefix "store/rule_list.edn") default-rule-list))
 
 ;;;; Rules written in Clojure and combined with externally-defined rules.
 
