@@ -21,16 +21,16 @@ If you need one of those production-ready chatbots written in Clojure, maybe hav
 
 ## USAGE
 
-By default, Bobtailbot connects to an irc server running locally, with host 127.0.0.1 and port 6667, and then it join a default irc channel, which is #whateverhey. These options can be changed in `config.clj`.
+By default, Bobtailbot connects to an irc server running locally, with host 127.0.0.1 and port 6667, and then it join a default irc channel, which is #bobtailbot. These options can be changed in `config.clj`.
 So, to get started quickly (for Ubuntu and similar):
 
-## 1. Set up a local chat server, connect to it and join the default channel #whateverhey
+## 1. Set up a local chat server, connect to it and join the default channel #bobtailbot
 
  1. Install an irc server like [inspircd](http://www.inspircd.org/) (`sudo apt-get install inspircd`) and start it with the defaults. Check the configuration file with `sudo nano /etc/inspircd/inspircd.conf`. You shouldn't need to edit it.
  2. To start the server, do `sudo service inspircd start`. I took the instructions from [this blog post](https://samuelhewitt.com/blog/2016-04-09-how-to-deploy-an-irc-server-on-ubuntu).
  3. Start your favorite irc client, for instance [Hexchat](https://hexchat.github.io/) (if you don't have it installed, first do `sudo apt-get install hexchat`).
  4. In the Hexchat menu, do [Hexchat]->[Network list]->[Add], call this network "Localnet" (or whatever, it's not important).
- 5. Edit Localnet so that in the Servers tab you've got `127.0.0.1/6667` and in the "connection commands" tab you've got `JOIN #whateverhey`.
+ 5. Edit Localnet so that in the Servers tab you've got `127.0.0.1/6667` and in the "connection commands" tab you've got `JOIN #bobtailbot`.
  6. Connect to Localnet with a nick of your choice.
 
 ## 2. Download and run Bobtailbot, so that it connects to this chat server and joins the channel.

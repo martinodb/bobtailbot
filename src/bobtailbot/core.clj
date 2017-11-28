@@ -20,7 +20,7 @@
 (defconfig nick "bobtailbot")
 (defconfig host "127.0.0.1")
 (defconfig port 6667)
-(defconfig irc-channel "#whateverhey")
+(defconfig irc-channel "#bobtailbot")
 
 
 

@@ -2,18 +2,18 @@
 
 ;; CONFIG ENTRIES:
 
-bobtailbot.core/brain #_:quickanddirty :example-shopping
+bobtailbot.core/brain :example-shopping #_:example-shopping
 
 #_bobtailbot.core/greeting #_"Hello.  Let's chat."
 
 #_bobtailbot.core/host #_"127.0.0.1"
 
-#_bobtailbot.core/irc-channel #_"#whateverhey"
+#_bobtailbot.core/irc-channel #_"#bobtailbot"
 
 #_bobtailbot.core/nick #_"bobtailbot"
 
 #_bobtailbot.core/port #_6667
 
-bobtailbot.core/user-interface #_:repl :irc
+bobtailbot.core/user-interface :irc #_:irc
 
 }
