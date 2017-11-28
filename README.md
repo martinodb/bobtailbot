@@ -8,17 +8,6 @@ I picked Clojure as a language because:
 * It's a LISP, so it should be well-suited for all things AI.
 * It runs on the JVM, so I get access to plenty of NLP tools and Semantic Web tools, which I'd like to use.
 
-The original version was based on [Gigasquid's speech acts classifier](https://github.com/gigasquid/speech-acts-classifier), but I've removed the NLP stuff for now and added a few more things, like:
-* irc connectivity from [AdamBoxall's irc client](https://github.com/AdamBoxall/clojure-irc-client), perhaps also with some code from [Nakkaya](https://nakkaya.com/2010/02/10/a-simple-clojure-irc-client/).
-* Event publishing and subscribing from an official [example](https://github.com/clojure/core.async/wiki/Pub-Sub).
-* The DSL from the already mentioned Clara [example](https://github.com/cerner/clara-examples/blob/master/src/main/clojure/clara/examples/shopping.clj).
-
-If you need one of those production-ready chatbots written in Clojure, maybe have a look at these:
-
-* [Yetibot](https://github.com/devth/yetibot)
-* [Jubot](https://github.com/liquidz/jubot)
-* [Clojurebot](https://github.com/hiredman/clojurebot)
-
 ## USAGE
 
 By default, Bobtailbot connects to an irc server running locally, with host 127.0.0.1 and port 6667, and then it join a default irc channel, which is #bobtailbot. These options can be changed in `config.clj`.
@@ -45,3 +34,18 @@ So, to get started quickly (for Ubuntu and similar):
 
 If you are using `lein repl`, then after editing `config.edn` or any other file,
    do `(user/refresh)`, and then again `(-main)`. Sometimes, if you edit namespace names and things like that, it's better to do `quit` and `lein repl` again, though.
+
+## CREDIT
+
+Here I mention open-source projects, blogs, etc, that I found useful and sometimes took code from.
+
+* [Gigasquid's speech acts classifier](https://github.com/gigasquid/speech-acts-classifier).
+* [AdamBoxall's irc client](https://github.com/AdamBoxall/clojure-irc-client), perhaps also with some code from [Nakkaya](https://nakkaya.com/2010/02/10/a-simple-clojure-irc-client/).
+* Event publishing and subscribing from an official [example](https://github.com/clojure/core.async/wiki/Pub-Sub).
+* The DSL from the already mentioned Clara [example](https://github.com/cerner/clara-examples/blob/master/src/main/clojure/clara/examples/shopping.clj).
+
+Also, if you need a production-ready chatbot written in Clojure, maybe have a look at these:
+
+* [Yetibot](https://github.com/devth/yetibot)
+* [Jubot](https://github.com/liquidz/jubot)
+* [Clojurebot](https://github.com/hiredman/clojurebot)
