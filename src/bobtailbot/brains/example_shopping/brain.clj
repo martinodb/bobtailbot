@@ -53,7 +53,6 @@
 
 
 (def shopping-grammar
-  ;(insta/parser  (slurp "./resources/grammars/shopping/shopping_grammar.ebnf") :auto-whitespace :standard )
   (insta/parser  (slurp (str dir-prefix "grammar.ebnf")) :auto-whitespace :standard ))
 
 
@@ -116,12 +115,8 @@
      (->Purchase 120 :widget)
      (->Purchase 90 :widget)] )
 
-;(def default-fact-list "patata")
 
-
-;(def fact-list (atom default-fact-list))
-(def fact-list (disk-atom (str dir-prefix "store/fact_list.edn") default-fact-list))
-
+(def fact-list (disk-ref (str dir-prefix "store/fact_list.edn") default-fact-list))
 
 
 ;; These rules may be stored in an external file or database.
@@ -132,8 +127,10 @@
    promotion free-widget-month free-widget when customer status is gold and order month is august;")
 
 
-;(def rule-list (atom default-rule-list))
-(def rule-list (disk-atom (str dir-prefix "store/rule_list.edn") default-rule-list))
+
+(def rule-list (disk-ref (str dir-prefix "store/rule_list.edn") default-rule-list))
+
+
 
 ;;;; Rules written in Clojure and combined with externally-defined rules.
 
@@ -220,8 +217,8 @@
                     (fire-rules)))
 
 
-(def curr-session (atom default-session))
 
+(def curr-session (ref default-session))
 
 
 
@@ -268,14 +265,13 @@ Dynamic rules is something I wouldn't mind adding to Clara, although that comes 
                         ))
                   (catch Exception e (do (println (.getMessage e))
                                          "That's not a valid query." )))
-       (or :DISCOUNT :PROMOTION) 
-          (do (swap! rule-list #(str % text))
-              (let [new-session (-> (mk-session (symbol this-ns)
-                                        (load-user-rules @rule-list))
-                                    ( #(apply insert %1 %2) @fact-list)
-                                    (fire-rules))]               
-                 (reset! curr-session new-session))
-                 (str "rules loaded: " (apply str (load-user-rules text))) )
+       (or :DISCOUNT :PROMOTION)  (dosync (alter rule-list #(str % text))
+                                          (let [new-session (-> (mk-session (symbol this-ns)
+                                                (load-user-rules @rule-list))
+                                                ( #(apply insert %1 %2) @fact-list)
+                                                (fire-rules))]
+                                              (ref-set curr-session new-session))
+                                              (str "rules loaded: " (apply str (load-user-rules text))))
         "unknown input")))
 
 

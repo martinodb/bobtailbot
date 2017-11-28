@@ -44,3 +44,16 @@
      (if (empty? (load-from-path-or-create path)) (dump-to-path path init))
      (add-watch state :persist-watcher (persist-fn path))
      state)))
+
+(defn disk-ref
+   "A ref that loads its initial state from a file and persists each new state
+    to the same path. If an initial value is given, AND the file is empty, the initial value is stored in the file"
+   ([path]
+   (let [init  (load-from-path-or-create path)]
+          (disk-ref path init)))
+     
+   ([path init]
+   (let [state (ref init)]
+     (if (empty? (load-from-path-or-create path)) (dump-to-path path init))
+     (add-watch state :persist-watcher (persist-fn path))
+     state)))
