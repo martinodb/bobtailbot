@@ -52,6 +52,20 @@
 (defrecord Promotion [reason type])
 
 
+;https://www.compoundtheory.com/clojure-edn-walkthrough/
+(def edn-readers 
+    { 'bobtailbot.brains.example_shopping.brain.Order map->Order
+      'bobtailbot.brains.example_shopping.brain.Customer map->Customer
+      'bobtailbot.brains.example_shopping.brain.Purchase map->Purchase
+      'bobtailbot.brains.example_shopping.brain.Discount map->Discount
+      'bobtailbot.brains.example_shopping.brain.Total map->Total
+      'bobtailbot.brains.example_shopping.brain.Promotion map->Promotion
+     
+    })
+
+
+
+
 (def shopping-grammar
   (insta/parser  (slurp (str dir-prefix "grammar.ebnf")) :auto-whitespace :standard ))
 
@@ -116,7 +130,7 @@
      (->Purchase 90 :widget)] )
 
 
-(def fact-list (disk-ref (str dir-prefix "store/fact_list.edn") default-fact-list))
+(def fact-list (disk-ref (str dir-prefix "store/fact_list.edn") default-fact-list edn-readers))
 
 
 ;; These rules may be stored in an external file or database.
@@ -128,7 +142,7 @@
 
 
 
-(def rule-list (disk-ref (str dir-prefix "store/rule_list.edn") default-rule-list))
+(def rule-list (disk-ref (str dir-prefix "store/rule_list.edn") default-rule-list edn-readers))
 
 
 

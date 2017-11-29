@@ -7,6 +7,10 @@
 ;; CREDIT:
 ;; https://spootnik.org/entries/2016/12/17/building-an-atomic-database-with-clojure/
 
+
+
+
+
 (defn dump-to-path
   "Store a value's representation to a given path"
   [path value]
@@ -15,15 +19,18 @@
 (defn load-from-path
   "Load a value from its representation stored in a given path.
    When reading fails, yield the empty string"
-  [path]
+  [path edn-readers]
   (try
-    (let [string (edn/read-string (slurp path))] (if string string ""))
+     (let [string (edn/read-string 
+                    {:readers edn-readers}
+                    (slurp path))]
+          (if string string ""))
     (catch Exception e (println (.getMessage e)))))
 
 (defn load-from-path-or-create
-  [path]
+  [path edn-readers]
   (try
-    (if (.exists (io/as-file path)) (load-from-path path) (do (io/file path) ""))
+    (if (.exists (io/as-file path)) (load-from-path path edn-readers) (do (io/file path) ""))
     (catch Exception e (println (.getMessage e)))))
 
 (defn persist-fn
@@ -35,25 +42,25 @@
 (defn disk-atom
    "An atom that loads its initial state from a file and persists each new state
     to the same path. If an initial value is given, AND the file is empty, the initial value is stored in the file"
-   ([path]
-   (let [init  (load-from-path-or-create path)]
+   ([path edn-readers]
+   (let [init  (load-from-path-or-create path edn-readers)]
           (disk-atom path init)))
      
-   ([path init]
+   ([path init edn-readers]
    (let [state (atom init)]
-     (if (empty? (load-from-path-or-create path)) (dump-to-path path init))
+     (if (empty? (load-from-path-or-create path edn-readers)) (dump-to-path path init))
      (add-watch state :persist-watcher (persist-fn path))
      state)))
 
 (defn disk-ref
    "A ref that loads its initial state from a file and persists each new state
     to the same path. If an initial value is given, AND the file is empty, the initial value is stored in the file"
-   ([path]
-   (let [init  (load-from-path-or-create path)]
-          (disk-ref path init)))
+   ([path edn-readers]
+   (let [init  (load-from-path-or-create path edn-readers)]
+          (disk-ref path init edn-readers)))
      
-   ([path init]
+   ([path init edn-readers]
    (let [state (ref init)]
-     (if (empty? (load-from-path-or-create path)) (dump-to-path path init))
+     (if (empty? (load-from-path-or-create path edn-readers)) (dump-to-path path init))
      (add-watch state :persist-watcher (persist-fn path))
      state)))
