@@ -27,9 +27,9 @@
 
 
 
-;(let [ new-rule-list (str @rule-list "match customer status is gold;") new-session (-> (mk-session (symbol this-ns) (load-user-rules new-rule-list)) ( #(apply insert %1 %2) @fact-list) (fire-rules))](apply str ((first (insta/transform shopping-transforms parsetree)) new-session )))
+;(let [ new-rule-list (str @rule-list "match customer status is gold;") new-session (-> (mk-session (symbol this-ns) (load-user-rules new-rule-list)) ( #(apply insert %1 %2) @fact-set) (fire-rules))](apply str ((first (insta/transform shopping-transforms parsetree)) new-session )))
 
-(def my-default-fact-list [(->Customer "gold") (->Order 2013 "august" 20) (->Purchase 20 :gizmo) (->Purchase 120 :widget)  (->Purchase 90 :widget)])
+(def my-default-fact-set (set [(->Customer "gold") (->Order 2013 "august" 20) (->Purchase 20 :gizmo) (->Purchase 120 :widget)  (->Purchase 90 :widget)]))
 
 
 
@@ -62,7 +62,7 @@ match customer status is gold;
 
 (def p-new-rule-list (str @rule-list p-text))
 
-(def p-new-session (-> (mk-session (symbol this-ns) (load-user-rules p-new-rule-list)) ( #(apply insert %1 %2) @fact-list) (fire-rules)))
+(def p-new-session (-> (mk-session (symbol this-ns) (load-user-rules p-new-rule-list)) ( #(apply insert %1 %2) @fact-set) (fire-rules)))
 
 (def p-my-query  (first (insta/transform shopping-transforms p-parsetree)))
 

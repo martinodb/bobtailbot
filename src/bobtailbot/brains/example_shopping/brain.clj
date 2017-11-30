@@ -125,15 +125,15 @@
 
 
 
-(def default-fact-list
-    [(->Customer "gold")
-     (->Order 2013 "august" 20)
-     (->Purchase 20 :gizmo)
-     (->Purchase 120 :widget)
-     (->Purchase 90 :widget)] )
+(def default-fact-set
+  (set [(->Customer "gold")
+        (->Order 2013 "august" 20)
+        (->Purchase 20 :gizmo)
+        (->Purchase 120 :widget)
+        (->Purchase 90 :widget)]) )
 
 
-(def fact-list (disk-ref (str dir-prefix "store/fact_list.edn") default-fact-list edn-readers))
+(def fact-set (disk-ref (str dir-prefix "store/fact_set.edn") default-fact-set edn-readers))
 
 
 ;; These rules may be stored in an external file or database.
@@ -230,7 +230,7 @@
 
 
 (def default-session (-> (mk-session 'bobtailbot.brains.example-shopping.brain (load-user-rules @rule-list))
-                    ( #(apply insert %1 %2) @fact-list)
+                    ( #(apply insert %1 %2) @fact-set)
                     (fire-rules)))
 
 
@@ -273,7 +273,7 @@ Dynamic rules is something I wouldn't mind adding to Clara, although that comes 
              (let [ new-rule-list (str @rule-list text)
                     new-session   (-> (mk-session (symbol this-ns)
                                         (load-user-rules new-rule-list))
-                                        ( #(apply insert %1 %2) @fact-list)
+                                        ( #(apply insert %1 %2) @fact-set)
                                         (fire-rules))
                     anon-query  (first (insta/transform shopping-transforms parsetree))]
                 (apply str (query new-session anon-query))))
@@ -281,14 +281,15 @@ Dynamic rules is something I wouldn't mind adding to Clara, although that comes 
        (= intype (or :DISCOUNT :PROMOTION)) (dosync (alter rule-list #(str % text))
                                               (let [new-session (-> (mk-session (symbol this-ns)
                                                 (load-user-rules @rule-list))
-                                                ( #(apply insert %1 %2) @fact-list)
+                                                ( #(apply insert %1 %2) @fact-set)
                                                 (fire-rules))]
                                                 (ref-set curr-session new-session))
                                               (str "rules loaded: " (apply str (load-user-rules text))))
        (= intype (or :F-CUSTOMER :F-ORDER :F-PURCHASE))
-                            (dosync (alter fact-list #(into [] (concat % (load-user-facts text))))
+                            (dosync  (alter fact-set #(into #{} (reduce conj % (load-user-facts text))))
+                                    ;(alter fact-set #(into [] (concat % (load-user-facts text))))
                                     (let [new-session (-> @curr-session 
-                                                        (#(apply insert %1 %2) @fact-list)
+                                                        (#(apply insert %1 %2) @fact-set)
                                                         (fire-rules))]
                                           (ref-set curr-session new-session))
                                     (str "facts added: " (apply str (load-user-facts text))))
