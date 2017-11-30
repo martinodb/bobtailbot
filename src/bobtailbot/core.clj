@@ -5,6 +5,7 @@
             
             [bobtailbot.brains.example-shopping.brain :as shopbr]
             [bobtailbot.brains.quick-and-dirty.brain :as qdbr]
+            [bobtailbot.brains.general.brain :as genbr]
             
             [bobtailbot.repl :as repl]
             [bobtailbot.irc :as irc]
@@ -31,6 +32,7 @@
   (case brain
     :quickanddirty (qdbr/respond text)
     :example-shopping (shopbr/respond text)
+    :general (genbr/respond text)
     (qdbr/respond text)
     )
   )
@@ -40,6 +42,7 @@
   (case brain
     :quickanddirty  (qdbr/hear text)
     :example-shopping (shopbr/hear text)
+    :general (genbr/hear text)
     (qdbr/hear text)
     )
   )
@@ -52,7 +55,8 @@
   (case brain
     :quickanddirty (qdbr/speakup speakup-chan)
     :example-shopping (shopbr/speakup speakup-chan)
-    ()
+    :general (genbr/speakup speakup-chan)
+    (qdbr/speakup speakup-chan)
     )
   )
 
