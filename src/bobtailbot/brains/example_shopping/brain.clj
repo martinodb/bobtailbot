@@ -292,7 +292,7 @@ Dynamic rules is something I wouldn't mind adding to Clara, although that comes 
                                                         (#(apply insert %1 %2) @fact-set)
                                                         (fire-rules))]
                                           (ref-set curr-session new-session))
-                                    (str "facts added: " (apply str (load-user-facts text))))
+                                    (str "facts added: " (pr-str (load-user-facts text))))
         :else "unknown input")))
 
 
