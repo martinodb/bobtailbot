@@ -115,6 +115,9 @@
                   
                   :params #{}
                   })
+    :F-CUSTOMER (fn [status] (->Customer status))
+    :F-ORDER    (fn [year month day] (->Order year month day))
+    :F-PURCHASE (fn [cost item] (->Purchase cost item))
                  
                  })
 
@@ -215,7 +218,7 @@
     (insta/transform shopping-transforms parse-tree)))
 
 (def load-user-rules load-user-rules-safe)
-;(def load-user-rules load-user-rules-unsafe)
+(def load-user-facts load-user-rules-unsafe)
 
 
 
@@ -254,39 +257,42 @@ Dynamic rules is something I wouldn't mind adding to Clara, although that comes 
 
 (defn  respond-sync
   "Respond to text"
-  [text]
-  (let [parsetree  (shopping-grammar text)]
-     (case (first (first parsetree))
-       :NQUERY  (try
-                 (apply str
-                    ((first (insta/transform shopping-transforms parsetree)) @curr-session ))
-                 (catch Exception e (do (println (.getMessage e))
+ [text]
+  (let [parsetree  (shopping-grammar text)
+         intype (first (first parsetree))]
+   (cond 
+     (= intype :NQUERY)
+        (try
+          (apply str
+            ((first (insta/transform shopping-transforms parsetree)) @curr-session ))
+          (catch Exception e (do (println (.getMessage e))
                                          "That's not a valid query." )))
-       :QUERY  (try
-                 (do 
-                     
-                     (let [ new-rule-list (str @rule-list text)
-                            new-session   (-> (mk-session (symbol this-ns)
-                                                 (load-user-rules new-rule-list))
-                                              ( #(apply insert %1 %2) @fact-list)
-                                              (fire-rules))
-                            anon-query  (first (insta/transform shopping-transforms parsetree))
-                                              
-                                              ]               
-                        (apply str
-                           (query new-session anon-query))
-                        
-                        ))
-                  (catch Exception e (do (println (.getMessage e))
-                                         "That's not a valid query." )))
-       (or :DISCOUNT :PROMOTION)  (dosync (alter rule-list #(str % text))
-                                          (let [new-session (-> (mk-session (symbol this-ns)
+       (= intype :QUERY )
+         (try
+           (do 
+             (let [ new-rule-list (str @rule-list text)
+                    new-session   (-> (mk-session (symbol this-ns)
+                                        (load-user-rules new-rule-list))
+                                        ( #(apply insert %1 %2) @fact-list)
+                                        (fire-rules))
+                    anon-query  (first (insta/transform shopping-transforms parsetree))]
+                (apply str (query new-session anon-query))))
+            (catch Exception e (do (println (.getMessage e)) "That's not a valid query." )))
+       (= intype (or :DISCOUNT :PROMOTION)) (dosync (alter rule-list #(str % text))
+                                              (let [new-session (-> (mk-session (symbol this-ns)
                                                 (load-user-rules @rule-list))
                                                 ( #(apply insert %1 %2) @fact-list)
                                                 (fire-rules))]
-                                              (ref-set curr-session new-session))
+                                                (ref-set curr-session new-session))
                                               (str "rules loaded: " (apply str (load-user-rules text))))
-        "unknown input")))
+       (= intype (or :F-CUSTOMER :F-ORDER :F-PURCHASE))
+                            (dosync (alter fact-list #(into [] (concat % (load-user-facts text))))
+                                    (let [new-session (-> @curr-session 
+                                                        (#(apply insert %1 %2) @fact-list)
+                                                        (fire-rules))]
+                                          (ref-set curr-session new-session))
+                                    (str "facts added: " (apply str (load-user-facts text))))
+        :else "unknown input")))
 
 
 
