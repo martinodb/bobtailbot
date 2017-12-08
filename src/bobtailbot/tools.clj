@@ -60,7 +60,8 @@
           (disk-ref path init edn-readers)))
      
    ([path init edn-readers]
-   (let [state (ref init)]
-     (if (empty? (load-from-path-or-create path edn-readers)) (dump-to-path path init))
+   (let [state (ref init)
+         filecont (load-from-path-or-create path edn-readers)]
+     (if (empty? filecont) (dump-to-path path init) (dosync (ref-set state filecont)))
      (add-watch state :persist-watcher (persist-fn path))
      state)))

@@ -320,7 +320,7 @@
 
 
 (def g-default-fact-set
-  (set [`(->Triple "fact-1" true "Joe Smith" "loves"  "Liz Taylor")]
+  (set [(->Triple "fact-1" true "Joe Smith" "loves"  "Liz Taylor")]
         ) )
 
 (def g-fact-set (disk-ref (str dir-prefix "store/g_fact_set.edn") g-default-fact-set g-edn-readers))

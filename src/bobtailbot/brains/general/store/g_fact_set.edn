@@ -1,1 +1,1 @@
-#{#bobtailbot.brains.general.brain.Triple{:name "my-fact", :affirm true, :subj "Mary", :verb "loves", :obj "Gary Cooper"} (bobtailbot.brains.general.brain/->Triple "fact-1" true "Joe Smith" "loves" "Liz Taylor")}
+#{#bobtailbot.brains.general.brain.Triple{:name "my-fact", :affirm true, :subj "Mary", :verb "loves", :obj "Gary Cooper"} #bobtailbot.brains.general.brain.Triple{:name "fact-1", :affirm true, :subj "Joe Smith", :verb "loves", :obj "Liz Taylor"}}
