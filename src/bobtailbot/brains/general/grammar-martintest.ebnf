@@ -1,0 +1,228 @@
+(* EBNF grammar for instaparse *)
+
+
+S = (Clause | NegClause ) <'.'>? ;
+
+
+IdiomClause = (<"Bite me!"> | <"Go figure">) ;  (* idiom clause *)
+
+
+<Clause> = ( SimpClause | CompClause);
+
+<CompClause> = (CompClauseAND | CompClauseOR);
+CompClauseAND = SimpClause (<PuntComma> SimpClause)* (<AND> SimpClause)+ (<AND> NegClause)?;
+CompClauseOR = SimpClause (<PuntComma> SimpClause)* (<OR> SimpClause)+ (<AND> NegClause)?;
+
+
+
+
+
+NegClause = <IINotTCT> Clause ;
+
+
+
+
+VP2 = VP CC ( VP | VP2 ) ;
+
+<NNPgroup> = (NNPgroupAND | NNPgroupOR);
+NNPgroupAND = NNP  (<AND> NNP)+ ;
+NNPgroupOR = NNP (<OR> NNP)+ ;
+
+
+<CC> = (AND | OR ) ;
+
+<VP> = (VPaff | VPneg);
+<VPaff> = (VintConj | VtraConjNP | VtraConjPRPacc | VPaffcop ); 
+<VPneg> = (NegVintConj | NegVtraConjNP | NegVtraConjPRPacc | VPnegcop) ;
+
+VtraConjNP = VtraConj NP ;
+VtraConjPRPacc = VtraConj PRPacc;
+
+NegVtraConjNP = NegVtraConj NP ;
+NegVtraConjPRPacc = NegVtraConj PRPacc;
+
+
+
+VPaffcop = ( CopConj Aart N  (* eg, "is a person" *) | CopConj Det N OF NNP  (* "is the mother of John" *) | CopConj NNP (* "is John" *)) ;
+VPnegcop = ( NegCopConj Aart N  (* eg, "is not a person" *) | NegCopConj Det N OF NNP  (* "is not the mother of john" *)) ;
+
+
+
+
+(*Do more tenses*)
+<VintConj>  =  (VintPres) ;
+<VtraConj> = (VtraPres) ;
+
+<VintPres> = (VintPres3 | VintPresNon3) ;
+<VtraPres> = (VtraPres3 | VtraPresNon3) ;
+
+
+
+(* in English the conjugated verb in present is like the infinitive, *)
+(* except for the 3rd person singular. *)
+
+VintPresNon3 = VintInfOrPresNon3 ;
+VtraPresNon3 = VtraInfOrPresNon3 ;
+
+
+
+
+
+
+(*Do more tenses*)
+NegVintConj = (NegVintPres) ;
+NegVtraConj = (NegVtraPres) ;
+
+
+NegVintPres = NegVintPres3 ;
+NegVtraPres = NegVtraPres3 ;
+
+
+
+NegVintPres3 = DoesNot VintInf ;
+NegVtraPres3 = DoesNot VtraInf ;
+
+
+<NP>  = (DetN | PRP | NNP | NNPgroup) ;
+<PRP> = (PRPnom | PRPacc);
+
+DetN = <Det> N;
+
+<SimpClause>  = (NormalClause| SpecialClause);
+NormalClause = NP (VP | VP2);
+<SpecialClause> = (IdiomClause |ClauseSEinv| ClauseESinv | ClauseSEinvLab1 | ClauseESinvLab1 | ClauseSEinvLab2 | ClauseESinvLab2 | ClauseEvery | ClauseSome) ; 
+
+
+
+ClauseSEinv = <Some> N <IsSuchThat> <Every> N VtraConj <This> <N> ; (* UNSAFE! *)
+ClauseESinv = <Every> N <IsSuchThat> <Some> N VtraConj <This> <N> ; (* UNSAFE! *)
+
+
+ClauseSEinvLab1 = <Some> N <Var> IsSuchThat <Every> N VtraConj <Var> ;  (* UNSAFE! *)
+ClauseESinvLab1 = <Every> N <Var> IsSuchThat <Some> N VtraConj <Var> ; (* UNSAFE! *)
+
+ClauseSEinvLab2 = <Some> N <Var> IsSuchThat <Every> N <Var> VtraConj <Var> ; (* UNSAFE! *)
+ClauseESinvLab2 = <Every> N <Var> IsSuchThat <Some> N <Var> VtraConj <Var> ; (* UNSAFE! *)
+
+
+
+<ClauseEvery> = (ClauseEveryNP | ClauseEveryVP | ClauseEveryNPVP ) ; 
+ClauseEveryNP = NPevery VP;
+ClauseEveryVP = NP VPevery;
+ClauseEveryNPVP = NPevery VPevery;
+
+
+<ClauseSome> = (ClauseSomeNP | ClauseSomeVP | ClauseSomeNPVP ) ; 
+ClauseSomeNP = NPsome VP;
+ClauseSomeVP = NP VPsome;
+ClauseSomeNPVP = NPsome VPsome;
+
+
+
+VPsome = VtraConj NPsome ;
+VPevery = VtraConj NPevery ;
+
+NPsome = <Some> N ;
+NPevery = <Every> N ;
+
+
+
+Nfree = Ntoken (<whitespace> Ntoken)*   ;
+Ntoken = #'[a-z][a-z0-9\-_]+' |'person' | 'father' | 'mother' | 'animal' | 'plant' | 'thing' | 'dream';
+
+
+
+
+<N> = (Nlex | Nlexcomp) ;
+
+Nlexcomp = Nlex <('who'|'which'|'that')> VP;
+
+Nlex = ((Adj)* Nsimp)+ ;
+
+<Nsimp> = ("thing" | "object" | "animal" | "person" | "man" | "woman" ) ;
+
+  
+<Adj> = ("heavy" | "tall" | "hard" | "good" | "great") ;
+
+
+
+VintPres3 = ("heaves" | "walks") ;
+
+VintInf = VintInfOrPresNon3;
+<VintInfOrPresNon3> = ("heave" | "walk") ;
+
+
+
+VtraPres3  = ("loves") ;
+
+VtraInf = VtraInfOrPresNon3;
+<VtraInfOrPresNon3> = ("love") ;
+
+
+
+
+
+
+CopConj = CopPres ;
+CopPres = CopPres3 ;
+CopPres3 = "is" ;
+CopInf = "be" ;
+
+NegCopConj = CopConj NOT;
+
+
+Some = "some" ;
+Every = "every" ;
+
+IsSuchThat = "is such that" ;
+
+Det =  "the" ;
+Aart = "a" ;
+This = "this" ;
+
+
+
+
+ 
+
+NNP =  NNPtoken (<whitespace> NNPtoken)* ;
+
+NNPtoken = #'[A-Z][A-Za-z0-9\-_]+' | 'Alice' | 'Bob' | 'Carol';
+
+
+whitespace = #'\s+' ;
+
+
+
+
+
+
+PRPnom = ('I'|'you'|'he'|'she'|'it'|'he/she/it'|'we'|'they') ;
+PRPacc = ('me'|'you'|'him'|'her'|'it'|'him/her/it'|'us'|'them');
+
+
+
+
+
+
+
+OF = 'of' ;
+
+
+AND = 'and' ;
+OR = 'or' ;
+
+NOT = 'not' ;
+
+IINotTCT = 'it is not the case that' ; 
+
+PuntComma = ',' ;
+
+
+Var = #'\?[a-zA-Z0-9]+' ;
+
+
+DoesNot = 'does not' ;
+
+
+<STRING> = #'[A-Za-z][A-Za-z0-9_-]+' ;

@@ -1,0 +1,1 @@
+#{ {:sing "thing", :plural "things"} {:sing "woman", :plural "women"} {:sing "animal", :plural "animals"} {:sing "person", :plural "people"} {:sing "man", :plural "men"} {:sing "object", :plural "objects"}}

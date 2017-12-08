@@ -1,0 +1,252 @@
+(* EBNF grammar for instaparse *)
+<SENTENCE> =   (ADD-VOCAB | RULES-QUERIES | NQUERY | YNQUESTION| FACTS) <";">* ;
+
+
+<ADD-VOCAB> = (ADD-VERB | ADD-NOUN | ADD-ADJ | ADD-ADV);
+
+ADD-VOCAB = <"add"> VOC-TYPE VOC-MAP <";">* ;
+VOC-TYPE = ("verb" | "noun" | "adj" | "adv") ;
+VOC-MAP = "{"  (VMkey <whitespace> VMval (<whitespace>)?)+  "}" ;
+
+
+<VMkey> = #"\:[A-Za-z0-9\-_]+" ;
+<VMval> = #"[\"\']?[A-Za-z0-9\-_]+[\"\']?" ;
+
+
+NQUERY = <"query"> NAME ;
+
+<RULES-QUERIES> = (RULE | QUERY)+ ;
+
+<RULE> = (NAMED-RULE | ANON-RULE);
+NAMED-RULE = (NAMED-RULE-wtest | NAMED-RULE-notest);
+NAMED-RULE-wtest = <"rule"> NAME <":">? RULE-BODY-wtest ;
+NAMED-RULE-notest = <"rule"> NAME <":">? RULE-BODY-notest ;
+ANON-RULE = (ANON-RULE-wtest | ANON-RULE-notest);
+ANON-RULE-wtest = RULE-BODY-wtest;
+ANON-RULE-notest = RULE-BODY-notest;
+
+<RULE-BODY-wtest> = FACT <"when"> LHS-wtest <';'>*  ;
+<RULE-BODY-notest> = FACT <"when"> LHS-notest <';'>*  ;
+
+<LHS-wtest> = <"test"> TEST <','>* <"facts"> R-FACTS  ;
+<LHS-notest> = R-FACTS ;
+
+
+
+
+
+<R-FACTS> = (R-FACT | R-AND-FACTS | R-OR-FACTS | R-NOT-FACTS)  ;
+<R-FACT> = R-TRIP-FACT-IND2 ;
+R-TRIP-FACT-IND2 = T-SUBJECT T-VERB T-OBJECT ;
+
+R-AND-FACTS = R-FACT (<"and"> (R-FACT | <"("> R-FACTS <")">))+  ;
+R-OR-FACTS = R-FACT (<"or"> (R-FACT | <"("> R-FACTS <")">))+  ;
+R-NOT-FACTS = (NEG R-FACT | NEG <"("> R-FACTS <")">) ;
+
+
+TEST = (TSEXPR)+ ;
+TSEXPR = TS-OPERATOR (TS-ARG)+ ;
+<TS-OPERATOR> = ("equals"| "=" | "greater than"| ">" | "lower than" | "<") ;
+
+
+<TS-ARG> = (T-NP | VAR | FUN-TSEXPR) ;
+
+
+FUN-TSEXPR = TFUN-HEAD (TFUN-ARG)* ;
+
+<TFUN-HEAD> = STRING ; (* CAREFUL!! *)
+
+<TFUN-ARG> = TS-ARG ;
+
+
+
+
+
+
+
+QUERY = (QUERY-wtest | QUERY-notest);
+QUERY-wtest = Q-BODY-wtest;
+QUERY-notest = Q-BODY-notest;
+
+<Q-BODY-wtest> = <"match"> QLHS-wtest <';'>* ;
+<Q-BODY-notest> = <"match"> QLHS-notest <';'>* ;
+
+<QLHS-wtest> = <"test"> TEST <','>* <"facts"> Q-FACTS  ;
+<QLHS-notest> = Q-FACTS ;
+
+<Q-FACTS> = (Q-FACT | Q-AND-FACTS | Q-OR-FACTS | Q-NOT-FACTS)  ;
+<Q-FACT> = Q-TRIP-FACT-IND2 ;
+Q-TRIP-FACT-IND2 = T-SUBJECT T-VERB T-OBJECT ;
+
+Q-AND-FACTS = Q-FACT (<"and"> (Q-FACT | <"("> Q-FACTS <")">))+  ;
+Q-OR-FACTS = Q-FACT (<"or"> (Q-FACT | <"("> Q-FACTS <")">))+  ;
+Q-NOT-FACTS = (NEG Q-FACT | NEG <"("> Q-FACTS <")">) ;
+
+
+
+
+
+
+
+
+AND-FACTS = FACT (<"and"> (FACT | <"("> FACTS <")">))+  ;
+OR-FACTS = FACT (<"or"> (FACT | <"("> FACTS <")">))+  ;
+NOT-FACTS = (NEG FACT | NEG <"("> FACTS <")">) ;
+
+<NEG> = (<"not"> | <"it is">? <"false that">) ;
+
+<FACTS> = (FACT | AND-FACTS | OR-FACTS | NOT-FACTS)  ;
+<FACT> = (ANON-FACT | NAMED-FACT) ;
+<ANON-FACT> = FACT-BODY ;
+NAMED-FACT = <"fact"> NAME <":">? FACT-BODY ;
+<FACT-BODY> = (TRIP-FACT | NONTRIP-FACT) ;
+
+<TRIP-FACT> = (AFF-TRIP-FACT | NEG-TRIP-FACT) ;
+<NEG-TRIP-FACT> = (PRENEG-TRIP-FACT | EMBNEG-TRIP-FACT) ;
+PRENEG-TRIP-FACT = (<"it's"> | <"it is">) (<"false"> | (<"not"> (<"the case">)?)) <"that"> AFF-TRIP-FACT ;
+<EMBNEG-TRIP-FACT> = (EMBNEG-TRIP-FACT-IND2 | EMBNEG-TRIP-FACT-IC); (* CLASS2 would be confusing*)
+EMBNEG-TRIP-FACT-IND2 = T-SUBJECT EMBNEG-T-VERB T-OBJECT ;
+<EMBNEG-T-VERB> = (EMBNEG-T-Vconj | EMBNEG-T-Vvar);
+EMBNEG-T-Vconj = (<"doesn't"> | <"does not"> | <"don't"> | <"do not">) VtraInf ;
+<EMBNEG-TRIP-FACT-IC> = EMBNEG-TRIP-FACT-ISA ;
+EMBNEG-TRIP-FACT-ISA = T-SUBJECT <EMBNEG-T-VCOP-IC> T-OBJECT-CLASS ;
+EMBNEG-T-VCOP-IC = (<"am not">|<"isn't">|<"is not">|<"aren't">|<"are not">)(<"a">|<"an">|<"a kind of">)? ;
+EMBNEG-T-Vvar = (<"doesn't do">|<"does not do"> | <"don't do"> | <"do not do">) VAR ;
+
+
+<AFF-TRIP-FACT> = (TRIP-FACT-IND2 | TRIP-FACT-IC | TRIP-FACT-CLASS2) ;
+TRIP-FACT-IND2 = T-SUBJECT T-VERB T-OBJECT ;
+<T-SUBJECT> = (T-NP | VAR);
+<T-VERB> = (T-Vconj | T-Vvar);
+<T-OBJECT> = (T-NP | VAR);
+
+<TRIP-FACT-IC> = TRIP-FACT-ISA ;
+TRIP-FACT-ISA = T-SUBJECT <T-ISA> T-OBJECT-CLASS ;
+T-ISA = (<"am">|<"is">|<"are">)(<"a">|<"an">|<"a kind of">)? ;
+
+<TRIP-FACT-CLASS2> = TRIP-FACT-EVERYISA;
+TRIP-FACT-EVERYISA = <"every"> T-SUBJECT-CLASS <T-ISA> T-OBJECT-CLASS ;
+
+T-SUBJECT-CLASS = T-N ;
+T-OBJECT-CLASS = T-N;
+
+<T-Vconj> = VtraPres ;
+T-Vvar = (<"does"> | <"do">) VAR ;
+
+
+<T-NP> = (INDNAME | T-DET-P) ;
+T-DET-P = <"the"> T-N ;
+<INDNAME> = (NNP | GER-OR-TOINF | VALUE) ;
+
+<VAR> = (EXVAR | UNVAR) ;
+EXVAR = #"\![A-Za-z][A-Za-z0-9_-]*";
+UNVAR = #"\?[A-Za-z][A-Za-z0-9_-]*";
+
+YNQUESTION = (<"is it ">? <"true that">)? FACTS <"?"> ;
+
+<NAME> = STRING ;
+
+NUMBER = #"[0-9]+" ;
+
+(* <STRING> = #"[A-Za-z][A-Za-z0-9_-]+" ; *)
+<STRING> = #"[A-Za-z][A-Za-z0-9\/\._-]+" ;
+
+<FIELD> = STRING ;
+
+
+NNP =  NNPtoken (<whitespace> NNPtoken)* ;
+<NNPtoken> = #"[A-Z][A-Za-z0-9\-_]+" ;
+whitespace = #"\s+" ;
+
+<VALUE> = STRING | NUMBER ;
+
+<GER-OR-TOINF> = (GERUND | TOINF) ;
+<TOINF> = (TOINFcop | TOINFnc) ;
+
+TOINFcop = <"to"> "be" ;
+
+TOINFnc = <"to"> V-INF-OR-PNon3 ;
+
+<V-INF-OR-PNon3> = (VtraInfOrPresNon3 | VintInfOrPresNon3) ;
+
+
+VintInfOrPresNon3 = ("walk" | "talk" |"breath");
+
+<VtraInf> = VtraInfOrPresNon3 ;
+<VintInf> = VintInfOrPresNon3 ;
+
+<GERUND> = (GERUNDtra | GERUNDint | GERUNDcop);
+
+
+GERUNDint = ("walking"|"talking"|"breathing") ;
+GERUNDcop = ("being") ;
+
+<T-N> = T-Nsg (* for now, especially for triples, only nouns in singular forms*)
+<T-Nsg> = Nlex-sg ;
+
+
+<Nlex-sg> = ((Adj)* Nsimp-sg)+ ;
+
+
+
+  
+
+
+
+
+
+
+NONTRIP-FACT = "just testing nontrip fact" ;
+NONTRIP-CONDITION = "just testing nontrip condition" ;
+
+
+
+(*Do more tenses*)
+<VintConj>  =  (VintPres) ;
+<VtraConj> = (VtraPres) ;
+
+<VintPres> = (VintPres3 | VintPresNon3) ;
+<VtraPres> = (VtraPres3 | VtraPresNon3) ;
+
+
+
+(* in English the conjugated verb in present is like the infinitive, *)
+(* except for the 3rd person singular. *)
+
+<VintPresNon3> = VintInfOrPresNon3 ;
+<VtraPresNon3> = VtraInfOrPresNon3 ;
+
+VintPres3 = ("walks" | "talks" |"breathes");
+
+
+
+
+
+(*Do more tenses*)
+NegVintConj = (NegVintPres) ;
+NegVtraConj = (NegVtraPres) ;
+
+
+<NegVintPres> = (NegVintPres3 | NegVintPresNon3 ) ;
+<NegVtraPres> = (NegVtraPres3 | NegVtraPresNon3);
+
+
+
+NegVintPres3 = (<"doesn't"> | <"does not">) VintInf ;
+NegVtraPres3 = (<"doesn't"> | <"does not">) VtraInf ;
+
+NegVintPresNon3 = (<"don't"> | <"do not">) VintInf ;
+NegVtraPresNon3 = (<"don't"> | <"do not">) VtraInf ;
+
+
+
+
+
+
+(* These are externally defined *)
+(*  VtraPres3 = ("loves" | "hates" ); *)
+(*  GERUNDtra = ("loving"|"hating") ; *)
+(*  VtraInfOrPresNon3  = ("love" | "hate" ); *)
+(* *)
+(* <Nsimp-sg> = ("thing" | "object" | "animal" | "person" | "man" | "woman" ) ; *)
+(* <Adj> = ("heavy" | "tall" | "hard" | "good" | "great") ; *)
