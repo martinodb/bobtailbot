@@ -47,8 +47,9 @@
           (disk-atom path init)))
      
    ([path init edn-readers]
-   (let [state (atom init)]
-     (if (empty? (load-from-path-or-create path edn-readers)) (dump-to-path path init))
+   (let [state (atom init)
+          filecont (load-from-path-or-create path edn-readers)]
+     (if (empty? filecont) (dump-to-path path init) (reset! state filecont))
      (add-watch state :persist-watcher (persist-fn path))
      state)))
 
