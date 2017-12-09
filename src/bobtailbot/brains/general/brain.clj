@@ -518,6 +518,10 @@ Dynamic rules is something I wouldn't mind adding to Clara, although that comes 
 ")
 
 
+;;silly reason.
+(declare get-ans-vars)
+
+
 (defn g-respond-sync
 
 [text]
@@ -559,8 +563,10 @@ Dynamic rules is something I wouldn't mind adding to Clara, although that comes 
                                         (g-load-user-rules new-rule-list))
                                         ( #(apply insert %1 %2) @g-fact-set)
                                         (fire-rules))
-                    anon-query  (first (insta/transform g-transforms parsetree))]
-                (apply str (query new-session anon-query))))
+                    anon-query  (first (insta/transform g-transforms parsetree))
+                    raw-query-result (apply str (query new-session anon-query))]
+                    (str (apply str (get-ans-vars raw-query-result)) " \n\n "
+                          "raw query result:\n " raw-query-result )   ))
             (catch Exception e (do (println (.getMessage e)) "That's not a valid query." )))
        (= intype :ANON-RULE) (dosync (alter g-rule-list #(str % text))
                                               (let [new-session (-> (mk-session (symbol this-ns)
@@ -654,3 +660,6 @@ Dynamic rules is something I wouldn't mind adding to Clara, although that comes 
 (def hear g-hear)
 (def speakup g-speakup)
 (def respond g-respond)
+
+
+(defn get-ans-vars [raw-q-result] (re-seq #"\:\?\S+\s+\"[a-zA-z0-9_\-\s]*\"" raw-q-result))
