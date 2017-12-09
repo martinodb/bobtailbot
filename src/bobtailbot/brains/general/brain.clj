@@ -56,13 +56,13 @@
 
 ;https://www.compoundtheory.com/clojure-edn-walkthrough/
 (def shop-edn-readers 
-    { 'bobtailbot.brains.general.brain.Order map->Order
-      'bobtailbot.brains.general.brain.Customer map->Customer
-      'bobtailbot.brains.general.brain.Purchase map->Purchase
-      'bobtailbot.brains.general.brain.Discount map->Discount
-      'bobtailbot.brains.general.brain.Total map->Total
-      'bobtailbot.brains.general.brain.Promotion map->Promotion
-     
+    { ;'bobtailbot.brains.general.brain.Order map->Order
+      (symbol (str this-ns "." "Order")) map->Order
+      (symbol (str this-ns "." "Customer")) map->Customer
+      (symbol (str this-ns "." "Purchase")) map->Purchase
+      (symbol (str this-ns "." "Discount")) map->Discount
+      (symbol (str this-ns "." "Total")) map->Total
+      (symbol (str this-ns "." "Promotion")) map->Promotion
     })
 
 
@@ -70,7 +70,8 @@
 
 ;https://www.compoundtheory.com/clojure-edn-walkthrough/
 (def g-edn-readers 
-    { 'bobtailbot.brains.general.brain.Triple map->Triple })
+    { (symbol (str this-ns "." "Triple")) map->Triple }
+    )
 
 
 
