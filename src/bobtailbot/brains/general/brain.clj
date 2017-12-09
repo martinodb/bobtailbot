@@ -42,30 +42,7 @@
 
 
 
-;;;; Facts used in the examples below.
-
-(defrecord Order [year month day])
-(defrecord Customer [status])
-(defrecord Purchase [cost item])
-(defrecord Discount [name percent])
-(defrecord Total [value])
-(defrecord Promotion [reason type])
-
 (defrecord Triple [name affirm subj verb obj])
-
-
-;https://www.compoundtheory.com/clojure-edn-walkthrough/
-(def shop-edn-readers 
-    { ;'bobtailbot.brains.general.brain.Order map->Order
-      (symbol (str this-ns "." "Order")) map->Order
-      (symbol (str this-ns "." "Customer")) map->Customer
-      (symbol (str this-ns "." "Purchase")) map->Purchase
-      (symbol (str this-ns "." "Discount")) map->Discount
-      (symbol (str this-ns "." "Total")) map->Total
-      (symbol (str this-ns "." "Promotion")) map->Promotion
-    })
-
-
 
 
 ;https://www.compoundtheory.com/clojure-edn-walkthrough/
@@ -134,12 +111,6 @@
 
 
 
-
-
-
-
-
-
 (defn ebnify-wtail [coll] (apply str (map #(str "'" %1 "'"   " | ") coll)) )
 (defn ebnify-notail [coll] (str (apply str (map #(str "'" %1 "'"   " | ") (butlast coll))) " " "'" (last coll) "'" " " ) )
 
@@ -180,29 +151,18 @@
 (def g-grammar-1
   (insta/parser raw-g-grammar-1-w-annex  :auto-whitespace :standard ))
 
-(def shop-grammar
-  (insta/parser  (slurp (str dir-prefix "shop-grammar.ebnf")) :auto-whitespace :standard ))
 
 
 
-
-;(def g-grammar shop-grammar)
 (def g-grammar g-grammar-1)
 ;(def g-grammar grammar-martintest)
 
 
 (defn parsed-voc-map [parsetree] (read-string (apply str (rest (nth (first parsetree) 2 )))))
-;bobtailbot.brains.general.brain=> (apply str (rest (nth (first (g-grammar-1 "add verb {:my balls  :are  fresh };")) 2 )))
-;"{:my balls  :are  fresh }"
+;bobtailbot.brains.general.brain=> (apply str (rest (nth (first (g-grammar-1 "add verb {:my taylor  :is  rich };")) 2 )))
+;"{:my taylor  :is  rich }"
 
 
-
-
-
-(def shop-operators {"is" `=
-                ">" `>
-                "<" `<
-                "=" `=})
 
 
 (def g-ts-operators {"equals" `=
@@ -213,52 +173,6 @@
                 "=" `=})
 
 
-
-(def shop-fact-types
-  {"customer" Customer
-   "total" Total
-   "order" Order})
-
-(def shop-transforms
-  {:NUMBER #(Integer/parseInt %)
-   :OPERATOR shop-operators
-   :FACTTYPE shop-fact-types
-   :CONDITION (fn [fact-type field operator value]
-                {:type fact-type
-                 :constraints [(list operator (symbol field) value)]
-                 })
-   :QCONDITION (fn [fact-type field operator value]
-                {:type fact-type
-                 :constraints [(list operator (symbol field) value)]
-                 :fact-binding :?thing
-                 })
-   ;; Convert promotion strings to keywords.
-   :PROMOTIONTYPE keyword
-
-   :DISCOUNT (fn [name percent & conditions]
-               {:name name
-                :lhs conditions
-
-                :rhs `(insert! (->Discount ~name ~percent))})
-
-   :PROMOTION (fn [name promotion-type & conditions]
-                {:name name
-                 :lhs conditions
-                 :rhs `(insert! (->Promotion ~name ~promotion-type))})
-                 
-                 
-    :NQUERY  (fn [name] (fn [session-name] (query session-name (if (.contains name ns-prefix) name (str ns-prefix name)))))
-    :QUERY   (fn [& conditions]
-                 {:name "anon-query"
-                  :lhs conditions
-                  
-                  :params #{}
-                  })
-    :F-CUSTOMER (fn [status] (->Customer status))
-    :F-ORDER    (fn [year month day] (->Order year month day))
-    :F-PURCHASE (fn [cost item] (->Purchase cost item))
-                 
-                 })
 
 
 
@@ -308,19 +222,6 @@
 
 
 
-(def shop-default-fact-set
-  (set [(->Customer "gold")
-        (->Order 2013 "august" 20)
-        (->Purchase 20 :gizmo)
-        (->Purchase 120 :widget)
-        (->Purchase 90 :widget)]) )
-
-
-(def shop-fact-set (disk-ref (str dir-prefix "store/shop_fact_set.edn") shop-default-fact-set shop-edn-readers))
-
-
-
-
 (def g-default-fact-set
   (set [(->Triple "fact-1" true "Joe Smith" "loves"  "Liz Taylor")]
         ) )
@@ -328,20 +229,6 @@
 (def g-fact-set (disk-ref (str dir-prefix "store/g_fact_set.edn") g-default-fact-set g-edn-readers))
 
 
-
-
-
-
-
-
-;; These rules may be stored in an external file or database.
-(def shop-default-rule-list
-
-  "discount my-discount 15 when customer status is platinum;
-   discount extra-discount 10 when customer status is gold and total value > 200;
-   promotion free-widget-month free-widget when customer status is gold and order month is august;")
-
-(def shop-rule-list (disk-ref (str dir-prefix "store/shop_rule_list.edn") shop-default-rule-list shop-edn-readers))
 
 
 (def g-default-rule-list
@@ -352,107 +239,15 @@
 
 
 
-
-;;;; Rules written in Clojure and combined with externally-defined rules.
-
-(defrule total-purchases
-  [?total <- (acc/sum :cost) :from [Purchase]]
-  =>
-  (insert! (->Total ?total)))
-  
-
-
-;; event rules
-
 (def last-utterance (atom {}))
 
-(defrule alert-gizmo-purchase
-  "Anyone who purchases a gizmo gets a free lunch."
-  [Purchase (= item :gizmo)]
-  =>
-  (reset! last-utterance
-                  {:type :alert , :text "someone bought a gizmo!"}))
 
-
-
-
-;;; just trying a few things
-(defrule shop-alert-purchase-inc-21
-  ""
-  [Purchase (= (inc cost) 21)]
-  =>
-  (do (reset! last-utterance {:type :alert , :text "someone spent 20 dollars"})
-      (println "20 dollars spent")))
-
-(defrule shop-alert-purchase-plus-2-22-test
-  ""
-  [Purchase (= ?cost cost)]
-  [:test (= (+ 2 ?cost) 22)]
-  =>
-  (do (reset! last-utterance {:type :alert , :text "test confirms someone spent 20 dollars"})
-      (println "by test, 20 dollars spent")))
 
 (defrule Joe-Smith-loves-back
   [Triple (= ?x subj)(= "loves" verb)(= "Joe Smith" obj)]
   =>
   (do (insert! (->Triple "my-Joe-fact" true "Joe Smith" "loves" ?x))
       (println "Joe is loved by, and loves back: " ?x)))
-
-
-;;;
-
-
-;; named queries
-
-(defquery get-discounts
-  "Returns the available discounts."
-  []
-  [?discount <- Discount])
-
-(defquery get-promotions
-  "Returns the available promotions."
-  []
-  [?discount <- Promotion])
-
-
-
-
-
-
-
-
-
-
-;;;; Example code to load and validate rules.
-
-(sc/defn ^:always-validate shop-load-user-rules-safe :- [clara.rules.schema/Production]
-  "Converts a business rule string into Clara productions. Safe version."
-  [business-rules :- sc/Str]
-
-  (let [parse-tree (shop-grammar business-rules)]
-
-    (when (insta/failure? parse-tree)
-      (throw (ex-info (print-str parse-tree) {:failure parse-tree})))
-
-    (insta/transform shop-transforms parse-tree)))
-
-
-(defn shop-load-user-rules-unsafe 
-  "Converts a business rule string into Clara productions. Unsafe version."
-  [business-rules]
-
-  (let [parse-tree (shop-grammar business-rules)]
-
-    (when (insta/failure? parse-tree)
-      (throw (ex-info (print-str parse-tree) {:failure parse-tree})))
-
-    (insta/transform shop-transforms parse-tree)))
-
-(def shop-load-user-rules shop-load-user-rules-safe)
-(def shop-load-user-facts shop-load-user-rules-unsafe)
-
-
-
 
 
 
@@ -485,16 +280,6 @@
 
 
 
-
-
-(def shop-default-session (-> (mk-session (symbol this-ns) (shop-load-user-rules @shop-rule-list))
-                    ( #(apply insert %1 %2) @shop-fact-set)
-                    (fire-rules)))
-
-(def shop-curr-session (ref shop-default-session))
-
-
-
 (def g-default-session (-> (mk-session (symbol this-ns) (g-load-user-rules @g-rule-list))
                     ( #(apply insert %1 %2) @g-fact-set)
                     (fire-rules)))
@@ -502,12 +287,6 @@
 (def g-curr-session (ref g-default-session))
 
 
-
-
-;; this one is useful for the REPL
-(def text-01 (str "query " ns-prefix "get-discounts"))
-(def text-02 "query get-discounts")
-(def text-rule-01 "discount gold-summer-discount 20 when customer status is gold and order month is august;")
 
 
 
@@ -589,60 +368,6 @@ Dynamic rules is something I wouldn't mind adding to Clara, although that comes 
 
 
 
-(defn  shop-respond-sync
-  "Respond to text"
- [text]
-  (let [parsetree  (shop-grammar text)
-         intype (first (first parsetree))]
-   (cond 
-     (= intype :NQUERY)
-        (try
-          (apply str
-            ((first (insta/transform shop-transforms parsetree)) @shop-curr-session ))
-          (catch Exception e (do (println (.getMessage e))
-                                         "That's not a valid query." )))
-       (= intype :QUERY )
-         (try
-           (do 
-             (let [ new-rule-list (str @shop-rule-list text)
-                    new-session   (-> (mk-session (symbol this-ns)
-                                        (shop-load-user-rules new-rule-list))
-                                        ( #(apply insert %1 %2) @shop-fact-set)
-                                        (fire-rules))
-                    anon-query  (first (insta/transform shop-transforms parsetree))]
-                (apply str (query new-session anon-query))))
-            (catch Exception e (do (println (.getMessage e)) "That's not a valid query." )))
-       (= intype (or :DISCOUNT :PROMOTION)) (dosync (alter shop-rule-list #(str % text))
-                                              (let [new-session (-> (mk-session (symbol this-ns)
-                                                (shop-load-user-rules @shop-rule-list))
-                                                ( #(apply insert %1 %2) @shop-fact-set)
-                                                (fire-rules))]
-                                                (ref-set shop-curr-session new-session))
-                                              (str "rules loaded: " (apply str (shop-load-user-rules text))))
-       (= intype (or :F-CUSTOMER :F-ORDER :F-PURCHASE))
-                            (dosync  (alter shop-fact-set #(into #{} (reduce conj % (shop-load-user-facts text))))
-                                    (let [new-session (-> @shop-curr-session 
-                                                        (#(apply insert %1 %2) @shop-fact-set)
-                                                        (fire-rules))]
-                                          (ref-set shop-curr-session new-session))
-                                    (str "facts added: " (pr-str (shop-load-user-facts text))))
-        :else "unknown input")))
-
-
-
-;;; Only use "hear" and "speakup" for multi-user interfaces like irc. The bot may report events asyncronously, not just respond to questions.
-;(defn shop-hear [text-in] (future 
-                        ;(reset! last-utterance
-                           ;{:type :response , :text (shop-respond-sync text-in)} )))
-
-
-;(defn shop-speakup [speakup-chan] (add-watch last-utterance :utt-ready
-                                          ;(fn [k r old-state new-state]
-                                                ;(>!! speakup-chan (:text new-state) ))))
-
-;;; Only use for repl and similar, single-user interfaces. It's syncronous (blocking). 
-;(def shop-respond shop-respond-sync)
-
 
 
 ;;; Only use "hear" and "speakup" for multi-user interfaces like irc. The bot may report events asyncronously, not just respond to questions.
@@ -660,10 +385,6 @@ Dynamic rules is something I wouldn't mind adding to Clara, although that comes 
 
 
 
-
-;(def hear shop-hear)
-;(def speakup shop-speakup)
-;(def respond shop-respond)
 
 (def hear g-hear)
 (def speakup g-speakup)
