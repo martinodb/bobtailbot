@@ -576,7 +576,7 @@ Dynamic rules is something I wouldn't mind adding to Clara, although that comes 
                     (str (apply str (get-ans-vars raw-query-result)) "   "
                           "raw query result:  " raw-query-result )   ))
             (catch Exception e (do (println (.getMessage e)) "That's not a valid query." )))
-       (= intype :ANON-RULE) (dosync (alter g-rule-list #(str % text))
+       (= intype :ANON-RULE) (dosync (alter g-rule-list #(str % text ";"))
                                               (let [new-session (-> (mk-session (symbol this-ns)
                                                 (g-load-user-rules @g-rule-list))
                                                 ( #(apply insert %1 %2) @g-fact-set)
