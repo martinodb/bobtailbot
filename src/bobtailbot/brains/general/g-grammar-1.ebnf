@@ -131,7 +131,7 @@ T-SUBJECT-CLASS = T-N ;
 T-OBJECT-CLASS = T-N;
 
 <T-Vconj> = VtraPres ;
-T-Vvar = (<"does"> | <"do">) VAR ;
+<T-Vvar> = (VAR | ((<"does"> | <"do">) VAR <"to">)) ;
 
 
 <T-NP> = (INDNAME | T-DET-P) ;
