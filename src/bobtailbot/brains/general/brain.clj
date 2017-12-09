@@ -289,6 +289,7 @@
                                        ]
                        :fact-binding :?thing
                         })
+    :AND-FACTS vector
     :UNVAR symbol
     :NNP #(str %1 " " %2)
     :VtraPres3 identity
@@ -548,13 +549,20 @@ Dynamic rules is something I wouldn't mind adding to Clara, although that comes 
                )
             :else "unknown vocabulary type"
              ))
-      (= intype :TRIP-FACT-IND2)
+       (= intype :TRIP-FACT-IND2)
         (dosync  (alter g-fact-set #(into #{} (reduce conj % (map eval (g-load-user-facts text)))))
                                     (let [new-session (-> @g-curr-session 
                                                         (#(apply insert %1 %2) @g-fact-set)
                                                         (fire-rules))]
                                           (ref-set g-curr-session new-session))
                                     (str "facts added: " (pr-str (g-load-user-facts text))))
+       (= intype :AND-FACTS)
+        (dosync  (alter g-fact-set #(into #{} (reduce conj % (map eval (first (g-load-user-facts text))))))
+                                    (let [new-session (-> @g-curr-session 
+                                                        (#(apply insert %1 %2) @g-fact-set)
+                                                        (fire-rules))]
+                                          (ref-set g-curr-session new-session))
+                                    (str "facts added: " (pr-str (first (g-load-user-facts text)))))
        (= intype :QUERY )
          (try
            (do 
@@ -565,8 +573,8 @@ Dynamic rules is something I wouldn't mind adding to Clara, although that comes 
                                         (fire-rules))
                     anon-query  (first (insta/transform g-transforms parsetree))
                     raw-query-result (apply str (query new-session anon-query))]
-                    (str (apply str (get-ans-vars raw-query-result)) " \n\n "
-                          "raw query result:\n " raw-query-result )   ))
+                    (str (apply str (get-ans-vars raw-query-result)) "   "
+                          "raw query result:  " raw-query-result )   ))
             (catch Exception e (do (println (.getMessage e)) "That's not a valid query." )))
        (= intype :ANON-RULE) (dosync (alter g-rule-list #(str % text))
                                               (let [new-session (-> (mk-session (symbol this-ns)
