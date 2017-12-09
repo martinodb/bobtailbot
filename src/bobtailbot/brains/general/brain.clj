@@ -351,9 +351,15 @@ Dynamic rules is something I wouldn't mind adding to Clara, although that comes 
                                         ( #(apply insert %1 %2) @g-fact-set)
                                         (fire-rules))
                     anon-query  (first (insta/transform g-transforms parsetree))
-                    raw-query-result (apply str (query new-session anon-query))]
-                    (str (apply str (get-ans-vars raw-query-result)) "   "
-                          "raw query result:  " raw-query-result )   ))
+                    raw-query-result  (query new-session anon-query)
+                    raw-query-result-set (into #{} raw-query-result)
+                    ;raw-query-result-str (apply str raw-query-result)
+                    raw-query-result-set-str (apply str raw-query-result-set)]
+                    (str 
+                       ;"with dups: " (apply str (get-ans-vars raw-query-result-str)) "   " 
+                        ;  "raw query result, with dups:  " raw-query-result-str "   " 
+                          "satisfiers: " (apply str (get-ans-vars raw-query-result-set-str)) "    " 
+                          "raw query result (no duplicates):  " raw-query-result-set-str                                          )))
             (catch Exception e (do (println (.getMessage e)) "That's not a valid query." )))
        (= intype :ANON-RULE) (dosync (alter g-rule-list #(str % text ";"))
                                               (let [new-session (-> (mk-session (symbol this-ns)
