@@ -173,7 +173,7 @@
                 "=" `=})
 
 
-
+(defn NNPkw->str [kw] (-> kw name (string/replace #"_" " ")))
 
 
 (def g-transforms
@@ -201,12 +201,18 @@
                                      (list '= t-verb 'verb)
                                      (list '= t-obj 'obj)
                                        ]
-                       :fact-binding :?thing
+                       :fact-binding :?#thing
                         })
     :AND-FACTS vector
     :UNVAR symbol
-    :NNP #(str %1 " " %2)
-    :VtraPres3 identity
+    
+    ;:NNP #(str %1 " " %2)
+    ;:NNP #(keyword (str %1 "_" %2))
+    :NNP (fn [NNP-f & NNP-rest] (keyword (str NNP-f (apply str (map #(str "_" %) NNP-rest)))))
+    
+    ;:VtraPres3 identity
+    :VtraPres3 keyword
+    
     :ANON-RULE identity
     :QUERY identity
                  
@@ -223,7 +229,10 @@
 
 
 (def g-default-fact-set
-  (set [(->Triple "fact-1" true "Joe Smith" "loves"  "Liz Taylor")]
+  (set [
+         ;(->Triple "fact-1" true "Joe Smith" "loves"  "Liz Taylor")
+         (->Triple "fact-1" true :Joe_Smith :loves  :Liz_Taylor)
+         ]
         ) )
 
 (def g-fact-set (disk-ref (str dir-prefix "store/g_fact_set.edn") g-default-fact-set g-edn-readers))
@@ -396,5 +405,5 @@ Dynamic rules is something I wouldn't mind adding to Clara, although that comes 
 (def speakup g-speakup)
 (def respond g-respond)
 
-
-(defn get-ans-vars [raw-q-result] (re-seq #"\:\?\S+\s+\"[a-zA-z0-9_\-\s]*\"" raw-q-result))
+(defn get-ans-vars [raw-q-result] (re-seq #"\:\?[\S&&[^\#]]+\s+[\S&&[^\{\}]]+" raw-q-result))
+;(defn get-ans-vars [raw-q-result] (re-seq #"\:\?\S+\s+\"[a-zA-z0-9_\-\s]*\"" raw-q-result))

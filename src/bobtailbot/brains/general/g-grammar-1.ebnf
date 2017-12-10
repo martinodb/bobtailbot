@@ -151,14 +151,16 @@ NUMBER = #"[0-9]+" ;
 (* <STRING> = #"[A-Za-z][A-Za-z0-9_-]+" ; *)
 <STRING> = #"[A-Za-z][A-Za-z0-9\/\._-]+" ;
 
-<FIELD> = STRING ;
+<STRING-notNNP> = #"[a-z][A-Za-z0-9\/\._-]+" ;
+
+<FIELD> = STRING-notNNP ;
 
 
 NNP =  NNPtoken (<whitespace> NNPtoken)* ;
 <NNPtoken> = #"[A-Z][A-Za-z0-9\-_]+" ;
 whitespace = #"\s+" ;
 
-<VALUE> = STRING | NUMBER ;
+<VALUE> = STRING-notNNP | NUMBER ;
 
 <GER-OR-TOINF> = (GERUND | TOINF) ;
 <TOINF> = (TOINFcop | TOINFnc) ;
