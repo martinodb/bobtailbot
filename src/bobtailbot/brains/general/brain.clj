@@ -215,9 +215,15 @@
     
     :ANON-RULE identity
     :QUERY identity
+    :YNQUESTION identity
                  
     :NQUERY  (fn [name] (fn [session-name] (query session-name (if (.contains name ns-prefix) name (str ns-prefix name)))))
     :QUERY-notest   (fn [& facts]
+                     {:name "anon-query"
+                      :lhs facts
+                      :params #{}
+                       })
+    :YNQUESTION-notest   (fn [& facts]
                      {:name "anon-query"
                       :lhs facts
                       :params #{}
@@ -369,6 +375,24 @@ Dynamic rules is something I wouldn't mind adding to Clara, although that comes 
                         ;  "raw query result, with dups:  " raw-query-result-str "   " 
                           "satisfiers: " (apply str (get-ans-vars raw-query-result-set-str)) "    " 
                           "raw query result (no duplicates):  " raw-query-result-set-str                                          )))
+            (catch Exception e (do (println (.getMessage e)) "That's not a valid query." )))
+       (= intype :YNQUESTION )
+         (try
+           (do 
+             (let [ new-rule-list (str @g-rule-list text)
+                    new-session   (-> (mk-session (symbol this-ns)
+                                        (g-load-user-rules new-rule-list))
+                                        ( #(apply insert %1 %2) @g-fact-set)
+                                        (fire-rules))
+                    anon-query  (first (insta/transform g-transforms parsetree))
+                    raw-query-result  (query new-session anon-query)
+                    ;raw-query-result-set (into #{} raw-query-result)
+                    raw-query-result-str (apply str raw-query-result)
+                    ;raw-query-result-set-str (apply str raw-query-result-set)
+                    ]
+                    (if  (not (= raw-query-result-str "")) 
+                       (str "Yes." "   Raw query result:  " raw-query-result-str ) 
+                       (str "No." "   Raw query result:  " raw-query-result-str )   )))
             (catch Exception e (do (println (.getMessage e)) "That's not a valid query." )))
        (= intype :ANON-RULE) (dosync (alter g-rule-list #(str % text ";"))
                                               (let [new-session (-> (mk-session (symbol this-ns)

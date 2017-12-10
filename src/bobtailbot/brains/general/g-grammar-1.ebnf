@@ -1,5 +1,5 @@
 (* EBNF grammar for instaparse *)
-<SENTENCE> =   (ADD-VOCAB | RULES-QUERIES | NQUERY | YNQUESTION| FACTS) <";">* ;
+<SENTENCE> =   (ADD-VOCAB | RULES-QUERIES | NQUERY | FACTS) <";">* ;
 
 
 <ADD-VOCAB> = (ADD-VERB | ADD-NOUN | ADD-ADJ | ADD-ADV);
@@ -15,7 +15,7 @@ VOC-MAP = "{"  (VMkey <whitespace> VMval (<whitespace>)?)+  "}" ;
 
 NQUERY = <"query"> NAME ;
 
-<RULES-QUERIES> = (RULE | QUERY)+ ;
+<RULES-QUERIES> = (RULE | QUERY | YNQUESTION)+ ;
 
 <RULE> = (NAMED-RULE | ANON-RULE);
 NAMED-RULE = (NAMED-RULE-wtest | NAMED-RULE-notest);
@@ -85,6 +85,15 @@ Q-NOT-FACTS = (NEG Q-FACT | NEG <"("> Q-FACTS <")">) ;
 
 
 
+YNQUESTION = (YNQUESTION-wtest | YNQUESTION-notest);
+YNQUESTION-wtest = YNQ-BODY-wtest;
+YNQUESTION-notest = YNQ-BODY-notest;
+
+<YNQ-BODY-wtest> = (<"is it ">? <"true that">)? YNQLHS-wtest <"?"> <';'>* ;
+<YNQ-BODY-notest> = (<"is it ">? <"true that">)? YNQLHS-notest <"?"> <';'>* ;
+
+<YNQLHS-wtest> = QLHS-wtest ;
+<YNQLHS-notest> = QLHS-notest ;
 
 
 
@@ -142,7 +151,7 @@ T-DET-P = <"the"> T-N ;
 EXVAR = #"\![A-Za-z][A-Za-z0-9_-]*";
 UNVAR = #"\?[A-Za-z][A-Za-z0-9_-]*";
 
-YNQUESTION = (<"is it ">? <"true that">)? FACTS <"?"> ;
+
 
 <NAME> = STRING ;
 
