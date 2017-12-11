@@ -206,9 +206,7 @@
     :AND-FACTS vector
     :UNVAR symbol
     
-    ;:NNP #(str %1 " " %2)
-    ;:NNP #(keyword (str %1 "_" %2))
-    :NNP (fn [NNP-f & NNP-rest] (keyword (str NNP-f (apply str (map #(str "_" %) NNP-rest)))))
+    :NNP (fn [& NNP-tokens] (keyword (string/join "_" NNP-tokens)))
     
     ;:VtraPres3 identity
     :VtraPres3 keyword
