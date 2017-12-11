@@ -70,13 +70,12 @@
 (def verb-set (disk-ref (str dir-prefix "store/verb_set.edn") default-verb-set verb-set-edn-readers ))
 
 
-(def Vinf (set (map :inf @verb-set)))
-(def Vpast (set (map :past @verb-set)))
-(def Vpp (set (map :pp @verb-set)))
-(def Ver (set (map :er @verb-set)))
-(def Ving (set (map :ing @verb-set)))
-(def Vpres3 (set (map :pres3 @verb-set)))
-
+(defn Vinf [] (set (map :inf @verb-set)))
+(defn Vpast [] (set (map :past @verb-set)))
+(defn Vpp [] (set (map :pp @verb-set)))
+(defn Ver [] (set (map :er @verb-set)))
+(defn Ving [] (set (map :ing @verb-set)))
+(defn Vpres3 []  (set (map :pres3 @verb-set)))
 
 
 (def default-noun-set (set [
@@ -90,7 +89,7 @@
 
 (def noun-set-edn-readers {})
 (def noun-set (disk-ref (str dir-prefix "store/noun_set.edn") default-noun-set noun-set-edn-readers ))
-(def Nsimp-sg (set (map :sing @noun-set)))
+(defn  Nsimp-sg [] (set (map :sing @noun-set)))
 
 
 
@@ -105,7 +104,7 @@
 
 (def adj-set-edn-readers {})
 (def adj-set (disk-ref (str dir-prefix "store/adj_set.edn") default-adj-set adj-set-edn-readers ))
-(def Adj (set (map :a @adj-set)))
+(defn Adj [] (set (map :a @adj-set)))
 
 
 
@@ -119,20 +118,20 @@
 ; "'walks' |'loves' |'eats' |'hates' |'drinks' |'breathes' |'talks' |'kisses' |'slaps' |"
 
 
-(def g-grammar-1-annex (str
-" VtraInfOrPresNon3 = "  "( " (ebnify-notail Vinf)  " ); "
+(defn g-grammar-1-annex [] (str
+" VtraInfOrPresNon3 = "  "( " (ebnify-notail (Vinf))  " ); "
 
 
 ;"\n VtraPast = "  "(" (ebnify-notail Vpast)  "); \n"
 ;"\n VtraPP = "  "(" (ebnify-notail Vpp)  "); \n"
 ;"\n VtraER = "  "(" (ebnify-notail Ver)  "); \n"
 
-" GERUNDtra = "  "( " (ebnify-notail Ving)  " ); "
-" VtraPres3 = "  "( " (ebnify-notail Vpres3)  " ); "
+" GERUNDtra = "  "( " (ebnify-notail (Ving))  " ); "
+" VtraPres3 = "  "( " (ebnify-notail (Vpres3))  " ); "
 
-" <Nsimp-sg> = "  "( " (ebnify-notail Nsimp-sg)  " ); "
+" <Nsimp-sg> = "  "( " (ebnify-notail (Nsimp-sg))  " ); "
 
-" <Adj> = "  "( " (ebnify-notail Adj)  " ); "
+" <Adj> = "  "( " (ebnify-notail (Adj))  " ); "
 
 
 "\n"
@@ -141,15 +140,15 @@
 
 
 
-(def raw-g-grammar-1 (slurp (str dir-prefix "g-grammar-1.ebnf")) )
-(def raw-g-grammar-1-w-annex (str raw-g-grammar-1 g-grammar-1-annex))
+(defn raw-g-grammar-1 [] (slurp (str dir-prefix "g-grammar-1.ebnf")) )
+(defn raw-g-grammar-1-w-annex [] (str (raw-g-grammar-1) (g-grammar-1-annex)))
 
 
 (def grammar-martintest
   (insta/parser  (slurp (str dir-prefix "grammar-martintest.ebnf")) :auto-whitespace :standard ))
 
-(def g-grammar-1
-  (insta/parser raw-g-grammar-1-w-annex  :auto-whitespace :standard ))
+(defn g-grammar-1 []
+  (insta/parser (raw-g-grammar-1-w-annex)  :auto-whitespace :standard ))
 
 
 
@@ -271,7 +270,7 @@
   "Converts a business rule string into Clara productions. Safe version."
   [business-rules :- sc/Str]
 
-  (let [parse-tree (g-grammar business-rules)]
+  (let [parse-tree ((g-grammar) business-rules)]
 
     (when (insta/failure? parse-tree)
       (throw (ex-info (print-str parse-tree) {:failure parse-tree})))
@@ -283,7 +282,7 @@
   "Converts a business rule string into Clara productions. Unsafe version."
   [business-rules]
 
-  (let [parse-tree (g-grammar business-rules)]
+  (let [parse-tree ((g-grammar) business-rules)]
 
     (when (insta/failure? parse-tree)
       (throw (ex-info (print-str parse-tree) {:failure parse-tree})))
@@ -320,7 +319,7 @@ Dynamic rules is something I wouldn't mind adding to Clara, although that comes 
 (defn g-respond-sync
 
 [text]
-(let  [parsetree  (g-grammar text)
+(let  [parsetree  ((g-grammar) text)
          intype (first (first parsetree))]
    (cond 
      (= intype :ADD-VOCAB)
