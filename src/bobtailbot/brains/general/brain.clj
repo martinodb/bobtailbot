@@ -403,7 +403,11 @@ Dynamic rules is something I wouldn't mind adding to Clara, although that comes 
                                                 ( #(apply insert %1 %2) @g-fact-set)
                                                 (fire-rules))]
                                                 (ref-set g-curr-session new-session))
-                                              (str "rules loaded: " (apply str (g-load-user-rules text))))
+                                              
+                                              ;(str "rules loaded: " (apply str (g-load-user-rules text)))
+                                              "OK, got it. That's a rule."
+                                              
+                                              )
        
       :else "unknown input"
        )))
