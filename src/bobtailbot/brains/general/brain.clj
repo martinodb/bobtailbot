@@ -188,16 +188,38 @@
     :TRIP-FACT-IND2 (fn [t-subj t-verb t-obj]
                       `(->Triple "my-fact" true ~t-subj ~t-verb ~t-obj )
                        )
+    :PRENEG-TRIP-FACT-IND2 (fn [t-subj t-verb t-obj]
+                      `(->Triple "my-fact" false ~t-subj ~t-verb ~t-obj )
+                       )
     :R-TRIP-FACT-IND2 (fn [t-subj t-verb t-obj]
                       {:type Triple
-                       :constraints [(list '= t-subj 'subj)
+                       :constraints [(list '= true 'affirm)
+                                     (list '= t-subj 'subj)
+                                     (list '= t-verb 'verb)
+                                     (list '= t-obj 'obj)
+                                       ]
+                        })
+    :NEG-R-TRIP-FACT-IND2 (fn [t-subj t-verb t-obj]
+                      {:type Triple
+                       :constraints [(list '= false 'affirm)
+                                     (list '= t-subj 'subj)
                                      (list '= t-verb 'verb)
                                      (list '= t-obj 'obj)
                                        ]
                         })
     :Q-TRIP-FACT-IND2 (fn [t-subj t-verb t-obj]
                       {:type Triple
-                       :constraints [(list '= t-subj 'subj)
+                       :constraints [(list '= true 'affirm)
+                                     (list '= t-subj 'subj)
+                                     (list '= t-verb 'verb)
+                                     (list '= t-obj 'obj)
+                                       ]
+                       :fact-binding :?#thing
+                        })
+    :NEG-Q-TRIP-FACT-IND2 (fn [t-subj t-verb t-obj]
+                      {:type Triple
+                       :constraints [(list '= false 'affirm)
+                                     (list '= t-subj 'subj)
                                      (list '= t-verb 'verb)
                                      (list '= t-obj 'obj)
                                        ]
@@ -341,7 +363,7 @@ Dynamic rules is something I wouldn't mind adding to Clara, although that comes 
                )
             :else "unknown vocabulary type"
              ))
-       (= intype :TRIP-FACT-IND2)
+       (or (= intype :TRIP-FACT-IND2 ) (= intype :PRENEG-TRIP-FACT-IND2))
         (dosync  (alter g-fact-set #(into #{} (reduce conj % (map eval (g-load-user-facts text)))))
                                     (let [new-session (-> @g-curr-session 
                                                         (#(apply insert %1 %2) @g-fact-set)

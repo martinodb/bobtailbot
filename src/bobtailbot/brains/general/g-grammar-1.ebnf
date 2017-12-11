@@ -35,13 +35,20 @@ ANON-RULE-notest = RULE-BODY-notest;
 
 
 
-<R-FACTS> = (R-FACT | R-AND-FACTS | R-OR-FACTS | R-NOT-FACTS)  ;
-<R-FACT> = R-TRIP-FACT-IND2 ;
+<R-FACTS> = (R-FACT | R-AND-FACTS | R-OR-FACTS )  ;
+<R-FACT> = (AFF-R-FACT | NEG-R-FACT);
+
+<AFF-R-FACT> = R-TRIP-FACT-IND2 ;
 R-TRIP-FACT-IND2 = T-SUBJECT T-VERB T-OBJECT ;
+
+<NEG-R-FACT> = NEG-R-TRIP-FACT-IND2 ;
+NEG-R-TRIP-FACT-IND2 = <NEG> T-SUBJECT T-VERB T-OBJECT ;
+
+
 
 R-AND-FACTS = R-FACT (<"and"> (R-FACT | <"("> R-FACTS <")">))+  ;
 R-OR-FACTS = R-FACT (<"or"> (R-FACT | <"("> R-FACTS <")">))+  ;
-R-NOT-FACTS = (NEG R-FACT | NEG <"("> R-FACTS <")">) ;
+
 
 
 TEST = (TSEXPR)+ ;
@@ -74,13 +81,24 @@ QUERY-notest = Q-BODY-notest;
 <QLHS-wtest> = <"test"> TEST <','>* <"facts"> Q-FACTS  ;
 <QLHS-notest> = Q-FACTS ;
 
-<Q-FACTS> = (Q-FACT | Q-AND-FACTS | Q-OR-FACTS | Q-NOT-FACTS)  ;
-<Q-FACT> = Q-TRIP-FACT-IND2 ;
+<Q-FACTS> = (Q-FACT | Q-AND-FACTS | Q-OR-FACTS )  ;
+
+<Q-FACT> = (AFF-Q-FACT | NEG-Q-FACT);
+
+<AFF-Q-FACT> = Q-TRIP-FACT-IND2 ;
 Q-TRIP-FACT-IND2 = T-SUBJECT T-VERB T-OBJECT ;
+
+<NEG-Q-FACT> = NEG-Q-TRIP-FACT-IND2 ;
+NEG-Q-TRIP-FACT-IND2 = <NEG> T-SUBJECT T-VERB T-OBJECT ;
+
+
+
 
 Q-AND-FACTS = Q-FACT (<"and"> (Q-FACT | <"("> Q-FACTS <")">))+  ;
 Q-OR-FACTS = Q-FACT (<"or"> (Q-FACT | <"("> Q-FACTS <")">))+  ;
-Q-NOT-FACTS = (NEG Q-FACT | NEG <"("> Q-FACTS <")">) ;
+
+
+
 
 
 
@@ -100,11 +118,10 @@ YNQUESTION-notest = YNQ-BODY-notest;
 
 AND-FACTS = FACT (<"and"> (FACT | <"("> FACTS <")">))+  ;
 OR-FACTS = FACT (<"or"> (FACT | <"("> FACTS <")">))+  ;
-NOT-FACTS = (NEG FACT | NEG <"("> FACTS <")">) ;
 
-<NEG> = (<"not"> | <"it is">? <"false that">) ;
+NEG = (<"it's"> | <"it is">) (<"false"> | (<"not"> (<"the case">)?)) <"that">  ;
 
-<FACTS> = (FACT | AND-FACTS | OR-FACTS | NOT-FACTS)  ;
+<FACTS> = (FACT | AND-FACTS | OR-FACTS )  ;
 <FACT> = (ANON-FACT | NAMED-FACT) ;
 <ANON-FACT> = FACT-BODY ;
 NAMED-FACT = <"fact"> NAME <":">? FACT-BODY ;
@@ -112,7 +129,20 @@ NAMED-FACT = <"fact"> NAME <":">? FACT-BODY ;
 
 <TRIP-FACT> = (AFF-TRIP-FACT | NEG-TRIP-FACT) ;
 <NEG-TRIP-FACT> = (PRENEG-TRIP-FACT | EMBNEG-TRIP-FACT) ;
-PRENEG-TRIP-FACT = (<"it's"> | <"it is">) (<"false"> | (<"not"> (<"the case">)?)) <"that"> AFF-TRIP-FACT ;
+
+<PRENEG-TRIP-FACT> = (PRENEG-TRIP-FACT-IND2 | PRENEG-TRIP-FACT-IC | PRENEG-TRIP-FACT-CLASS2) ;
+
+PRENEG-TRIP-FACT-IND2 = <NEG> T-SUBJECT T-VERB T-OBJECT ;
+
+
+<PRENEG-TRIP-FACT-IC> = PRENEG-TRIP-FACT-ISA ;
+PRENEG-TRIP-FACT-ISA = <NEG> T-SUBJECT <T-ISA> T-OBJECT-CLASS ;
+<PRENEG-TRIP-FACT-CLASS2> = PRENEG-TRIP-FACT-EVERYISA;
+PRENEG-TRIP-FACT-EVERYISA = <NEG> <"every"> T-SUBJECT-CLASS <T-ISA> T-OBJECT-CLASS ;
+
+
+
+
 <EMBNEG-TRIP-FACT> = (EMBNEG-TRIP-FACT-IND2 | EMBNEG-TRIP-FACT-IC); (* CLASS2 would be confusing*)
 EMBNEG-TRIP-FACT-IND2 = T-SUBJECT EMBNEG-T-VERB T-OBJECT ;
 <EMBNEG-T-VERB> = (EMBNEG-T-Vconj | EMBNEG-T-Vvar);
@@ -129,13 +159,13 @@ TRIP-FACT-IND2 = T-SUBJECT T-VERB T-OBJECT ;
 <T-VERB> = (T-Vconj | T-Vvar);
 <T-OBJECT> = (T-NP | VAR);
 
+
 <TRIP-FACT-IC> = TRIP-FACT-ISA ;
 TRIP-FACT-ISA = T-SUBJECT <T-ISA> T-OBJECT-CLASS ;
-T-ISA = (<"am">|<"is">|<"are">)(<"a">|<"an">|<"a kind of">)? ;
-
 <TRIP-FACT-CLASS2> = TRIP-FACT-EVERYISA;
 TRIP-FACT-EVERYISA = <"every"> T-SUBJECT-CLASS <T-ISA> T-OBJECT-CLASS ;
 
+T-ISA = (<"am">|<"is">|<"are">)(<"a">|<"an">|<"a kind of">)? ;
 T-SUBJECT-CLASS = T-N ;
 T-OBJECT-CLASS = T-N;
 
