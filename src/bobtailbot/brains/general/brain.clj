@@ -175,6 +175,7 @@
 (defn NNPkw->str [kw] (-> kw name (string/replace #"_" " ")))
 
 
+
 (def g-transforms
   {:NUMBER #(Integer/parseInt %)
    :TS-OPERATOR g-ts-operators
@@ -370,10 +371,9 @@ Dynamic rules is something I wouldn't mind adding to Clara, although that comes 
                     ;raw-query-result-str (apply str raw-query-result)
                     raw-query-result-set-str (apply str raw-query-result-set)]
                     (str 
-                       ;"with dups: " (apply str (get-ans-vars raw-query-result-str)) "   " 
-                        ;  "raw query result, with dups:  " raw-query-result-str "   " 
-                          "satisfiers: " (apply str (get-ans-vars raw-query-result-set-str)) "    " 
-                          "raw query result (no duplicates):  " raw-query-result-set-str                                          )))
+                          "satisfiers: " (string/join "  " (get-ans-vars raw-query-result-set-str)) "    " 
+                          ;"raw query result (no duplicates):  " raw-query-result-set-str 
+                          )))
             (catch Exception e (do (println (.getMessage e)) "That's not a valid query." )))
        (= intype :YNQUESTION )
          (try
@@ -390,8 +390,14 @@ Dynamic rules is something I wouldn't mind adding to Clara, although that comes 
                     ;raw-query-result-set-str (apply str raw-query-result-set)
                     ]
                     (if  (not (= raw-query-result-str "")) 
-                       (str "Yes." "   Raw query result:  " raw-query-result-str ) 
-                       (str "No." "   Raw query result:  " raw-query-result-str )   )))
+                       
+                       ;(str "Yes." "   Raw query result:  " raw-query-result-str ) 
+                       "Yes."
+                       
+                       ;(str "No." "   Raw query result:  " raw-query-result-str )
+                       "No."
+                       
+                       )))
             (catch Exception e (do (println (.getMessage e)) "That's not a valid query." )))
        (= intype :ANON-RULE) (dosync (alter g-rule-list #(str % text ";"))
                                               (let [new-session (-> (mk-session (symbol this-ns)
