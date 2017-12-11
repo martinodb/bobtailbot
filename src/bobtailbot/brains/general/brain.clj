@@ -415,7 +415,7 @@ Dynamic rules is something I wouldn't mind adding to Clara, although that comes 
                        "Yes."
                        
                        ;(str "No." "   Raw query result:  " raw-query-result-str )
-                       "No."
+                       "Not that I know of."
                        
                        )))
             (catch Exception e (do (println (.getMessage e)) "That's not a valid query." )))
