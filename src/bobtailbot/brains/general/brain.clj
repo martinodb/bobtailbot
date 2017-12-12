@@ -235,6 +235,9 @@
     :R-NOT-FACTS   (fn [map] (postwalk #(if (or (= % true) (= % false)) (not %) % ) map)) 
     :NOT-FACTS   (fn [map] (postwalk #(if (or (= % true) (= % false)) (not %) % ) map)) 
     
+    :Q-PREAFF-FACTS identity
+    :R-PREAFF-FACTS identity
+    :PREAFF-FACTS identity
     
     
     :AND-FACTS vector
@@ -380,7 +383,7 @@ Dynamic rules is something I wouldn't mind adding to Clara, although that comes 
                )
             :else "unknown vocabulary type"
              ))
-       (or (= intype :TRIP-FACT-IND2 ) (= intype :PRENEG-TRIP-FACT-IND2) (= intype :NOT-FACTS ))
+       (or (= intype :TRIP-FACT-IND2 ) (= intype :PRENEG-TRIP-FACT-IND2) (= intype :NOT-FACTS ) (= intype :PREAFF-FACTS ))
          (cond 
           (= (g-respond-sync yntext) "Yes.") (do "I know, right.")
           (= (g-respond-sync yntext) "Definitely not.") (do "That's impossible.")

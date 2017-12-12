@@ -13,6 +13,10 @@ VOC-MAP = "{"  (VMkey <whitespace> VMval (<whitespace>)?)+  "}" ;
 <VMval> = #"[\"\']?[A-Za-z0-9\-_]+[\"\']?" ;
 
 
+NEG = (<"it's"> | <"it is">) (<"false"> | (<"not"> (<"the case">)?)) <"that">  ;
+PREAFF = (<"it's"> | <"it is">) (<"true"> | <"the case">) <"that">  ;
+
+
 NQUERY = <"query"> NAME ;
 
 <RULES-QUERIES> = (RULE | QUERY | YNQUESTION)+ ;
@@ -35,7 +39,7 @@ ANON-RULE-notest = RULE-BODY-notest;
 
 
 
-<R-FACTS> = (R-FACT | R-AND-FACTS | R-OR-FACTS | R-NOT-FACTS)  ;
+<R-FACTS> = (R-FACT | R-AND-FACTS | R-OR-FACTS | R-NOT-FACTS | R-PREAFF-FACTS)  ;
 <R-FACT> = (AFF-R-FACT | NEG-R-FACT);
 
 <AFF-R-FACT> = R-TRIP-FACT-IND2 ;
@@ -50,7 +54,7 @@ R-AND-FACTS = R-FACT (<"and"> (R-FACT | <"("> R-FACTS <")">))+  ;
 R-OR-FACTS = R-FACT (<"or"> (R-FACT | <"("> R-FACTS <")">))+  ;
 
 R-NOT-FACTS = <NEG> R-FACTS;
-
+R-PREAFF-FACTS = <PREAFF> R-FACTS;
 
 TEST = (TSEXPR)+ ;
 TSEXPR = TS-OPERATOR (TS-ARG)+ ;
@@ -82,7 +86,7 @@ QUERY-notest = Q-BODY-notest;
 <QLHS-wtest> = <"test"> TEST <','>* <"facts"> Q-FACTS  ;
 <QLHS-notest> = Q-FACTS ;
 
-<Q-FACTS> = (Q-FACT | Q-AND-FACTS | Q-OR-FACTS | Q-NOT-FACTS)  ;
+<Q-FACTS> = (Q-FACT | Q-AND-FACTS | Q-OR-FACTS | Q-NOT-FACTS | Q-PREAFF-FACTS)  ;
 
 <Q-FACT> = (AFF-Q-FACT | NEG-Q-FACT);
 
@@ -99,7 +103,7 @@ Q-AND-FACTS = Q-FACT (<"and"> (Q-FACT | <"("> Q-FACTS <")">))+  ;
 Q-OR-FACTS = Q-FACT (<"or"> (Q-FACT | <"("> Q-FACTS <")">))+  ;
 
 Q-NOT-FACTS = <NEG> Q-FACTS;
-
+Q-PREAFF-FACTS = <PREAFF> Q-FACTS;
 
 
 
@@ -121,10 +125,11 @@ AND-FACTS = FACT (<"and"> (FACT | <"("> FACTS <")">))+  ;
 OR-FACTS = FACT (<"or"> (FACT | <"("> FACTS <")">))+  ;
 
 NOT-FACTS = <NEG> FACTS;
+PREAFF-FACTS = <PREAFF> FACTS;
 
-NEG = (<"it's"> | <"it is">) (<"false"> | (<"not"> (<"the case">)?)) <"that">  ;
 
-<FACTS> = (FACT | AND-FACTS | OR-FACTS | NOT-FACTS)  ;
+
+<FACTS> = (FACT | AND-FACTS | OR-FACTS | NOT-FACTS | PREAFF-FACTS)  ;
 <FACT> = (ANON-FACT | NAMED-FACT) ;
 <ANON-FACT> = FACT-BODY ;
 NAMED-FACT = <"fact"> NAME <":">? FACT-BODY ;
