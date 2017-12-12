@@ -382,7 +382,7 @@ Dynamic rules is something I wouldn't mind adding to Clara, although that comes 
              ))
        (or (= intype :TRIP-FACT-IND2 ) (= intype :PRENEG-TRIP-FACT-IND2) (= intype :NOT-FACTS ))
          (cond 
-          (= (g-respond-sync yntext) "Yes.") (do "You told me that already.")
+          (= (g-respond-sync yntext) "Yes.") (do "I know, right.")
           (= (g-respond-sync yntext) "Definitely not.") (do "That's impossible.")
           (= (g-respond-sync yntext) "Not that I know of.") (dosync  (alter g-fact-set #(into #{} (reduce conj % (map eval (g-load-user-facts text)))))
                                                               (let [new-session (-> @g-curr-session 
