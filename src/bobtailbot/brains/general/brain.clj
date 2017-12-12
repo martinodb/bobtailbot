@@ -434,16 +434,16 @@ Dynamic rules is something I wouldn't mind adding to Clara, although that comes 
                     
                     
                     ]
-                    (println "raw-query-result-str: " raw-query-result-str)
+                    ;(println "raw-query-result-str: " raw-query-result-str)
                     (cond
-                      (and (= raw-query-result-str "")  @negating ) (do (reset! negating false) (println "was negating, no longer") "Not that I know of.")
-                      (and (= raw-query-result-str "")  (not @negating) ) (do (println "wasnt negating. now i will.")
+                      (and (= raw-query-result-str "")  @negating ) (do (reset! negating false)  "Not that I know of.")
+                      (and (= raw-query-result-str "")  (not @negating) ) (do 
                                                                              (reset! negating true)
                                                                              (let [neg-qr (g-respond-sync negtext)]
                                                                                    (if (= neg-qr "Yes.") 
-                                                                                     (do  (reset! negating false) (println "neg-qr: " neg-qr ) "Definitely not.")
+                                                                                     (do  (reset! negating false)  "Definitely not.")
                                                                                      
-                                                                                     (do (reset! negating false) (println "neg-qr: " neg-qr ) "Not that I know of."))))
+                                                                                     (do (reset! negating false)  "Not that I know of."))))
                        
                        :else "Yes."
                        
