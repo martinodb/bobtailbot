@@ -16,6 +16,8 @@
             [clojure.core.async :as async 
                :refer [go-loop <! <!! >! >!!  close! chan pub sub go]]
             
+            [clojure.walk :as walk :refer [postwalk]]
+            
             [schema.core :as sc]
             
             
@@ -225,6 +227,7 @@
                                        ]
                        :fact-binding :?#thing
                         })
+    :Q-NOT-FACTS   (fn [map] (postwalk #(if (or (= % true) (= % false)) (not %) % ) map)) 
     :AND-FACTS vector
     :UNVAR symbol
     
