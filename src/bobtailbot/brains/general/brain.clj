@@ -338,13 +338,15 @@ Dynamic rules is something I wouldn't mind adding to Clara, although that comes 
 
 ;;silly reason.
 (declare get-ans-vars)
-
+(declare remove-iitt)
 
 (defn g-respond-sync
 
 [text]
-(let  [parsetree  ((g-grammar) text)
-         intype (first (first parsetree))]
+(let  [ cleantext (remove-iitt text)
+        negtext (str "it's false that " cleantext)
+        parsetree  ((g-grammar) text)
+        intype (first (first parsetree))]
    (cond 
      (= intype :ADD-VOCAB)
        (let [voctype (second (second (first parsetree)))]
@@ -421,8 +423,8 @@ Dynamic rules is something I wouldn't mind adding to Clara, although that comes 
                        "Yes."
                        
                        ;(str "No." "   Raw query result:  " raw-query-result-str )
-                       (let [hr-neg-qr (g-respond-sync (str "it's false that " text))]
-                           (if (= hr-neg-qr "Yes.") "Definitely not." "Not that I know of."))
+                       (let [neg-qr (g-respond-sync negtext)]
+                           (if (= neg-qr "Yes.") "Definitely not." "Not that I know of."))
                        
                        )))
             (catch Exception e (do (println (.getMessage e)) "That's not a valid query." )))
@@ -467,3 +469,5 @@ Dynamic rules is something I wouldn't mind adding to Clara, although that comes 
 
 (defn get-ans-vars [raw-q-result] (re-seq #"\:\?[\S&&[^\#]]+\s+[\S&&[^\{\}]]+" raw-q-result))
 ;(defn get-ans-vars [raw-q-result] (re-seq #"\:\?\S+\s+\"[a-zA-z0-9_\-\s]*\"" raw-q-result))
+
+(defn remove-iitt [text] (string/replace text #"is it true that" ""  ))
