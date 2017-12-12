@@ -35,7 +35,7 @@ ANON-RULE-notest = RULE-BODY-notest;
 
 
 
-<R-FACTS> = (R-FACT | R-AND-FACTS | R-OR-FACTS )  ;
+<R-FACTS> = (R-FACT | R-AND-FACTS | R-OR-FACTS | R-NOT-FACTS)  ;
 <R-FACT> = (AFF-R-FACT | NEG-R-FACT);
 
 <AFF-R-FACT> = R-TRIP-FACT-IND2 ;
@@ -49,6 +49,7 @@ NEG-R-TRIP-FACT-IND2 = <NEG> T-SUBJECT T-VERB T-OBJECT ;
 R-AND-FACTS = R-FACT (<"and"> (R-FACT | <"("> R-FACTS <")">))+  ;
 R-OR-FACTS = R-FACT (<"or"> (R-FACT | <"("> R-FACTS <")">))+  ;
 
+R-NOT-FACTS = <NEG> R-FACTS;
 
 
 TEST = (TSEXPR)+ ;
@@ -119,9 +120,11 @@ YNQUESTION-notest = YNQ-BODY-notest;
 AND-FACTS = FACT (<"and"> (FACT | <"("> FACTS <")">))+  ;
 OR-FACTS = FACT (<"or"> (FACT | <"("> FACTS <")">))+  ;
 
+NOT-FACTS = <NEG> FACTS;
+
 NEG = (<"it's"> | <"it is">) (<"false"> | (<"not"> (<"the case">)?)) <"that">  ;
 
-<FACTS> = (FACT | AND-FACTS | OR-FACTS )  ;
+<FACTS> = (FACT | AND-FACTS | OR-FACTS | NOT-FACTS)  ;
 <FACT> = (ANON-FACT | NAMED-FACT) ;
 <ANON-FACT> = FACT-BODY ;
 NAMED-FACT = <"fact"> NAME <":">? FACT-BODY ;

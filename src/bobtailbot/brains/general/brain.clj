@@ -227,7 +227,16 @@
                                        ]
                        :fact-binding :?#thing
                         })
+    
+    
+    
+    ;CAREFUL: this only works because the Triple record only has one boolean (affirm).
     :Q-NOT-FACTS   (fn [map] (postwalk #(if (or (= % true) (= % false)) (not %) % ) map)) 
+    :R-NOT-FACTS   (fn [map] (postwalk #(if (or (= % true) (= % false)) (not %) % ) map)) 
+    :NOT-FACTS   (fn [map] (postwalk #(if (or (= % true) (= % false)) (not %) % ) map)) 
+    
+    
+    
     :AND-FACTS vector
     :UNVAR symbol
     
@@ -369,7 +378,7 @@ Dynamic rules is something I wouldn't mind adding to Clara, although that comes 
                )
             :else "unknown vocabulary type"
              ))
-       (or (= intype :TRIP-FACT-IND2 ) (= intype :PRENEG-TRIP-FACT-IND2))
+       (or (= intype :TRIP-FACT-IND2 ) (= intype :PRENEG-TRIP-FACT-IND2) (= intype :NOT-FACTS ))
          (cond 
           (= (g-respond-sync yntext) "Yes.") (do "You told me that already.")
           (= (g-respond-sync yntext) "Definitely not.") (do "That's impossible.")
