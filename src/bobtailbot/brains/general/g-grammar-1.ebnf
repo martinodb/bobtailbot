@@ -88,13 +88,16 @@ QUERY-notest = Q-BODY-notest;
 
 <Q-FACTS> = (Q-FACT | Q-AND-FACTS | Q-OR-FACTS | Q-NOT-FACTS | Q-PREAFF-FACTS)  ;
 
-<Q-FACT> = (AFF-Q-FACT | NEG-Q-FACT);
 
-<AFF-Q-FACT> = Q-TRIP-FACT-IND2 ;
+<Q-FACT> = Q-TRIP-FACT ;
+<Q-TRIP-FACT> = (AFF-Q-TRIP-FACT | NEG-Q-TRIP-FACT);
+<AFF-Q-TRIP-FACT> = Q-TRIP-FACT-IND2 ;
 Q-TRIP-FACT-IND2 = T-SUBJECT T-VERB T-OBJECT ;
-
-<NEG-Q-FACT> = NEG-Q-TRIP-FACT-IND2 ;
-NEG-Q-TRIP-FACT-IND2 = <NEG> T-SUBJECT T-VERB T-OBJECT ;
+<NEG-Q-TRIP-FACT> = (PRENEG-Q-TRIP-FACT | EMBNEG-Q-TRIP-FACT);
+<PRENEG-Q-TRIP-FACT> = (PRENEG-Q-TRIP-FACT-IND2) ;
+PRENEG-Q-TRIP-FACT-IND2 = <NEG> T-SUBJECT T-VERB T-OBJECT ;
+<EMBNEG-Q-TRIP-FACT> = (EMBNEG-Q-TRIP-FACT-IND2) ;
+EMBNEG-Q-TRIP-FACT-IND2 = T-SUBJECT EMBNEG-T-VERB T-OBJECT ;
 
 
 
@@ -130,17 +133,25 @@ PREAFF-FACTS = <PREAFF> FACTS;
 
 
 <FACTS> = (FACT | AND-FACTS | OR-FACTS | NOT-FACTS | PREAFF-FACTS)  ;
+
 <FACT> = (ANON-FACT | NAMED-FACT) ;
 <ANON-FACT> = FACT-BODY ;
 NAMED-FACT = <"fact"> NAME <":">? FACT-BODY ;
+
+
+
 <FACT-BODY> = (TRIP-FACT | NONTRIP-FACT) ;
-
 <TRIP-FACT> = (AFF-TRIP-FACT | NEG-TRIP-FACT) ;
+<AFF-TRIP-FACT> = (TRIP-FACT-IND2 | TRIP-FACT-IC | TRIP-FACT-CLASS2) ;
+TRIP-FACT-IND2 = T-SUBJECT T-VERB T-OBJECT ;
 <NEG-TRIP-FACT> = (PRENEG-TRIP-FACT | EMBNEG-TRIP-FACT) ;
-
 <PRENEG-TRIP-FACT> = (PRENEG-TRIP-FACT-IND2 | PRENEG-TRIP-FACT-IC | PRENEG-TRIP-FACT-CLASS2) ;
-
 PRENEG-TRIP-FACT-IND2 = <NEG> T-SUBJECT T-VERB T-OBJECT ;
+<EMBNEG-TRIP-FACT> = (EMBNEG-TRIP-FACT-IND2 | EMBNEG-TRIP-FACT-IC); (* CLASS2 would be confusing*)
+EMBNEG-TRIP-FACT-IND2 = T-SUBJECT EMBNEG-T-VERB T-OBJECT ;
+
+
+
 
 
 <PRENEG-TRIP-FACT-IC> = PRENEG-TRIP-FACT-ISA ;
@@ -151,21 +162,31 @@ PRENEG-TRIP-FACT-EVERYISA = <NEG> <"every"> T-SUBJECT-CLASS <T-ISA> T-OBJECT-CLA
 
 
 
-<EMBNEG-TRIP-FACT> = (EMBNEG-TRIP-FACT-IND2 | EMBNEG-TRIP-FACT-IC); (* CLASS2 would be confusing*)
-EMBNEG-TRIP-FACT-IND2 = T-SUBJECT EMBNEG-T-VERB T-OBJECT ;
-<EMBNEG-T-VERB> = (EMBNEG-T-Vconj | EMBNEG-T-Vvar);
-EMBNEG-T-Vconj = (<"doesn't"> | <"does not"> | <"don't"> | <"do not">) VtraInf ;
+
+
 <EMBNEG-TRIP-FACT-IC> = EMBNEG-TRIP-FACT-ISA ;
 EMBNEG-TRIP-FACT-ISA = T-SUBJECT <EMBNEG-T-VCOP-IC> T-OBJECT-CLASS ;
 EMBNEG-T-VCOP-IC = (<"am not">|<"isn't">|<"is not">|<"aren't">|<"are not">)(<"a">|<"an">|<"a kind of">)? ;
-EMBNEG-T-Vvar = (<"doesn't do">|<"does not do"> | <"don't do"> | <"do not do">) VAR ;
 
 
-<AFF-TRIP-FACT> = (TRIP-FACT-IND2 | TRIP-FACT-IC | TRIP-FACT-CLASS2) ;
-TRIP-FACT-IND2 = T-SUBJECT T-VERB T-OBJECT ;
+
+
+
+
+
+<EMBNEG-T-VERB> = (EMBNEG-T-Vconj | EMBNEG-T-Vvar);
+<EMBNEG-T-Vconj> = (<"doesn't"> | <"does not"> ) VtraInf ;
+<EMBNEG-T-Vvar> = (<"doesn't do">|<"does not do"> ) VAR <"to">;
+
+<T-Vconj> = VtraPres3 ;
+<T-Vvar> = (VAR | <"does"> VAR <"to">) ;
+
 <T-SUBJECT> = (T-NP | VAR);
 <T-VERB> = (T-Vconj | T-Vvar);
 <T-OBJECT> = (T-NP | VAR);
+
+
+
 
 
 <TRIP-FACT-IC> = TRIP-FACT-ISA ;
@@ -177,8 +198,8 @@ T-ISA = (<"am">|<"is">|<"are">)(<"a">|<"an">|<"a kind of">)? ;
 T-SUBJECT-CLASS = T-N ;
 T-OBJECT-CLASS = T-N;
 
-<T-Vconj> = VtraPres ;
-<T-Vvar> = (VAR | ((<"does"> | <"do">) VAR <"to">)) ;
+<T-Vconj> = VtraPres3 ;
+<T-Vvar> = (VAR | <"does"> VAR <"to">) ;
 
 
 <T-NP> = (INDNAME | T-DET-P) ;
@@ -219,10 +240,10 @@ TOINFnc = <"to"> V-INF-OR-PNon3 ;
 <V-INF-OR-PNon3> = (VtraInfOrPresNon3 | VintInfOrPresNon3) ;
 
 
-VintInfOrPresNon3 = ("walk" | "talk" |"breath");
+<VintInfOrPresNon3> = ("walk" | "talk" |"breath");
 
-<VtraInf> = VtraInfOrPresNon3 ;
-<VintInf> = VintInfOrPresNon3 ;
+VtraInf = VtraInfOrPresNon3 ;
+VintInf = VintInfOrPresNon3 ;
 
 <GERUND> = (GERUNDtra | GERUNDint | GERUNDcop);
 

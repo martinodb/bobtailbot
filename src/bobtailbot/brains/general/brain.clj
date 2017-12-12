@@ -121,7 +121,7 @@
 
 
 (defn g-grammar-1-annex [] (str
-" VtraInfOrPresNon3 = "  "( " (ebnify-notail (Vinf))  " ); "
+" <VtraInfOrPresNon3> = "  "( " (ebnify-notail (Vinf))  " ); "
 
 
 ;"\n VtraPast = "  "(" (ebnify-notail Vpast)  "); \n"
@@ -188,11 +188,12 @@
                         :rhs `(insert! ~fact)})
                  
     :TRIP-FACT-IND2 (fn [t-subj t-verb t-obj]
-                      `(->Triple "my-fact" true ~t-subj ~t-verb ~t-obj )
-                       )
+                      `(->Triple "my-fact" true ~t-subj ~t-verb ~t-obj ) )
     :PRENEG-TRIP-FACT-IND2 (fn [t-subj t-verb t-obj]
-                      `(->Triple "my-fact" false ~t-subj ~t-verb ~t-obj )
-                       )
+                             `(->Triple "my-fact" false ~t-subj ~t-verb ~t-obj ))
+    :EMBNEG-TRIP-FACT-IND2 (fn [t-subj t-verb-inf t-obj]
+                              (let [t-verb-pres3 (:pres3 (first (filter #(= (:inf %) t-verb-inf ) @verb-set)))]
+                                `(->Triple "my-fact" false ~t-subj ~t-verb-pres3 ~t-obj )))
     :R-TRIP-FACT-IND2 (fn [t-subj t-verb t-obj]
                       {:type Triple
                        :constraints [(list '= true 'affirm)
@@ -218,16 +219,21 @@
                                        ]
                        :fact-binding :?#thing
                         })
-    :NEG-Q-TRIP-FACT-IND2 (fn [t-subj t-verb t-obj]
-                      {:type Triple
-                       :constraints [(list '= false 'affirm)
-                                     (list '= t-subj 'subj)
-                                     (list '= t-verb 'verb)
-                                     (list '= t-obj 'obj)
-                                       ]
-                       :fact-binding :?#thing
-                        })
-    
+    :PRENEG-Q-TRIP-FACT-IND2 (fn [t-subj t-verb t-obj]
+                              {:type Triple
+                               :constraints [(list '= false 'affirm)
+                                             (list '= t-subj 'subj)
+                                             (list '= t-verb 'verb)
+                                             (list '= t-obj 'obj) ]
+                                :fact-binding :?#thing })
+    :EMBNEG-Q-TRIP-FACT-IND2 (fn [t-subj t-verb-inf t-obj]
+                               (let [t-verb-pres3 (:pres3 (first (filter #(= (:inf %) t-verb-inf ) @verb-set)))]
+                                  { :type Triple
+                                    :constraints [(list '= false 'affirm)
+                                                 (list '= t-subj 'subj)
+                                                 (list '= t-verb-pres3 'verb)
+                                                 (list '= t-obj 'obj) ]
+                                    :fact-binding :?#thing }))
     
     
     ;CAREFUL: this only works because the Triple record only has one boolean (affirm).
@@ -245,8 +251,11 @@
     
     :NNP (fn [& NNP-tokens] (keyword (string/join "_" NNP-tokens)))
     
-    ;:VtraPres3 identity
-    :VtraPres3 keyword
+    :VtraPres3 identity
+    ;:VtraPres3 keyword
+    
+    :VtraInf identity
+    
     
     :ANON-RULE identity
     :QUERY identity
@@ -271,8 +280,7 @@
 
 (def g-default-fact-set
   (set [
-         ;(->Triple "fact-1" true "Joe Smith" "loves"  "Liz Taylor")
-         (->Triple "fact-1" true :Joe_Smith :loves  :Liz_Taylor)
+         (->Triple "fact-1" true :Joe_Smith "loves"  :Liz_Taylor)
          ]
         ) )
 
@@ -383,7 +391,7 @@ Dynamic rules is something I wouldn't mind adding to Clara, although that comes 
                )
             :else "unknown vocabulary type"
              ))
-       (or (= intype :TRIP-FACT-IND2 ) (= intype :PRENEG-TRIP-FACT-IND2) (= intype :NOT-FACTS ) (= intype :PREAFF-FACTS ))
+       (or (= intype :TRIP-FACT-IND2 ) (= intype :PRENEG-TRIP-FACT-IND2) (= intype :EMBNEG-TRIP-FACT-IND2) (= intype :NOT-FACTS ) (= intype :PREAFF-FACTS ))
          (cond 
           (= (g-respond-sync yntext) "Yes.") (do "I know, right.")
           (= (g-respond-sync yntext) "Definitely not.") (do "That's impossible.")
