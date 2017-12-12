@@ -345,6 +345,7 @@ Dynamic rules is something I wouldn't mind adding to Clara, although that comes 
 [text]
 (let  [ cleantext (remove-iitt text)
         negtext (str "it's false that " cleantext)
+        yntext (str cleantext " ?")
         parsetree  ((g-grammar) text)
         intype (first (first parsetree))]
    (cond 
@@ -369,12 +370,17 @@ Dynamic rules is something I wouldn't mind adding to Clara, although that comes 
             :else "unknown vocabulary type"
              ))
        (or (= intype :TRIP-FACT-IND2 ) (= intype :PRENEG-TRIP-FACT-IND2))
-        (dosync  (alter g-fact-set #(into #{} (reduce conj % (map eval (g-load-user-facts text)))))
-                                    (let [new-session (-> @g-curr-session 
-                                                        (#(apply insert %1 %2) @g-fact-set)
-                                                        (fire-rules))]
-                                          (ref-set g-curr-session new-session))
-                                    (str "facts added: " (pr-str (g-load-user-facts text))))
+         (cond 
+          (= (g-respond-sync yntext) "Yes.") (do "You told me that already.")
+          (= (g-respond-sync yntext) "Definitely not.") (do "That's impossible.")
+          (= (g-respond-sync yntext) "Not that I know of.") (dosync  (alter g-fact-set #(into #{} (reduce conj % (map eval (g-load-user-facts text)))))
+                                                              (let [new-session (-> @g-curr-session 
+                                                                                 (#(apply insert %1 %2) @g-fact-set)
+                                                                                 (fire-rules))]
+                                                                    (ref-set g-curr-session new-session))
+                                                              (str "facts added: " (pr-str (g-load-user-facts text))))
+          :else "Oops, a bug in my respond function"  )
+          
        (= intype :AND-FACTS)
         (dosync  (alter g-fact-set #(into #{} (reduce conj % (map eval (first (g-load-user-facts text))))))
                                     (let [new-session (-> @g-curr-session 
