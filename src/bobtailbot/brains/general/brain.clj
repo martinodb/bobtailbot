@@ -389,7 +389,8 @@ Dynamic rules is something I wouldn't mind adding to Clara, although that comes 
                                                                                  (#(apply insert %1 %2) @g-fact-set)
                                                                                  (fire-rules))]
                                                                     (ref-set g-curr-session new-session))
-                                                              (str "facts added: " (pr-str (g-load-user-facts text))))
+                                                              ;(str "facts added: " (pr-str (g-load-user-facts text)))
+                                                               (do "OK, got it."))
           :else "Oops, a bug in my respond function"  )
           
        (= intype :AND-FACTS)
