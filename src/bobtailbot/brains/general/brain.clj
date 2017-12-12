@@ -411,6 +411,9 @@ Dynamic rules is something I wouldn't mind adding to Clara, although that comes 
                     ;raw-query-result-set (into #{} raw-query-result)
                     raw-query-result-str (apply str raw-query-result)
                     ;raw-query-result-set-str (apply str raw-query-result-set)
+                    
+                    
+                    
                     ]
                     (if  (not (= raw-query-result-str "")) 
                        
@@ -418,7 +421,8 @@ Dynamic rules is something I wouldn't mind adding to Clara, although that comes 
                        "Yes."
                        
                        ;(str "No." "   Raw query result:  " raw-query-result-str )
-                       "Not that I know of."
+                       (let [hr-neg-qr (g-respond-sync (str "it's false that " text))]
+                           (if (= hr-neg-qr "Yes.") "Definitely not." "Not that I know of."))
                        
                        )))
             (catch Exception e (do (println (.getMessage e)) "That's not a valid query." )))
