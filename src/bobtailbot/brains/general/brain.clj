@@ -349,6 +349,8 @@ Dynamic rules is something I wouldn't mind adding to Clara, although that comes 
 (declare get-ans-vars)
 (declare remove-iitt)
 
+(def negating (atom false))
+
 (defn g-respond-sync
 
 [text]
@@ -432,16 +434,22 @@ Dynamic rules is something I wouldn't mind adding to Clara, although that comes 
                     
                     
                     ]
-                    (if  (not (= raw-query-result-str "")) 
+                    (cond
+                      (and (= raw-query-result-str "")  negating ) (do (reset! negating false) "Not that I know of.")
+                      (and (= raw-query-result-str "")  (not negating) ) (do (reset! negating true)
+                                                                             (let [neg-qr (g-respond-sync negtext)]
+                                                                                   (if (= neg-qr "Yes.") 
+                                                                                     (do  (reset! negating false) "Definitely not.")
+                                                                                     
+                                                                                     (do (reset! negating false) "Not that I know of."))))
                        
-                       ;(str "Yes." "   Raw query result:  " raw-query-result-str ) 
-                       "Yes."
+                       :else "Yes."
                        
-                       ;(str "No." "   Raw query result:  " raw-query-result-str )
-                       (let [neg-qr (g-respond-sync negtext)]
-                           (if (= neg-qr "Yes.") "Definitely not." "Not that I know of."))
                        
-                       )))
+                       
+                       )
+                       
+                       ))
             (catch Exception e (do (println (.getMessage e)) "That's not a valid query." )))
        (= intype :ANON-RULE) (dosync (alter g-rule-list #(str % text ";"))
                                               (let [new-session (-> (mk-session (symbol this-ns)

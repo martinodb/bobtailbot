@@ -108,8 +108,8 @@ YNQUESTION = (YNQUESTION-wtest | YNQUESTION-notest);
 YNQUESTION-wtest = YNQ-BODY-wtest;
 YNQUESTION-notest = YNQ-BODY-notest;
 
-<YNQ-BODY-wtest> = (<"is it ">? <"true that">)? YNQLHS-wtest <"?"> <';'>* ;
-<YNQ-BODY-notest> = (<"is it ">? <"true that">)? YNQLHS-notest <"?"> <';'>* ;
+<YNQ-BODY-wtest> = (<"is it ">? <"true that">)? YNQLHS-wtest <"?">+ <';'>* ;
+<YNQ-BODY-notest> = (<"is it ">? <"true that">)? YNQLHS-notest <"?">+ <';'>* ;
 
 <YNQLHS-wtest> = QLHS-wtest ;
 <YNQLHS-notest> = QLHS-notest ;
