@@ -393,8 +393,8 @@ Dynamic rules is something I wouldn't mind adding to Clara, although that comes 
              ))
        (or (= intype :TRIP-FACT-IND2 ) (= intype :PRENEG-TRIP-FACT-IND2) (= intype :EMBNEG-TRIP-FACT-IND2) (= intype :NOT-FACTS ) (= intype :PREAFF-FACTS ))
          (cond 
-          (= (g-respond-sync yntext) "Yes.") (do "I know, right.")
-          (= (g-respond-sync yntext) "Definitely not.") (do "That's impossible.")
+          (= (g-respond-sync yntext) "Yes, that's right.") (do "I know, right.")
+          (= (g-respond-sync yntext) "Definitely not, that's false.") (do "That's impossible.")
           (= (g-respond-sync yntext) "Not that I know of.") (dosync  (alter g-fact-set #(into #{} (reduce conj % (map eval (g-load-user-facts text)))))
                                                               (let [new-session (-> @g-curr-session 
                                                                                  (#(apply insert %1 %2) @g-fact-set)
@@ -452,12 +452,12 @@ Dynamic rules is something I wouldn't mind adding to Clara, although that comes 
                       (and (= raw-query-result-str "")  (not @negating) ) (do 
                                                                              (reset! negating true)
                                                                              (let [neg-qr (g-respond-sync negtext)]
-                                                                                   (if (= neg-qr "Yes.") 
-                                                                                     (do  (reset! negating false)  "Definitely not.")
+                                                                                   (if (= neg-qr "Yes, that's right.") 
+                                                                                     (do  (reset! negating false)  "Definitely not, that's false.")
                                                                                      
                                                                                      (do (reset! negating false)  "Not that I know of."))))
                        
-                       :else "Yes."
+                       :else "Yes, that's right."
                        
                        
                        
