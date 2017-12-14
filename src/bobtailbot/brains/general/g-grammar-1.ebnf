@@ -19,7 +19,7 @@ PREAFF = (<"it's"> | <"it is">) (<"true"> | <"the case">) <"that">  ;
 
 NQUERY = <"query"> NAME ;
 
-<RULES-QUERIES> = (RULE | QUERY | YNQUESTION)+ ;
+<RULES-QUERIES> = (RULE | QUERY | YNQUESTION | T-DOES-QUESTION)+ ;
 
 <RULE> = (NAMED-RULE | ANON-RULE);
 NAMED-RULE = (NAMED-RULE-wtest | NAMED-RULE-notest);
@@ -120,6 +120,11 @@ YNQUESTION-notest = YNQ-BODY-notest;
 
 <YNQLHS-wtest> = QLHS-wtest ;
 <YNQLHS-notest> = QLHS-notest ;
+
+
+
+T-DOES-QUESTION = <"does"> T-SUBJECT VtraInf T-OBJECT <"?">+ ;
+
 
 
 
@@ -316,7 +321,7 @@ NegVtraPresNon3 = (<"don't"> | <"do not">) VtraInf ;
 (* These are externally defined *)
 (*  VtraPres3 = ("loves" | "hates" ); *)
 (*  GERUNDtra = ("loving"|"hating") ; *)
-(*  VtraInfOrPresNon3  = ("love" | "hate" ); *)
+(*  <VtraInfOrPresNon3>  = ("love" | "hate" ); *)
 (* *)
 (* <Nsimp-sg> = ("thing" | "object" | "animal" | "person" | "man" | "woman" ) ; *)
 (* <Adj> = ("heavy" | "tall" | "hard" | "good" | "great") ; *)

@@ -278,6 +278,22 @@
 
 
 
+(defn g-rephrase-from-tree [parsetree]
+ (let [actual-ptree (first parsetree)
+       intype (first actual-ptree)]
+    (cond
+      (= intype :T-DOES-QUESTION)
+        (let [t-subj (second (second actual-ptree))
+              t-verb-inf (second (nth actual-ptree 2))
+              t-verb-pres3 (:pres3 (first (filter #(= (:inf %) t-verb-inf ) @verb-set))) 
+              t-obj (second (nth actual-ptree 3))]
+           (str t-subj " " t-verb-pres3 " " t-obj "?"))
+      :else "g-rephrase-from-tree failed" )))
+
+
+
+
+
 (def g-default-fact-set
   (set [
          (->Triple "fact-1" true :Joe_Smith "loves"  :Liz_Taylor)
@@ -368,6 +384,7 @@ Dynamic rules is something I wouldn't mind adding to Clara, although that comes 
 (let  [ cleantext (remove-iitt text)
         negtext (str "it's false that " cleantext)
         yntext (str cleantext " ?")
+        
         parsetree  ((g-grammar) text)
         intype (first (first parsetree))]
    (cond 
@@ -465,6 +482,9 @@ Dynamic rules is something I wouldn't mind adding to Clara, although that comes 
                        
                        ))
             (catch Exception e (do (println (.getMessage e)) "That's not a valid query." )))
+       
+       (= intype :T-DOES-QUESTION) (g-respond-sync (g-rephrase-from-tree parsetree))
+       
        (= intype :ANON-RULE) (dosync (alter g-rule-list #(str % text ";"))
                                               (let [new-session (-> (mk-session (symbol this-ns)
                                                 (g-load-user-rules @g-rule-list))
