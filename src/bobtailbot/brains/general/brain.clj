@@ -276,17 +276,17 @@
 
 
 
-
+(defn joinNNPstr [NNP] (string/join " " (rest NNP)))
 
 (defn g-rephrase-from-tree [parsetree]
  (let [actual-ptree (first parsetree)
        intype (first actual-ptree)]
     (cond
       (= intype :T-DOES-QUESTION)
-        (let [t-subj (second (second actual-ptree))
+        (let [t-subj (joinNNPstr (second actual-ptree))
               t-verb-inf (second (nth actual-ptree 2))
               t-verb-pres3 (:pres3 (first (filter #(= (:inf %) t-verb-inf ) @verb-set))) 
-              t-obj (second (nth actual-ptree 3))]
+              t-obj (joinNNPstr (nth actual-ptree 3))]
            (str t-subj " " t-verb-pres3 " " t-obj "?"))
       :else "g-rephrase-from-tree failed" )))
 
