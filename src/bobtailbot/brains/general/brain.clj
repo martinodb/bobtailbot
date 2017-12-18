@@ -96,11 +96,11 @@
 
 
 (def default-adj-set (set [
-  {:a "heavy"}
-  {:a "tall"}
-  {:a "hard"}
-  {:a "good"}
-  {:a "great"}
+  {:a "heavy" :comp "heavier" :sup "heaviest"}
+  {:a "tall" :comp "taller" :sup "tallest"}
+  {:a "hard" :comp "harder" :sup "hardest"}
+  {:a "good" :comp "better" :sup "best"}
+  {:a "great" :comp "greater" :sup "greatest"}
 
   ]))
 
