@@ -24,6 +24,7 @@
             ;[duratom.core :as dac :refer [duratom destroy]]
             [bobtailbot.tools :as tools :refer :all]
             
+            [clojure.set :as set]
             
             [clojure.edn :as edn]))
 
@@ -175,6 +176,22 @@
 
 
 (defn NNPkw->str [kw] (-> kw name (string/replace #"_" " ")))
+
+
+
+
+
+(declare gram-voc)
+(defn rem-tp [text] (string/replace text #"[\?|\!]+\s*\z" "" ))
+
+(defn words-in [text] (into #{} (re-seq #"\S+" (rem-tp text))) )
+(defn NNPtk-in [text] (into #{} (re-seq #"[A-Z]\S+" (rem-tp text))))
+(defn vars-in [text] (into #{} (re-seq #"\?\S+" (rem-tp text))))
+
+(defn poss-voc-in [text] (set/difference (words-in text)(NNPtk-in text) (vars-in text)))
+(defn unk-words [text](set/difference (poss-voc-in text) (gram-voc)) )
+
+
 
 
 
@@ -378,10 +395,13 @@ Dynamic rules is something I wouldn't mind adding to Clara, although that comes 
 
 (def negating (atom false))
 
+
+
 (defn g-respond-sync
 
 [text]
-(let  [ cleantext (remove-iitt text)
+(let  [ 
+        cleantext (remove-iitt text)
         negtext (str "it's false that " cleantext)
         yntext (str cleantext " ?")
         
@@ -503,6 +523,18 @@ Dynamic rules is something I wouldn't mind adding to Clara, although that comes 
 
 
 
+(defn g-respond-sync-top [text]
+(let [ukw (unk-words text)]
+ (cond 
+   (empty? ukw) (g-respond-sync text)
+   :else (str "I don't know these words: " (string/join ", " ukw))
+   )
+))
+
+
+
+
+
 
 ;;; Only use "hear" and "speakup" for multi-user interfaces like irc. The bot may report events asyncronously, not just respond to questions.
 (defn g-hear [text-in] (future 
@@ -515,7 +547,7 @@ Dynamic rules is something I wouldn't mind adding to Clara, although that comes 
                                                 (>!! speakup-chan (:text new-state) ))))
 
 ;; Only use for repl and similar, single-user interfaces. It's syncronous (blocking). 
-(def g-respond g-respond-sync)
+(def g-respond g-respond-sync-top)
 
 
 
@@ -528,3 +560,5 @@ Dynamic rules is something I wouldn't mind adding to Clara, although that comes 
 ;(defn get-ans-vars [raw-q-result] (re-seq #"\:\?\S+\s+\"[a-zA-z0-9_\-\s]*\"" raw-q-result))
 
 (defn remove-iitt [text] (string/replace text #"is it true that" ""  ))
+
+(defn gram-voc [] (into #{} (map second (re-seq #"\"([a-z\']+)\"|\'([a-z]+)\'" (raw-g-grammar-1-w-annex)))))
