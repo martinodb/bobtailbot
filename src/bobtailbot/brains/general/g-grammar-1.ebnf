@@ -19,7 +19,7 @@ PREAFF = (<"it's"> | <"it is">) (<"true"> | <"the case">) <"that">  ;
 
 NQUERY = <"query"> NAME ;
 
-<RULES-QUERIES> = (RULE | QUERY | YNQUESTION | T-DOES-QUESTION)+ ;
+<RULES-QUERIES> = (RULE | QUERY | YNQUESTION | T-DOES-QUESTION | T-WHO-QUESTION)+ ;
 
 <RULE> = (NAMED-RULE | ANON-RULE);
 NAMED-RULE = (NAMED-RULE-wtest | NAMED-RULE-notest);
@@ -125,7 +125,7 @@ YNQUESTION-notest = YNQ-BODY-notest;
 
 T-DOES-QUESTION = <"does"> T-SUBJECT VtraInf T-OBJECT <"?">+ ;
 
-
+T-WHO-QUESTION = <"who"> VtraPres3 T-NP <"?">+ ;
 
 
 
@@ -233,7 +233,9 @@ NNP =  NNPtoken (<whitespace> NNPtoken)* ;
 <NNPtoken> = #"[A-Z][A-Za-z0-9\-_]+" ;
 whitespace = #"\s+" ;
 
-<VALUE> = STRING-notNNP | NUMBER ;
+<VALUE> = STRING-quoted | NUMBER ;
+
+STRING-quoted = #"\"[A-Za-z][A-Za-z0-9\/\._-]+\"" ;
 
 <GER-OR-TOINF> = (GERUND | TOINF) ;
 <TOINF> = (TOINFcop | TOINFnc) ;

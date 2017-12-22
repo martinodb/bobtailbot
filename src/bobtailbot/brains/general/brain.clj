@@ -305,6 +305,10 @@
               t-verb-pres3 (:pres3 (first (filter #(= (:inf %) t-verb-inf ) @verb-set))) 
               t-obj (joinNNPstr (nth actual-ptree 3))]
            (str t-subj " " t-verb-pres3 " " t-obj "?"))
+      (= intype :T-WHO-QUESTION)
+        (let [t-verb  (second (second actual-ptree))
+              t-obj (joinNNPstr (nth actual-ptree 2))]
+           (str "match ?x " t-verb " " t-obj ))
       :else "g-rephrase-from-tree failed" )))
 
 
@@ -392,6 +396,7 @@ Dynamic rules is something I wouldn't mind adding to Clara, although that comes 
 ;;silly reason.
 (declare get-ans-vars)
 (declare remove-iitt)
+(declare get-who)
 
 (def negating (atom false))
 
@@ -504,6 +509,7 @@ Dynamic rules is something I wouldn't mind adding to Clara, although that comes 
             (catch Exception e (do (println (.getMessage e)) "That's not a valid query." )))
        
        (= intype :T-DOES-QUESTION) (g-respond-sync (g-rephrase-from-tree parsetree))
+       (= intype :T-WHO-QUESTION) (get-who (g-respond-sync (g-rephrase-from-tree parsetree)))
        
        (= intype :ANON-RULE) (dosync (alter g-rule-list #(str % text ";"))
                                               (let [new-session (-> (mk-session (symbol this-ns)
@@ -560,5 +566,7 @@ Dynamic rules is something I wouldn't mind adding to Clara, although that comes 
 ;(defn get-ans-vars [raw-q-result] (re-seq #"\:\?\S+\s+\"[a-zA-z0-9_\-\s]*\"" raw-q-result))
 
 (defn remove-iitt [text] (string/replace text #"is it true that" ""  ))
+
+(defn get-who [x-str] (->> x-str (re-find #"\:\?x\s+\:(\S+)" ) (second) (#(clojure.string/replace % "_" " "))  ))
 
 (defn gram-voc [] (into #{} (map second (re-seq #"\"([a-z\']+)\"|\'([a-z]+)\'" (raw-g-grammar-1-w-annex)))))
