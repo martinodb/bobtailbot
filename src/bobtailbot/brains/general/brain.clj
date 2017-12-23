@@ -177,7 +177,13 @@
 
 (defn NNPkw->str [kw] (-> kw name (string/replace #"_" " ")))
 
-
+(defn seq->str
+  ([seq] (seq->str seq ""))
+  ([seq header] (case (count seq)
+                      0 ""
+                      1 (str (first seq) ".")
+                      2 (str header (first seq) " and " (second seq) ".")
+                      (recur (rest seq) (str (first seq) ", ")))))
 
 
 
@@ -567,6 +573,6 @@ Dynamic rules is something I wouldn't mind adding to Clara, although that comes 
 
 (defn remove-iitt [text] (string/replace text #"is it true that" ""  ))
 
-(defn get-who [x-str] (->> x-str (re-find #"\:\?x\s+\:(\S+)" ) (second) (#(clojure.string/replace % "_" " "))  ))
+(defn get-who [x-str] (->> x-str (re-seq #"\:\?x\s+\:(\S+)" ) (map second) (map #(clojure.string/replace % "_" " ")) (seq->str)  ))
 
 (defn gram-voc [] (into #{} (map second (re-seq #"\"([a-z\']+)\"|\'([a-z]+)\'" (raw-g-grammar-1-w-annex)))))
