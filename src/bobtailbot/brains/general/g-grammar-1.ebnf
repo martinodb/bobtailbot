@@ -320,10 +320,4 @@ NegVtraPresNon3 = (<"don't"> | <"do not">) VtraInf ;
 
 
 
-(* These are externally defined *)
-(*  VtraPres3 = ("loves" | "hates" ); *)
-(*  GERUNDtra = ("loving"|"hating") ; *)
-(*  <VtraInfOrPresNon3>  = ("love" | "hate" ); *)
-(* *)
-(* <Nsimp-sg> = ("thing" | "object" | "animal" | "person" | "man" | "woman" ) ; *)
-(* <Adj> = ("heavy" | "tall" | "hard" | "good" | "great") ; *)
+

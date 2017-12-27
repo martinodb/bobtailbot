@@ -575,4 +575,4 @@ Dynamic rules is something I wouldn't mind adding to Clara, although that comes 
 
 (defn get-who [x-str] (->> x-str (re-seq #"\:\?x\s+\:(\S+)" ) (map second) (map #(clojure.string/replace % "_" " ")) (seq->str)  ))
 
-(defn gram-voc [] (into #{} (map second (re-seq #"\"([a-z\']+)\"|\'([a-z]+)\'" (raw-g-grammar-1-w-annex)))))
+(defn gram-voc [] (into #{} (map #(if (second %) (second %) (nth % 2)) (re-seq #"\"([a-z\']+)\"|\'([a-z]+)\'" (raw-g-grammar-1-w-annex)))))
