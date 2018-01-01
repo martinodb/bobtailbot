@@ -19,7 +19,7 @@ PREAFF = (<"it's"> | <"it is">) (<"true"> | <"the case">) <"that">  ;
 
 NQUERY = <"query"> NAME ;
 
-<RULES-QUERIES> = (RULE | QUERY | YNQUESTION | T-DOES-QUESTION | T-WHO-QUESTION)+ ;
+<RULES-QUERIES> = (RULE | QUERY | YNQUESTION | T-DOES-QUESTION | T-WHO-QUESTION | T-WHOM-QUESTION)+ ;
 
 <RULE> = (NAMED-RULE | ANON-RULE);
 NAMED-RULE = (NAMED-RULE-wtest | NAMED-RULE-notest);
@@ -126,7 +126,7 @@ YNQUESTION-notest = YNQ-BODY-notest;
 T-DOES-QUESTION = <"does"> T-SUBJECT VtraInf T-OBJECT <"?">+ ;
 
 T-WHO-QUESTION = <"who"> VtraPres3 T-NP <"?">+ ;
-
+T-WHOM-QUESTION = (<"who"> | <"whom">) <"does">  T-NP VtraInf <"?">+ ;
 
 
 AND-FACTS = FACT (<"and"> (FACT | <"("> FACTS <")">))+  ;

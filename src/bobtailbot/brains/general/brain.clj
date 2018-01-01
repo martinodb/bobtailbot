@@ -315,6 +315,11 @@
         (let [t-verb  (second (second actual-ptree))
               t-obj (joinNNPstr (nth actual-ptree 2))]
            (str "match ?x " t-verb " " t-obj ))
+      (= intype :T-WHOM-QUESTION)
+        (let [t-subj  (joinNNPstr (second actual-ptree))
+              t-verb-inf (second (nth actual-ptree 2))
+              t-verb-pres3 (:pres3 (first (filter #(= (:inf %) t-verb-inf ) @verb-set)))]
+           (str "match " t-subj " " t-verb-pres3 " " "?x" ))
       :else "g-rephrase-from-tree failed" )))
 
 
@@ -516,6 +521,7 @@ Dynamic rules is something I wouldn't mind adding to Clara, although that comes 
        
        (= intype :T-DOES-QUESTION) (g-respond-sync (g-rephrase-from-tree parsetree))
        (= intype :T-WHO-QUESTION) (get-who (g-respond-sync (g-rephrase-from-tree parsetree)))
+       (= intype :T-WHOM-QUESTION) (get-who (g-respond-sync (g-rephrase-from-tree parsetree)))
        
        (= intype :ANON-RULE) (dosync (alter g-rule-list #(str % text ";"))
                                               (let [new-session (-> (mk-session (symbol this-ns)
