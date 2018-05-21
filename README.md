@@ -36,6 +36,10 @@ So, to get started quickly (for Ubuntu and similar):
 If you are using `lein repl`, then after editing `config.edn` or any other file,
    do `(user/refresh)`, and then again `(-main)`. Sometimes, if you edit namespace names and things like that, it's better to do `quit` and `lein repl` again, though.
 
+## EXAMPLE INTERACTION
+
+![alt text](bobtailbot/2017-ex-int.png "Example interaction")
+
 ## CREDIT
 
 Here I mention open-source projects, blogs, etc, that I found useful and sometimes took code from.
