@@ -38,7 +38,7 @@ If you are using `lein repl`, then after editing `config.edn` or any other file,
 
 ## EXAMPLE INTERACTION
 
-![Example interaction](https://github.com/martinodb/bobtailbot/blob/master/2017-ex-int.png "Example interaction")
+![Example interaction](https://github.com/martinodb/bobtailbot/blob/master/doc/2017-ex-int.png "Example interaction")
 
 ## CREDIT
 
