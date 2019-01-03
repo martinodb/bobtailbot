@@ -1,7 +1,6 @@
 # Bobtailbot
 
-This is a simple little chatbot written in Clojure, mostly to have fun and learn about Clojure and also chatbots, AI, you name it. It can either talk through the command-line or connect to an irc server. It doesn't do much in terms of talking for now, but the idea is to make it accept [Clara](http://www.clara-rules.org/) rules and facts in some DSL or controlled natural language.
-For now, it only takes rules and responds to queries from a toy [example](https://github.com/cerner/clara-examples/blob/master/src/main/clojure/clara/examples/shopping.clj).
+This is a simple little chatbot written in Clojure, mostly to have fun and learn about Clojure and also chatbots, AI, you name it. It can either talk through the command-line or connect to an irc server. For the moment, it only accepts simple facts described in SVO sentences with proper names, and simple general rules and queries, as depicted in the example interaction below.
 
 I picked Clojure as a language because:
 
