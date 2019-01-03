@@ -41,7 +41,7 @@ If you are using `lein repl`, then after editing `config.edn` or any other file,
 
 ## CREDIT
 
-Here I mention open-source projects, blogs, etc, that I found useful and sometimes took code from.
+Here I mention open-source projects, blogs, etc, that I found useful and sometimes took code from (attribution given in the source files when applicable).
 
 * [Gigasquid's speech acts classifier](https://github.com/gigasquid/speech-acts-classifier).
 * [AdamBoxall's irc client](https://github.com/AdamBoxall/clojure-irc-client), perhaps also with some code from [Nakkaya](https://nakkaya.com/2010/02/10/a-simple-clojure-irc-client/).
