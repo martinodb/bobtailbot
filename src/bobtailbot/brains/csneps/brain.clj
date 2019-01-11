@@ -64,6 +64,8 @@
 
 
 
+;; Only use for repl and similar, single-user interfaces. It's syncronous (blocking). 
+(def respond respond-sync-csneps)
 
 
 ;;; Only use "hear" and "speakup" for multi-user interfaces like irc. The bot may report events asyncronously, not just respond to questions.
@@ -76,5 +78,3 @@
                                           (fn [k r old-state new-state]
                                                 (>!! speakup-chan (:text new-state) ))))
 
-;; Only use for repl and similar, single-user interfaces. It's syncronous (blocking). 
-(def respond respond-sync-csneps)
