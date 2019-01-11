@@ -13,8 +13,7 @@
             
             
             [clojure.string :as string]
-            [clojure.core.async :as async 
-               :refer [go-loop <! <!! >! >!!  close! chan pub sub go]]
+            [clojure.core.async :as async :refer [go-loop <! <!! >! >!!  close! chan pub sub go]]
             
             [clojure.walk :as walk :refer [postwalk]]
             
