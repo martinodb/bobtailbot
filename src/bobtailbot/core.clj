@@ -15,7 +15,7 @@
 
 
 
-(defconfig brain :example-shopping)
+(defconfig brain :general)
 (defconfig user-interface :irc)
 (defconfig greeting "Hello.  Let's chat.")
 (defconfig nick "bobtailbot")

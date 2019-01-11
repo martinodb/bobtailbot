@@ -2,7 +2,7 @@
 
 ;; CONFIG ENTRIES:
 
-bobtailbot.core/brain :general #_:quickanddirty #_:example-shopping
+bobtailbot.core/brain :general #_:general
 
 #_bobtailbot.core/greeting #_"Hello.  Let's chat."
 
@@ -14,6 +14,6 @@ bobtailbot.core/brain :general #_:quickanddirty #_:example-shopping
 
 #_bobtailbot.core/port #_6667
 
-bobtailbot.core/user-interface #_:repl :irc
+bobtailbot.core/user-interface :irc #_:irc
 
 }
