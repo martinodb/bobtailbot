@@ -33,7 +33,7 @@
     :quickanddirty (qdbr/respond text)
     :general (genbr/respond text)
     :csneps (csneps/respond text)
-    (qdbr/respond text)
+    (genbr/respond text)
     )
   )
 
@@ -43,7 +43,7 @@
     :quickanddirty  (qdbr/hear text)
     :general (genbr/hear text)
     :csneps (csneps/hear text)
-    (qdbr/hear text)
+    (genbr/hear text)
     )
   )
 
@@ -56,7 +56,7 @@
     :quickanddirty (qdbr/speakup speakup-chan)
     :general (genbr/speakup speakup-chan)
     :csneps (csneps/speakup speakup-chan)
-    (qdbr/speakup speakup-chan)
+    (genbr/speakup speakup-chan)
     )
   )
 
