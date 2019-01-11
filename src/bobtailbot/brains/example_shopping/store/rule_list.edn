@@ -1,1 +1,0 @@
-"discount my-discount 15 when customer status is platinum;\n   discount extra-discount 10 when customer status is gold and total value > 200;\n   promotion free-widget-month free-widget when customer status is gold and order month is august;"
