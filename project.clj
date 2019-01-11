@@ -30,7 +30,14 @@
   :aliases {"config" ["run" "-m" "outpace.config.generate"]}
   :plugins [ [lein-cljsbuild "1.1.3" :exclusions [org.clojure/clojure]] ;;only for development
              ;[lein-cljsbuild "1.1.7"]
-             ] 
+             
+             
+             [refactor-nrepl "2.4.0"]
+             [cider/cider-nrepl "0.18.0"]
+             
+             
+             ]
+  :middleware [refactor-nrepl.plugin/middleware]
                  )
 
 
