@@ -4,6 +4,9 @@
             [clojure.core.async :as async 
                :refer [go-loop <! <!! >! >!!  close! chan pub sub]]
             
+            ;[clojure.tools.nrepl.server :only (start-server stop-server) :as nrepl-server ]
+            [clojure.tools.nrepl :as repl]
+            
             ;[instaparse.core :as insta]
             ;[schema.core :as s]
             ))
@@ -40,7 +43,7 @@
 
 
 
-(defn respond-sync [text]
+(defn respond-sync-stub [text]
   (if (question-mark? text) "Nice question."
         (case text 
          "alert on"  (do (reset! alert-wanted? true)
@@ -50,6 +53,16 @@
          "alert off" (do (reset! alert-wanted? false)
                           "alert is now off!")
          "I see.")))
+
+(defn respond-sync-csneps [text]
+  (with-open [conn (repl/connect :port 33787)]
+     (-> (repl/client conn 1000)
+       ;(repl/message {:op :eval :code "(+ 1 1)"})
+       (repl/message {:op :eval :code text})
+       repl/response-values))
+)
+
+
 
 
 
@@ -64,4 +77,4 @@
                                                 (>!! speakup-chan (:text new-state) ))))
 
 ;; Only use for repl and similar, single-user interfaces. It's syncronous (blocking). 
-(def respond respond-sync)
+(def respond respond-sync-csneps)
