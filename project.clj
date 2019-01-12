@@ -21,7 +21,10 @@
                  
                  ;[duratom "0.3.5"]
                  
-                 [org.clojure/tools.nrepl "0.2.13"]
+                 
+                 ;[org.clojure/tools.nrepl "0.2.13"]
+                 ;[nrepl "0.4.0"]
+                 [nrepl "0.5.3"]
                  
                  ]
                  

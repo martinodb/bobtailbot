@@ -4,8 +4,10 @@
             [clojure.core.async :as async 
                :refer [go-loop <! <!! >! >!!  close! chan pub sub]]
             
-            ;[clojure.tools.nrepl.server :only (start-server stop-server) :as nrepl-server ]
-            [clojure.tools.nrepl :as repl]
+            
+            
+            ;https://nrepl.org/nrepl/hacking_on_nrepl.html
+            [nrepl.core :as nrepl]
             
             ;[instaparse.core :as insta]
             ;[schema.core :as s]
@@ -43,6 +45,15 @@
 
 
 
+(def mytext-1 "hello, one")
+
+(def mytext-2 "(str \"hello\")" )
+
+
+(def let-example (let [text3 (str "(str \\\"" mytext-1 "\\\")") ]   (str text3) ))
+
+
+
 (defn respond-sync-stub [text]
   (if (question-mark? text) "Nice question."
         (case text 
@@ -55,17 +66,69 @@
          "I see.")))
 
 (defn respond-sync-csneps [text]
-  (with-open [conn (repl/connect :port 33787)]
-     (-> (repl/client conn 1000)
-       ;(repl/message {:op :eval :code "(+ 1 1)"})
-       (repl/message {:op :eval :code text})
-       repl/response-values))
-)
+  (with-open
+     ;actual csneps system (port is different each time):
+     [conn (nrepl/connect  :port 34289)]
+     
+     ; minimal nrepl server, not csneps.
+     ;[conn (nrepl/connect :port 7888)]
+     
+     
+     (-> (nrepl/client conn 1000)
+       
+       
+       
+       
+       (nrepl/message  {:op :eval :code text})
+       
+       
+       nrepl/response-values
+       
+       
+       first
+       
+       
+       )))
 
+(defn respond-sync-csneps-outstr [text]
+  (with-out-str 
+     (with-open
+      ;actual csneps system (port is different each time):
+      [conn (nrepl/connect  :port 34289)]
+     
+      ; minimal nrepl server, not csneps.
+      ;[conn (nrepl/connect :port 7888)]
+     
+     
+      (-> (nrepl/client conn 1000)
+        
+        
+        
+        
+        (nrepl/message  {:op :eval :code text})
+        
+        
+        nrepl/response-values
+        
+        
+        first
+        
+        
+        ))))
+
+
+
+
+(defn respond-sync-csneps-ws
+ "wrap with string quotes all expressions that don't have a leading parenthesis"
+[text]
+(cond
+(= (first text) (first "(") ) (do (println (first text) " is a paren" ) (respond-sync-csneps text))
+:else  (respond-sync-csneps (do  (println (first text) "is not a paren") (pr-str (str  text )))  )))
 
 
 ;; Only use for repl and similar, single-user interfaces. It's syncronous (blocking). 
-(def respond respond-sync-csneps)
+(def respond respond-sync-csneps-ws)
 
 
 ;;; Only use "hear" and "speakup" for multi-user interfaces like irc. The bot may report events asyncronously, not just respond to questions.
