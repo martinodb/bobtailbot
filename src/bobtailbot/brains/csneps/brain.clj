@@ -9,6 +9,8 @@
             ;https://nrepl.org/nrepl/hacking_on_nrepl.html
             [nrepl.core :as nrepl]
             
+            [gniazdo.core :as ws]
+            
             ;[instaparse.core :as insta]
             ;[schema.core :as s]
             ))
@@ -106,8 +108,17 @@
 
 
 
+(def ws-port "8080")
+(def ws-host "localhost")
 
+(def ws-socket
+  (ws/connect
+    (str "ws://" ws-host ":" ws-port "/socket" )
+    :on-receive #(prn 'received %)))
 
+;;examples:
+;(ws/send-msg ws-socket "hello")
+;(ws/close ws-socket)
 
 
 

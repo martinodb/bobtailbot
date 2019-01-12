@@ -26,6 +26,8 @@
                  ;[nrepl "0.4.0"]
                  [nrepl "0.5.3"]
                  
+                 [stylefruits/gniazdo "1.1.1"]
+                 
                  ]
                  
   :profiles
