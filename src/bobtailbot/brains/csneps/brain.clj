@@ -90,14 +90,41 @@
        
        )))
 
-(defn respond-sync-csneps-outstr [text]
-  (with-out-str 
-     (with-open
+
+
+
+
+; https://clojuredocs.org/clojure.core/with-out-str
+(defmacro with-out-str-data-map
+  [& body]
+  `(let [s# (new java.io.StringWriter)]
+     (binding [*out* s#]
+       (let [r# ~@body]
+         {:result r#
+          :str    (str s#)}))))
+
+
+
+
+
+
+
+
+
+
+
+
+
+(defn respond-sync-csneps-outstr-v1 [text]
+  (with-open
       ;actual csneps system (port is different each time):
-      [conn (nrepl/connect  :port 34289)]
-     
+       [conn (nrepl/connect  :port 34289)]
       ; minimal nrepl server, not csneps.
       ;[conn (nrepl/connect :port 7888)]
+     
+     (with-out-str-data-map
+     
+     
      
      
       (-> (nrepl/client conn 1000)
@@ -119,12 +146,66 @@
 
 
 
+(defn respond-sync-csneps-outstr-v2 [text]
+  (with-out-str-data-map 
+      
+     
+     (with-open
+     ;actual csneps system (port is different each time):
+       [conn (nrepl/connect  :port 34289)]
+      ; minimal nrepl server, not csneps.
+      ;[conn (nrepl/connect :port 7888)]
+     
+     
+     
+      (-> (nrepl/client conn 1000)
+        
+        
+        
+        
+        (nrepl/message  {:op :eval :code text})
+        
+        
+        nrepl/response-values
+        
+        
+        first
+        
+        
+        ))))
+
+;(def respond-sync-csneps-outstr respond-sync-csneps-outstr-v1)
+(def respond-sync-csneps-outstr respond-sync-csneps-outstr-v2)
+
+
+
+
+
+(defn respond-sync-csneps-outstr-combined [text]
+ (let [text2 (respond-sync-csneps-outstr text)
+       text3  (str (if (not (string/blank? (:str text2 ))) (str (:str text2) "\n") "" ) (:result text2))
+       
+       ]
+   (if (string/blank? text3) nil (read-string text3 ))
+   
+   ;(println "text2: " text2)
+   
+   ;(:result text2)
+   ))
+
+
 (defn respond-sync-csneps-ws
- "wrap with string quotes all expressions that don't have a leading parenthesis"
-[text]
-(cond
-(= (first text) (first "(") ) (do (println (first text) " is a paren" ) (respond-sync-csneps text))
-:else  (respond-sync-csneps (do  (println (first text) "is not a paren") (pr-str (str  text )))  )))
+  "wrap with string quotes all expressions that don't have a leading parenthesis"
+  [text]
+  (cond
+     (= (first text) (first "(") )
+       (do
+        ;(println (first text) " is a paren" )
+        (respond-sync-csneps-outstr-combined text))
+     :else
+       (do
+       ;(println (first text) "is not a paren")
+       (respond-sync-csneps-outstr-combined (pr-str (str  text ))))))
 
 
 ;; Only use for repl and similar, single-user interfaces. It's syncronous (blocking). 
