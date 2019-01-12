@@ -116,9 +116,9 @@
     (str "ws://" ws-host ":" ws-port "/socket" )
     :on-receive #(prn 'received %)))
 
-;;examples:
-;(ws/send-msg ws-socket "hello")
-;(ws/close ws-socket)
+
+(defn send-msg-ws [msg] (ws/send-msg ws-socket msg))
+(def close-ws  (ws/close ws-socket))
 
 
 
