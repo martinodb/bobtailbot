@@ -108,17 +108,36 @@
 
 
 
-(def ws-port "8080")
+(def ws-port "10000")
 (def ws-host "localhost")
 
-(def ws-socket
-  (ws/connect
-    (str "ws://" ws-host ":" ws-port "/socket" )
-    :on-receive #(prn 'received %)))
+
+;;pick one:
+(def ws-connect-message (str "ws://" ws-host ":" ws-port "/echo" ))
+;(def ws-connect-message (str "ws://" ws-host ":" ws-port "/chat" ))
+;(def ws-connect-message (str "ws://" ws-host ":" ws-port "/socket" ))
+;(def ws-connect-message (str "ws://" ws-host ":" ws-port "/wssocket" ))
+
+(def echo-fn #(prn 'received %))
+
+(def defaultwss
+  (ws/connect ws-connect-message
+    :on-receive echo-fn))
 
 
-(defn send-msg-ws [msg] (ws/send-msg ws-socket msg))
-(def close-ws  (ws/close ws-socket))
+(defn defaultwssfn []
+  (ws/connect ws-connect-message
+    :on-receive echo-fn))
+
+
+(defn send-msg-ws
+     ([msg] (ws/send-msg defaultwss msg))
+     ([msg socket] (ws/send-msg socket msg))
+     )
+(defn close-ws
+    ([] (ws/close defaultwss))
+    ([socket] (ws/close socket))
+    )
 
 
 
