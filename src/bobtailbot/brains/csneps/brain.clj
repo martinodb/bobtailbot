@@ -108,7 +108,9 @@
 
 
 
-(def ws-port "10000")
+;(def ws-port "10000")
+(def ws-port "8080")
+
 (def ws-host "localhost")
 
 
@@ -119,6 +121,9 @@
 ;(def ws-connect-message (str "ws://" ws-host ":" ws-port "/wssocket" ))
 
 (def echo-fn #(prn 'received %))
+
+
+
 
 (def defaultwss
   (ws/connect ws-connect-message
