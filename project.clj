@@ -27,7 +27,10 @@
                  [nrepl "0.5.3"]
                  
                  [stylefruits/gniazdo "1.1.1"]
-                 [aleph "0.4.6"]
+                 
+                 ;[aleph "0.4.6"] ; Below we avoid conflict. do "lein deps :tree" to see why.
+                 [aleph "0.4.6" :exclusions [org.clojure/tools.logging]]
+                 
                  ; aleph seems better. Remove gniazdo later.
                  
                  ;these are required in the aleph websocket demo.

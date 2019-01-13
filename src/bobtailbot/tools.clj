@@ -138,6 +138,14 @@
 ;; prepend dppend-ns to every occurrence of the old ns in a string:
 (defn embns [st] (string/replace st (re-pattern dfregs) (str dppend-ns dfregs) ) )
 
+;bobtailbot.core=> (ns bobtailbot.tools )
+;nil
+;bobtailbot.tools=> (embns "csneps.core.snuser")
+;"bobtailbot.brains.csneps.emb.CSNePS.src.clj.csneps.core.snuser"
+;bobtailbot.tools=> 
+
+
+
 ;; accepts a file and does embnsfn to its content.
 (defn embnsffile  [f] (-> f slurp embns (spit (.getPath f))))
 
