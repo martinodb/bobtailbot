@@ -34,6 +34,11 @@
                  [gloss "0.2.6"]
                  [compojure "1.6.1"]
                  
+                 ;; https://github.com/Raynes/fs
+                 ;; Tools to manipulate files and dirs
+                 [me.raynes/fs "1.4.6"]
+                 
+                 
                  ]
                  
   :profiles

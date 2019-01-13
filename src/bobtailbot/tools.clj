@@ -2,6 +2,7 @@
 (:require [clojure.edn :as edn]
           [clojure.string :as string :refer [trim]]
           [clojure.java.io :as io]
+          [me.raynes.fs :as fs]
 ))
 
 ;; CREDIT:
