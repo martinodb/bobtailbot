@@ -26,6 +26,16 @@
 
 
 
+
+
+
+
+
+
+
+
+
+
 (defn dump-to-path
   "Store a value's representation to a given path"
   [path value]
@@ -94,31 +104,116 @@
 ;https://rosettacode.org/wiki/Walk_a_directory/Recursively#Clojure
 ;;(use '[clojure.java.io])
 ;; DOING: [clojure.java.io :as io] ; file -> io/file
- 
+
+
 (defn walk [dirpath pattern]
-  (doall (filter #(re-matches pattern (.getName %))
+  (do (filter #(re-matches pattern (.getName %))
                  (file-seq (io/file dirpath)))))
 
-(declare println-clj-filenames)
+
 
 ;; this-dir is "/home/martin/Documentos/programming/chatterbots/FOSS-clojure/bots/Bobtailbot/bobtailbot/src/bobtailbot"
 ;(def default-csneps-orig-repo "/home/martin/Documentos/programming/chatterbots/FOSS-clojure/bots/Bobtailbot/backends-for-embedding/CSNePS")
 ; (def default csneps-destination "/home/martin/Documentos/programming/chatterbots/FOSS-clojure/bots/Bobtailbot/bobtailbot/src/bobtailbot/brains/csneps/emb")
 
+;; default original repo, unqualified name.
+(def default-ruqn "CSNePS")
+;; The corresponding string for default-ruqn in bobtailbot.brains
+(def drbn "csneps")
 
-(def default-orig (str this-dir "/../../../" "backends-for-embedding/CSNePS"))
 
-(def default-dest (str this-dir "/brains/csneps/emb"))
+
+(def default-orig (str this-dir "/../../../" "backends-for-embedding/" default-ruqn))
+(def default-dest (str this-dir "/brains/" drbn "/emb"))
+
+;; default regex replacement string to find namespace names to modify. Notice double slash escape because it's for re-pattern.
+(def dfregs  (str drbn "\\.")  ) ; for "csneps" -> "csneps\\."
+
+
+; /CSNePS/src/clj/
+
+;; Namespace to prepend:
+(def dppend-ns (str "bobtailbot.brains." drbn ".emb" "." default-ruqn ".src.clj" ".") )
+
+;; prepend dppend-ns to every occurrence of the old ns in a string:
+(defn embns [st] (string/replace st (re-pattern dfregs) (str dppend-ns dfregs) ) )
+
+;; accepts a file and does embnsfn to its content.
+(defn embnsffile  [f] (-> f slurp embns (spit (.getPath f))))
+
+;; does embnsffile to every file in a given dir
+(defn rec-embnsffile
+  ""
+  ([] (rec-embnsffile default-dest ))
+  ([dir](map embnsffile (walk dir (re-pattern ".*\\.clj") ))) 
+
+  )
+
+
+
+
+ 
+
+
+
+
+
+;(declare println-clj-filenames)
+;(declare txt-fn)
+;(declare rec-proj-txt-fn)
+
+
+
+(defn println-clj-filenames
+  "print recursively the names of .clj files in a given dir"
+  ([] (println-clj-filenames "src"))
+  ([dir](map #(println (.getPath %)) (walk dir #".*\.clj"))) 
+
+  )
+
+(defn txt-fn 
+"rename given file adding .BKP.txt to its name"
+[file]
+(let [filename (.getPath file)]
+  (fs/rename filename (str filename ".BKP.txt"))))
+
+
+(defn rec-proj-txt-fn
+  "rename  .project  files in dir adding  .BKP.txt"
+  ([] (rec-proj-txt-fn  default-dest))
+  ([dir](map txt-fn (walk dir #"\.project"))) )
+
+
+
+
+
+
+
+
+
+
 
 
 (defn embed-backend
 "Creates a copy of a whole external repo of some FOSS third-party backend inside this repo, renaming namespaces accordingly. Used for CSNePS"
  ([] (do (println "TODO: the embed tool is not working yet!")
        (embed-backend default-orig default-dest)))
- ([orig dest] (do (println "TODO: the embed tool is not working yet!!")
+ ([orig dest] (do
+                  (println "TODO: the embed tool is not working yet!!")
                   (println-clj-filenames orig)
                   
-                  ))
+                  (println "copying dirs..")
+                   ;;(fs/copy-dir-into orig (str dest "/CSNePS")) ; copies the *contents* of orig into dest.
+                    (fs/copy-dir orig dest) ; copies orig into dest.
+                  ;;In both cases, if orig is aleady there, I think it overwrites it.
+                  ;;
+                  ;;rename project files to .clj.txt
+                   (rec-proj-txt-fn )
+                  ;; rename namespaces
+                   (rec-embnsffile)
+                  
+                  
+                    ))
  
  
 )
@@ -134,9 +229,5 @@
 
 ;; (map #(println (.getPath %)) (walk "src" #".*\.clj"))
 
-(defn println-clj-filenames
-  "print recursively the names of .clj files in a given dir"
-  ([] (println-clj-filenames "src"))
-  ([dir](map #(println (.getPath %)) (walk dir #".*\.clj"))) 
 
-  )
+
