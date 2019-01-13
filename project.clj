@@ -27,6 +27,12 @@
                  [nrepl "0.5.3"]
                  
                  [stylefruits/gniazdo "1.1.1"]
+                 [aleph "0.4.6"]
+                 ; aleph seems better. Remove gniazdo later.
+                 
+                 ;these are required in the aleph websocket demo.
+                 [gloss "0.2.6"]
+                 [compojure "1.6.1"]
                  
                  ]
                  
@@ -37,7 +43,15 @@
   :aliases {"config" ["run" "-m" "outpace.config.generate"]}
   :plugins [ [lein-cljsbuild "1.1.3" :exclusions [org.clojure/clojure]] ;;only for development
              ;[lein-cljsbuild "1.1.7"]
-             ] 
+             ]
+    :repl-options {
+     
+     :print clojure.core/println 
+     ;:print clojure.pprint/pprint
+     :timeout 120000
+     
+     
+     }
                  )
 
 
