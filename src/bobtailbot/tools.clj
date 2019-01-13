@@ -9,6 +9,20 @@
 
 
 
+;; IMPORTANT!!!
+;; Change this prefix if you change this file's name (or path).
+;;Also remember to change the ns declaration.
+(def parent-ns "bobtailbot")
+(def this-ns-unqual "tools")
+;;;;;
+
+
+(def this-ns (str parent-ns "." this-ns-unqual))
+(def ns-prefix (str this-ns "/"))
+(def this-dir (str "./src/" (-> parent-ns (string/replace #"\." "/" ) (string/replace #"-" "_")) ))
+(def dir-prefix (str this-dir "/" ))
+
+
 
 
 (defn dump-to-path
@@ -76,14 +90,52 @@
 ;; " lein embed "path/to/csneps/project/..../csneps" "./src/bobtailbot/brains/csneps/embed"  "
 
 
+;https://rosettacode.org/wiki/Walk_a_directory/Recursively#Clojure
+;;(use '[clojure.java.io])
+;; DOING: [clojure.java.io :as io] ; file -> io/file
+ 
+(defn walk [dirpath pattern]
+  (doall (filter #(re-matches pattern (.getName %))
+                 (file-seq (io/file dirpath)))))
+
+(declare println-clj-filenames)
+
+;; this-dir is "/home/martin/Documentos/programming/chatterbots/FOSS-clojure/bots/Bobtailbot/bobtailbot/src/bobtailbot"
+;(def default-csneps-orig-repo "/home/martin/Documentos/programming/chatterbots/FOSS-clojure/bots/Bobtailbot/backends-for-embedding/CSNePS")
+; (def default csneps-destination "/home/martin/Documentos/programming/chatterbots/FOSS-clojure/bots/Bobtailbot/bobtailbot/src/bobtailbot/brains/csneps/emb")
+
+
+(def default-orig (str this-dir "/../../../" "backends-for-embedding/CSNePS"))
+
+(def default-dest (str this-dir "/brains/csneps/emb"))
+
 
 (defn embed-backend
 "Creates a copy of a whole external repo of some FOSS third-party backend inside this repo, renaming namespaces accordingly. Used for CSNePS"
- (do
- (println "TODO: the embed tool is not working yet!")
- )
+ ([] (do (println "TODO: the embed tool is not working yet!")
+       (embed-backend default-orig default-dest)))
+ ([orig dest] (do (println "TODO: the embed tool is not working yet!!")
+                  (println-clj-filenames orig)
+                  
+                  ))
+ 
  
 )
 
 
 ;;;;;;;;;;;
+
+
+
+
+
+;;; FUNCTIONS WITH REGEXES
+
+;; (map #(println (.getPath %)) (walk "src" #".*\.clj"))
+
+(defn println-clj-filenames
+  "print recursively the names of .clj files in a given dir"
+  ([] (println-clj-filenames "src"))
+  ([dir](map #(println (.getPath %)) (walk dir #".*\.clj"))) 
+
+  )

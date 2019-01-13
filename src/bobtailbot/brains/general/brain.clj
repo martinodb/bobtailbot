@@ -21,7 +21,7 @@
             
             
             ;[duratom.core :as dac :refer [duratom destroy]]
-            [bobtailbot.tools :as tools :refer :all]
+            [bobtailbot.tools :as tools :refer [disk-atom disk-ref]]
             
             [clojure.set :as set]
             
