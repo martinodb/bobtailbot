@@ -124,24 +124,27 @@
 
 
 
-
-(def defaultwss
-  (ws/connect ws-connect-message
-    :on-receive echo-fn))
-
-
 (defn defaultwssfn []
   (ws/connect ws-connect-message
     :on-receive echo-fn))
 
 
+;(def defaultwss
+  ;(ws/connect ws-connect-message
+    ;:on-receive echo-fn))
+
+(def defaultwss (delay (defaultwssfn)))
+
+
+
+
 (defn send-msg-ws
-     ([msg] (ws/send-msg defaultwss msg))
-     ([msg socket] (ws/send-msg socket msg))
+     ([msg] (future (ws/send-msg defaultwss msg)))
+     ([msg socket] (future (ws/send-msg socket msg)))
      )
 (defn close-ws
-    ([] (ws/close defaultwss))
-    ([socket] (ws/close socket))
+    ([] (future (ws/close defaultwss)) )
+    ([socket] (future (ws/close socket)))
     )
 
 
