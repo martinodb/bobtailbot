@@ -66,3 +66,24 @@
      (if (empty? filecont) (dump-to-path path init) (dosync (ref-set state filecont)))
      (add-watch state :persist-watcher (persist-fn path))
      state)))
+
+
+
+
+;;;;;;;;;;
+;; EMBEDDING. TO RUN THROUGH A LEIN PROJECT ALIAS (A PLUGIN IS NOT NEEDED):
+;; EXAMPLE:
+;; " lein embed "path/to/csneps/project/..../csneps" "./src/bobtailbot/brains/csneps/embed"  "
+
+
+
+(defn embed-backend
+"Creates a copy of a whole external repo of some FOSS third-party backend inside this repo, renaming namespaces accordingly. Used for CSNePS"
+ (do
+ (println "TODO: the embed tool is not working yet!")
+ )
+ 
+)
+
+
+;;;;;;;;;;;
