@@ -146,8 +146,8 @@
 
 
 (defn defaultwssfn "default websocket conn maker function"[]
-  (ws/connect ws-connect-message
-    :on-receive echo-fn))
+  (delay (ws/connect ws-connect-message
+    :on-receive echo-fn)))
 
 
 ;(def defaultwss
@@ -155,20 +155,20 @@
     ;:on-receive echo-fn))
 
 ; default websocket connection
-(def defaultwss (delay (defaultwssfn)))
+(def defaultwss (future (defaultwssfn)))
 
 
 
 ;send websocket message
 (defn send-msg-ws
-     ([msg] (future (ws/send-msg defaultwss msg)))
-     ([msg socket] (future (ws/send-msg socket msg)))
+     ([msg] (ws/send-msg defaultwss msg))
+     ([msg socket] (ws/send-msg socket msg) )
      )
 
 ; close websocket
 (defn close-ws
-    ([] (future (ws/close defaultwss)) )
-    ([socket] (future (ws/close socket)))
+    ([] (ws/close defaultwss)  )
+    ([socket] (ws/close socket) )
     )
 
 
