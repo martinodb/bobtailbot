@@ -91,6 +91,7 @@
      (if (empty? filecont) (dump-to-path path init) (dosync (ref-set state filecont)))
      (add-watch state :persist-watcher (persist-fn path))
      state)))
+<<<<<<< HEAD
 
 
 
@@ -239,3 +240,5 @@
 
 
 
+=======
+>>>>>>> parent of cc6d8d6... add a stub for the embed tool, to run CSNePS embedded. This tool will copy-paste an intact CSNePS repo into the bobtailbot repo, changing namespaces accordingly, and maybe renaming project.clj to project.clj.txt or something like that. It should work not only for CSNePS but also for any other backend written in Clojure

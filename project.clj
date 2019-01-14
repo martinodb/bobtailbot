@@ -48,8 +48,7 @@
   {:dev {:source-paths ["dev" "src" "test"]
          :dependencies [[org.clojure/tools.namespace "0.2.11"]]}}
                  
-  :aliases {"config" ["run" "-m" "outpace.config.generate"]
-            "embed" ["run" "-m" "bobtailbot.embed-backend"]}
+  :aliases {"config" ["run" "-m" "outpace.config.generate"]}
   :plugins [ [lein-cljsbuild "1.1.3" :exclusions [org.clojure/clojure]] ;;only for development
              ;[lein-cljsbuild "1.1.7"]
              ]
