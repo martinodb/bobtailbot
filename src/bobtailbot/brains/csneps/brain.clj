@@ -27,7 +27,31 @@
 (def this-dir (str "./src/" (-> parent-ns (string/replace #"\." "/" ) (string/replace #"-" "_")) ))
 (def dir-prefix (str this-dir "/" ))
 
+
+
+
+
+
 ;;;
+;;; HOST AND PORTS OF RUNNING CSNEPS SERVER
+;;; FOR BOTH NREPL AND WSSOCKETS
+;;;
+
+;(def ws-port "10000")
+(def ws-port "8080")
+(def ws-host "localhost")
+
+(def nrepl-port "44001")
+(def nrepl-host "localhost")
+
+
+
+
+
+
+
+
+
 (def last-utterance (atom {}))
 ;;;
 
@@ -70,7 +94,7 @@
 (defn respond-sync-csneps [text]
   (with-open
      ;actual csneps system (port is different each time):
-     [conn (nrepl/connect  :port 34289)]
+     [conn (nrepl/connect  :port nrepl-port)]
      
      ; minimal nrepl server, not csneps.
      ;[conn (nrepl/connect :port 7888)]
@@ -81,7 +105,7 @@
        
        
        
-       (nrepl/message  {:op :eval :code text})
+       (nrepl/message  {:op :eval :code (str text)})
        
        
        nrepl/response-values
@@ -108,10 +132,7 @@
 
 
 
-;(def ws-port "10000")
-(def ws-port "8080")
 
-(def ws-host "localhost")
 
 
 ;;pick one:
@@ -156,7 +177,7 @@
 (defn respond-sync-csneps-outstr-v1 [text]
   (with-open
       ;actual csneps system (port is different each time):
-       [conn (nrepl/connect  :port 34289)]
+       [conn (nrepl/connect  :port nrepl-port)]
       ; minimal nrepl server, not csneps.
       ;[conn (nrepl/connect :port 7888)]
      
@@ -185,12 +206,11 @@
 
 
 (defn respond-sync-csneps-outstr-v2 [text]
-  (with-out-str-data-map 
       
      
      (with-open
      ;actual csneps system (port is different each time):
-       [conn (nrepl/connect  :port 34289)]
+       [conn (nrepl/connect  :port nrepl-port)]
       ; minimal nrepl server, not csneps.
       ;[conn (nrepl/connect :port 7888)]
      
@@ -210,7 +230,7 @@
         first
         
         
-        ))))
+        )) )
 
 ;(def respond-sync-csneps-outstr respond-sync-csneps-outstr-v1)
 (def respond-sync-csneps-outstr respond-sync-csneps-outstr-v2)
@@ -238,11 +258,11 @@
   (cond
      (= (first text) (first "(") )
        (do
-        ;(println (first text) " is a paren" )
+        (println (first text) " is a paren" )
         (respond-sync-csneps-outstr-combined text))
      :else
        (do
-       ;(println (first text) "is not a paren")
+       (println (first text) "is not a paren")
        (respond-sync-csneps-outstr-combined (pr-str (str  text ))))))
 
 
