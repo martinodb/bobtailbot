@@ -197,7 +197,7 @@
                                       (str (:str text2) "\n")
                                       "" )
                                    (:result text2))]
-                    (if (string/blank? text3) nil (read-string text3 )))))
+                    (if (string/blank? text3) "ok" (read-string text3 )))))
 
 
 (defn respond-sync-csneps-nrepl-wrapstring
@@ -207,7 +207,7 @@
                          (do (println (first text) " is a paren" )
                              (respond-sync-csneps-nrepl-outstr-combined text nport))
                       (do (println (first text) "is not a paren")
-                          (respond-sync-csneps-nrepl-outstr-combined (pr-str (str  text )))))))
+                          (respond-sync-csneps-nrepl-outstr-combined (pr-str (str  text )) nport )))))
 
 
 ;; Only use for repl and similar, single-user interfaces. It's syncronous (blocking). 
