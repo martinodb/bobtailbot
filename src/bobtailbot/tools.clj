@@ -91,7 +91,7 @@
      (if (empty? filecont) (dump-to-path path init) (dosync (ref-set state filecont)))
      (add-watch state :persist-watcher (persist-fn path))
      state)))
-<<<<<<< HEAD
+;; <<<<<<< HEAD
 
 
 
