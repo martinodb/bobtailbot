@@ -41,7 +41,7 @@
 (def ws-port "8080")
 (def ws-host "localhost")
 
-(def nrepl-port 44001)
+(def df-nrepl-port 37799)
 (def nrepl-host "localhost")
 
 
@@ -91,30 +91,30 @@
                           "alert is now off!")
          "I see.")))
 
-(defn respond-sync-csneps [text]
-  (with-open
-     ;actual csneps system (port is different each time):
-     [conn (nrepl/connect  :port nrepl-port)]
+;(defn respond-sync-csneps [text]
+  ;(with-open
+     ;;actual csneps system (port is different each time):
+     ;[conn (nrepl/connect  :port df-nrepl-port)]
      
-     ; minimal nrepl server, not csneps.
-     ;[conn (nrepl/connect :port 7888)]
+     ;; minimal nrepl server, not csneps.
+     ;;[conn (nrepl/connect :port 7888)]
      
      
-     (-> (nrepl/client conn 1000)
+     ;(-> (nrepl/client conn 1000)
        
        
        
        
-       (nrepl/message  {:op :eval :code (str text)})
+       ;(nrepl/message  {:op :eval :code (str text)})
        
        
-       nrepl/response-values
+       ;nrepl/response-values
        
        
-       first
+       ;first
        
        
-       )))
+       ;)))
 
 
 
@@ -145,7 +145,7 @@
 
 
 
-(defn defaultwssfn []
+(defn defaultwssfn "default websocket conn maker function"[]
   (ws/connect ws-connect-message
     :on-receive echo-fn))
 
@@ -154,15 +154,18 @@
   ;(ws/connect ws-connect-message
     ;:on-receive echo-fn))
 
+; default websocket connection
 (def defaultwss (delay (defaultwssfn)))
 
 
 
-
+;send websocket message
 (defn send-msg-ws
      ([msg] (future (ws/send-msg defaultwss msg)))
      ([msg socket] (future (ws/send-msg socket msg)))
      )
+
+; close websocket
 (defn close-ws
     ([] (future (ws/close defaultwss)) )
     ([socket] (future (ws/close socket)))
@@ -174,100 +177,41 @@
 
 
 
-(defn respond-sync-csneps-outstr-v1 [text]
-  (with-open
-      ;actual csneps system (port is different each time):
-       [conn (nrepl/connect  :port nrepl-port)]
-      ; minimal nrepl server, not csneps.
-      ;[conn (nrepl/connect :port 7888)]
+(defn respond-sync-csneps-nrepl-outstr
+     ([text]   (respond-sync-csneps-nrepl-outstr  text  df-nrepl-port)   )
      
-     (with-out-str-data-map
-     
-     
-     
-     
-      (-> (nrepl/client conn 1000)
-        
-        
-        
-        
-        (nrepl/message  {:op :eval :code text})
-        
-        
-        nrepl/response-values
-        
-        
-        first
-        
-        
-        ))))
+     ([text nport] (with-open   [conn (nrepl/connect  :port nport)]
+                       (-> (nrepl/client conn 1000)
+                           (nrepl/message  {:op :eval :code text})
+                           nrepl/response-values
+                           first 
+                           with-out-str-data-map ))) )
 
 
 
 
-(defn respond-sync-csneps-outstr-v2 [text]
-      
-     
-     (with-open
-     ;actual csneps system (port is different each time):
-       [conn (nrepl/connect  :port nrepl-port)]
-      ; minimal nrepl server, not csneps.
-      ;[conn (nrepl/connect :port 7888)]
-     
-     
-     
-      (-> (nrepl/client conn 1000)
-        
-        
-        
-        
-        (nrepl/message  {:op :eval :code text})
-        
-        
-        nrepl/response-values
-        
-        
-        first
-        
-        
-        )) )
-
-;(def respond-sync-csneps-outstr respond-sync-csneps-outstr-v1)
-(def respond-sync-csneps-outstr respond-sync-csneps-outstr-v2)
+(defn respond-sync-csneps-nrepl-outstr-combined 
+   ([text]   (respond-sync-csneps-nrepl-outstr-combined  text  df-nrepl-port))
+   ([text nport] (let [text2 (respond-sync-csneps-nrepl-outstr text)
+                       text3  (str (if (not (string/blank? (:str text2 )))
+                                      (str (:str text2) "\n")
+                                      "" )
+                                   (:result text2))]
+                    (if (string/blank? text3) nil (read-string text3 )))))
 
 
-
-
-
-(defn respond-sync-csneps-outstr-combined [text]
- (let [text2 (respond-sync-csneps-outstr text)
-       text3  (str (if (not (string/blank? (:str text2 ))) (str (:str text2) "\n") "" ) (:result text2))
-       
-       ]
-   (if (string/blank? text3) nil (read-string text3 ))
-   
-   ;(println "text2: " text2)
-   
-   ;(:result text2)
-   ))
-
-
-(defn respond-sync-csneps-ws
+(defn respond-sync-csneps-nrepl-wrapstring
   "wrap with string quotes all expressions that don't have a leading parenthesis"
-  [text]
-  (cond
-     (= (first text) (first "(") )
-       (do
-        (println (first text) " is a paren" )
-        (respond-sync-csneps-outstr-combined text))
-     :else
-       (do
-       (println (first text) "is not a paren")
-       (respond-sync-csneps-outstr-combined (pr-str (str  text ))))))
+  ([text]   (respond-sync-csneps-nrepl-wrapstring  text  df-nrepl-port))
+  ([text nport]   (if (= (first text) (first "(") ) 
+                         (do (println (first text) " is a paren" )
+                             (respond-sync-csneps-nrepl-outstr-combined text nport))
+                      (do (println (first text) "is not a paren")
+                          (respond-sync-csneps-nrepl-outstr-combined (pr-str (str  text )))))))
 
 
 ;; Only use for repl and similar, single-user interfaces. It's syncronous (blocking). 
-(def respond respond-sync-csneps-ws)
+(def respond respond-sync-csneps-nrepl-wrapstring)
 
 
 ;;; Only use "hear" and "speakup" for multi-user interfaces like irc. The bot may report events asyncronously, not just respond to questions.
