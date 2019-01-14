@@ -41,7 +41,7 @@
 (def ws-port "8080")
 (def ws-host "localhost")
 
-(def nrepl-port "44001")
+(def nrepl-port 44001)
 (def nrepl-host "localhost")
 
 
