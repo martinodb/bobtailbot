@@ -64,8 +64,12 @@
      
      }
   
-  ; https://github.com/technomancy/leiningen/blob/master/sample.project.clj
-  :repositories ^:replace [["local" {:url ~(str (.toURI (java.io.File. "local-m2"))) :checksum :warn} ]]
+  :repositories [
+      ["local"
+            {:url ~(str (.toURI (java.io.File. "local-m2")))
+             :checksum :warn
+            }  ]
+  ]
   
   
   
