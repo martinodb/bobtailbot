@@ -64,9 +64,12 @@
      
      }
   
-  :repositories {
-      "local" ~(str (.toURI (java.io.File. "local-m2")))
-  }
+  :repositories [
+      ["local"
+            {:url ~(str (.toURI (java.io.File. "local-m2")))
+             :checksum :warn
+            }  ]
+  ]
   
   
   
@@ -74,6 +77,10 @@
   ;
   ;https://www.spacjer.com/blog/2015/03/23/leiningen-working-with-local-repository/
   ;https://github.com/technomancy/leiningen/blob/stable/sample.project.clj#L248
-  ;:local-repo "local-m2"               )
+  ;:local-repo "local-m2"
+  
+  
+  
+  )
 
 
