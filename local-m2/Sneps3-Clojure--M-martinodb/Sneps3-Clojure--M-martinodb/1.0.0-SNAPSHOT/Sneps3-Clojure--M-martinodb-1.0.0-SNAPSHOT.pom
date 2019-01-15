@@ -10,7 +10,7 @@
     <url>https://github.com/SNePS/CSNePS</url>
     <connection>scm:git:git://github.com/SNePS/CSNePS.git</connection>
     <developerConnection>scm:git:ssh://git@github.com/SNePS/CSNePS.git</developerConnection>
-    <tag>48bab96e82f9efefc66a43b6f935b56180ef1803</tag>
+    <tag>671face34075a1efe2f5ecd9a4fd0eddaa94b5d6</tag>
   </scm>
   <build>
     <sourceDirectory>src/clj</sourceDirectory>
