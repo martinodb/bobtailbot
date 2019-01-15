@@ -117,20 +117,39 @@
        ;)))
 
 
+(defn just-one "pick the first element if it's a coll, leave the coll as is if it's more"
+  [indorcoll]
+    (if (coll? indorcoll)
+           (if (= (count indorcoll) 1) (first indorcoll) indorcoll)
+        indorcoll ))
+
 
 
 
 ; https://clojuredocs.org/clojure.core/with-out-str
+(defmacro BAD-with-out-str-data-map
+  [& body]
+  `(let [s# (new java.io.StringWriter)]
+     (binding [*out* s#]
+       (let [r# (just-one ~body)]
+         {:result r#
+          :str    (str s#)}))))
+
 (defmacro with-out-str-data-map
   [& body]
   `(let [s# (new java.io.StringWriter)]
      (binding [*out* s#]
-       (let [r# ~@body]
+       (let [r#  ~@body]
          {:result r#
           :str    (str s#)}))))
 
 
 
+;(defmacro quoted
+  ;[&body]
+  ;`(let [r#  ~@body]
+     
+      ;))
 
 
 
@@ -176,28 +195,43 @@
 
 
 
-
 (defn respond-sync-csneps-nrepl-outstr
      ([text]   (respond-sync-csneps-nrepl-outstr  text  df-nrepl-port)   )
      
      ([text nport] (with-open   [conn (nrepl/connect  :port nport)]
                        (-> (nrepl/client conn 1000)
                            (nrepl/message  {:op :eval :code text})
-                           nrepl/response-values
-                           first 
-                           with-out-str-data-map ))) )
+                            (nrepl/response-values)
+                           ;(prn)
+                           ;((fn [z ] (if (empty? z) "hum" z)))
+                           ;((fn [y ] (string/escape (str y) {\: "--" , \! "_BANG_"})))
+                           ;((fn [x] (if (string? x)  (fn [y] (string/escape y {\: "--" , \! "_BANG_"})) x)))
+                           ;(fn [z] (if z z "hum"))
+                          
+                           ;println ; debug
+                           ;first 
+                           ;println ; debug
+                           (with-out-str-data-map)
+                           
+                           ))) )
 
 
 
 
 (defn respond-sync-csneps-nrepl-outstr-combined 
    ([text]   (respond-sync-csneps-nrepl-outstr-combined  text  df-nrepl-port))
-   ([text nport] (let [text2 (respond-sync-csneps-nrepl-outstr text)
+   ([text nport] (let [text2-bis (respond-sync-csneps-nrepl-outstr text)
+                       text2 (if text2-bis text2-bis "text2-bis empty")
                        text3  (str (if (not (string/blank? (:str text2 )))
                                       (str (:str text2) "\n")
                                       "" )
                                    (:result text2))]
-                    (if (string/blank? text3) "ok" (read-string text3 )))))
+                    (do  (prn "text2: " text2 ", text3: " text3 ", (read-string text3): " "(read-string text3)" ) ;debug
+                         (if (string/blank? text3) "ok"  text3 ;(read-string text3)  ;(read-string text3)
+                          )
+                         
+                         
+                           )  ) ) )
 
 
 (defn respond-sync-csneps-nrepl-wrapstring
