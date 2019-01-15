@@ -41,7 +41,7 @@
 (def ws-port "8080")
 (def ws-host "localhost")
 
-(def df-nrepl-port 37799)
+(def df-nrepl-port 37785)
 (def nrepl-host "localhost")
 
 
@@ -145,11 +145,11 @@
 
 
 
-;(defmacro quoted
-  ;[&body]
-  ;`(let [r#  ~@body]
-     
-      ;))
+(defmacro stringed
+  [& body]
+  `(let [r#  ~@body]
+     (str r#)
+      ))
 
 
 
@@ -201,7 +201,11 @@
      ([text nport] (with-open   [conn (nrepl/connect  :port nport)]
                        (-> (nrepl/client conn 1000)
                            (nrepl/message  {:op :eval :code text})
+                            
+                            ;(nrepl/response-seq 200)
                             (nrepl/response-values)
+                            
+                           ; (stringed)
                            ;(prn)
                            ;((fn [z ] (if (empty? z) "hum" z)))
                            ;((fn [y ] (string/escape (str y) {\: "--" , \! "_BANG_"})))
@@ -211,7 +215,7 @@
                            ;println ; debug
                            ;first 
                            ;println ; debug
-                           (with-out-str-data-map)
+                           ;(with-out-str-data-map)
                            
                            ))) )
 

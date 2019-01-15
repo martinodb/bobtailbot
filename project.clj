@@ -42,6 +42,9 @@
                  [me.raynes/fs "1.4.6"]
                  
                  
+                 [Sneps3-Clojure--M-martinodb "1.0.0-SNAPSHOT"]
+                 
+                 
                  ]
                  
   :profiles
@@ -52,7 +55,7 @@
   :plugins [ [lein-cljsbuild "1.1.3" :exclusions [org.clojure/clojure]] ;;only for development
              ;[lein-cljsbuild "1.1.7"]
              ]
-    :repl-options {
+  :repl-options {
      
      :print clojure.core/println 
      ;:print clojure.pprint/pprint
@@ -60,6 +63,17 @@
      
      
      }
-                 )
+  
+  :repositories {
+      "local" ~(str (.toURI (java.io.File. "local-m2")))
+  }
+  
+  
+  
+  ;https://stackoverflow.com/questions/17035529/use-leiningen-with-local-m2-repository
+  ;
+  ;https://www.spacjer.com/blog/2015/03/23/leiningen-working-with-local-repository/
+  ;https://github.com/technomancy/leiningen/blob/stable/sample.project.clj#L248
+  ;:local-repo "local-m2"               )
 
 

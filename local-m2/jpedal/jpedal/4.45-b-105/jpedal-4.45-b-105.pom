@@ -1,0 +1,17 @@
+<project>
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>jpedal</groupId>
+  <artifactId>jpedal</artifactId>
+  <packaging>jar</packaging>
+  <name>JPedal</name>
+  <version>4.45-b-105</version>
+  <description>A cutdown viewer from the full JPedal library</description>
+  <url>http://www.jpedal.org/</url>
+  <licenses>
+    <license>
+      <name>GNU LGPL v3</name>
+      <url>http://www.gnu.org/licenses/lgpl.txt</url>
+      <distribution>repo</distribution>
+    </license>
+  </licenses>
+</project>

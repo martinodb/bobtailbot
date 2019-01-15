@@ -1,0 +1,20 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>org.swinglabs</groupId>
+	<artifactId>swing-worker</artifactId>
+	<packaging>jar</packaging>
+	<name>Swing Layout Extensions</name>
+	<version>1.1</version>
+    <url>https://swingworker.dev.java.net/</url>
+    <licenses>
+        <license>
+            <name>Lesser General Public License (LGPL)</name>
+            <url>http://www.gnu.org/copyleft/lesser.html</url>
+        </license>
+    </licenses>
+    <scm>
+        <url>https://swingworker.dev.java.net/source/browse/swingworker/</url>
+    </scm>
+    <description>Long running Swing GUI interacting tasks</description>
+</project>
