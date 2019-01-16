@@ -10,7 +10,7 @@
     <url>https://github.com/SNePS/CSNePS</url>
     <connection>scm:git:git://github.com/SNePS/CSNePS.git</connection>
     <developerConnection>scm:git:ssh://git@github.com/SNePS/CSNePS.git</developerConnection>
-    <tag>671face34075a1efe2f5ecd9a4fd0eddaa94b5d6</tag>
+    <tag>fa78a503d613eeffaa981b8046419f9ba8c4449b</tag>
   </scm>
   <build>
     <sourceDirectory>src/clj</sourceDirectory>
@@ -139,116 +139,6 @@
       <groupId>org.clojure</groupId>
       <artifactId>tools.nrepl</artifactId>
       <version>0.2.3</version>
-    </dependency>
-    <dependency>
-      <groupId>net.sf.jung</groupId>
-      <artifactId>jung-graph-impl</artifactId>
-      <version>2.0.1</version>
-    </dependency>
-    <dependency>
-      <groupId>net.sf.jung</groupId>
-      <artifactId>jung-api</artifactId>
-      <version>2.0.1</version>
-    </dependency>
-    <dependency>
-      <groupId>net.sf.jung</groupId>
-      <artifactId>jung-visualization</artifactId>
-      <version>2.0.1</version>
-    </dependency>
-    <dependency>
-      <groupId>net.sf.jung</groupId>
-      <artifactId>jung-io</artifactId>
-      <version>2.0.1</version>
-    </dependency>
-    <dependency>
-      <groupId>net.sf.jung</groupId>
-      <artifactId>jung-algorithms</artifactId>
-      <version>2.0.1</version>
-    </dependency>
-    <dependency>
-      <groupId>net.sf.jung</groupId>
-      <artifactId>jung-jai</artifactId>
-      <version>2.0.1</version>
-    </dependency>
-    <dependency>
-      <groupId>net.sf.jung</groupId>
-      <artifactId>jung-3d</artifactId>
-      <version>2.0.1</version>
-    </dependency>
-    <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
-      <version>3.8.2</version>
-    </dependency>
-    <dependency>
-      <groupId>jdom</groupId>
-      <artifactId>jdom</artifactId>
-      <version>1.0</version>
-    </dependency>
-    <dependency>
-      <groupId>org.freehep</groupId>
-      <artifactId>freehep-graphics2d</artifactId>
-      <version>2.4</version>
-    </dependency>
-    <dependency>
-      <groupId>org.freehep</groupId>
-      <artifactId>freehep-graphicsio</artifactId>
-      <version>2.4</version>
-    </dependency>
-    <dependency>
-      <groupId>org.freehep</groupId>
-      <artifactId>freehep-graphicsbase</artifactId>
-      <version>2.4</version>
-    </dependency>
-    <dependency>
-      <groupId>org.freehep</groupId>
-      <artifactId>freehep-io</artifactId>
-      <version>2.2.2</version>
-    </dependency>
-    <dependency>
-      <groupId>org.freehep</groupId>
-      <artifactId>freehep-graphicsio-emf</artifactId>
-      <version>2.4</version>
-    </dependency>
-    <dependency>
-      <groupId>org.freehep</groupId>
-      <artifactId>freehep-graphicsio-java</artifactId>
-      <version>2.4</version>
-    </dependency>
-    <dependency>
-      <groupId>org.freehep</groupId>
-      <artifactId>freehep-graphicsio-pdf</artifactId>
-      <version>2.4</version>
-    </dependency>
-    <dependency>
-      <groupId>org.freehep</groupId>
-      <artifactId>freehep-graphicsio-ps</artifactId>
-      <version>2.4</version>
-    </dependency>
-    <dependency>
-      <groupId>org.freehep</groupId>
-      <artifactId>freehep-graphicsio-svg</artifactId>
-      <version>2.4</version>
-    </dependency>
-    <dependency>
-      <groupId>org.freehep</groupId>
-      <artifactId>freehep-graphicsio-swf</artifactId>
-      <version>2.4</version>
-    </dependency>
-    <dependency>
-      <groupId>jpedal</groupId>
-      <artifactId>jpedal</artifactId>
-      <version>4.45-b-105</version>
-    </dependency>
-    <dependency>
-      <groupId>org.swinglabs</groupId>
-      <artifactId>swingx</artifactId>
-      <version>1.6.1</version>
-    </dependency>
-    <dependency>
-      <groupId>net.xeon</groupId>
-      <artifactId>jspf.core</artifactId>
-      <version>1.0.2</version>
     </dependency>
   </dependencies>
 </project>
