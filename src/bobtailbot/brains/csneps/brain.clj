@@ -95,6 +95,10 @@
                           "alert is now off!")
          "I see.")))
 
+
+
+
+
 ;(defn respond-sync-csneps [text]
   ;(with-open
      ;;actual csneps system (port is different each time):
@@ -252,8 +256,24 @@
                           (respond-sync-csneps-nrepl-outstr-combined (pr-str (str  text )) nport )))))
 
 
+
+
+
+(defn respond-sync-raw [text] "evaluate commands in this ns"
+(->> text (#(str "(do (in-ns 'bobtailbot.brains.csneps.brain)" % ")")) (load-string) (#(or % "OK")) ))
+
+
+
+
+
+
+
+
 ;; Only use for repl and similar, single-user interfaces. It's syncronous (blocking). 
-(def respond respond-sync-csneps-nrepl-wrapstring)
+;(def respond respond-sync-stub)
+;(def respond respond-sync-csneps-nrepl-wrapstring)
+(def respond respond-sync-raw)
+
 
 
 ;;; Only use "hear" and "speakup" for multi-user interfaces like irc. The bot may report events asyncronously, not just respond to questions.
