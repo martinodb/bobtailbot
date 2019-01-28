@@ -73,7 +73,9 @@
 
 
 (defn respond-sync-raw [text] "evaluate commands in this ns"
-(->> text (#(str "(do (in-ns 'bobtailbot.brains.csneps.brain)" % ")")) (load-string) (#(or % "OK")) ))
+(->> text (#(str "(do (in-ns 'bobtailbot.brains.csneps.brain)" % ")"))
+          (#(try (load-string %) (catch Exception e (str "caught exception: " (.getMessage e))) ) ) 
+          (#(or % "OK")) ))
 
 
 
