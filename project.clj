@@ -1,8 +1,8 @@
-;;;;;;; from CSNePS
-(require 'cemerick.pomegranate.aether)
-(cemerick.pomegranate.aether/register-wagon-factory!
-"http" #(org.apache.maven.wagon.providers.http.HttpWagon.))
-;;;;;;;;;;;;;;;;;
+;;;
+;;;
+;;;
+;;;
+;;;
 
 
 (defproject bobtailbot "0.1.0-SNAPSHOT"
@@ -79,8 +79,12 @@
                  ;; Tools to manipulate files and dirs
                  [me.raynes/fs "1.4.6"]
                  
-                 
-                 [Sneps3-Clojure--M-martinodb "1.0.0-SNAPSHOT"]
+                 ;;
+                 ;;
+                 ;;
+                 ;;
+                 ;;
+                 [org.clojars.martinodb/zinc "1.0.0-SNAPSHOT"] ; clojars version
                  
                  
                  ]
@@ -89,6 +93,7 @@
   {:dev {:source-paths ["dev" "src" "test"]
          :dependencies [ ;[org.clojure/tools.namespace "0.2.11"]
                          [org.clojure/tools.namespace "0.2.4"] ;from CSNePS
+                         
          ]}}
                  
   :aliases {"config" ["run" "-m" "outpace.config.generate"]}
@@ -118,8 +123,8 @@
   
   ;;;from CSNePS;;;;;;;;;
   
-  :source-paths ["src/clj/"]
-  :source-path "src/clj/"
+  ;:source-paths ["src/clj/"]
+  ;:source-path "src/clj/"
   ;:java-source-paths ["src/jvm/"] ;leiningen 2 compat.
   ;:java-source-path "src/jvm/" ;leiningen 1.x compat.
   
