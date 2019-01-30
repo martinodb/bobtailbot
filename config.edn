@@ -2,7 +2,7 @@
 
 ;; CONFIG ENTRIES:
 
-bobtailbot.core/brain :csneps #_:general
+bobtailbot.core/brain :zinc #_:csneps #_:general
 
 #_bobtailbot.core/greeting #_"Hello.  Let's chat."
 
