@@ -8,7 +8,8 @@
             
             
             
-            [csneps.core.snuser :as s]
+            ;[csneps.core.snuser :as s]
+            [zinc.core.snuser :as s]
             
             
             ;[instaparse.core :as insta]
