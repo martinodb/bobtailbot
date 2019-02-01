@@ -5,7 +5,6 @@
             
             [bobtailbot.brains.quick-and-dirty.brain :as qdbr]
             [bobtailbot.brains.general.brain :as genbr]
-            [bobtailbot.brains.csneps.brain :as csneps]
             [bobtailbot.brains.zinc.brain :as zinc]
             
             [bobtailbot.repl :as repl]
@@ -33,7 +32,6 @@
   (case brain
     :quickanddirty (qdbr/respond text)
     :general (genbr/respond text)
-    :csneps (csneps/respond text)
     :zinc (zinc/respond text)
     (genbr/respond text)
     )
@@ -44,7 +42,6 @@
   (case brain
     :quickanddirty  (qdbr/hear text)
     :general (genbr/hear text)
-    :csneps (csneps/hear text)
     :zinc (zinc/hear text)
     (genbr/hear text)
     )
@@ -58,7 +55,6 @@
   (case brain
     :quickanddirty (qdbr/speakup speakup-chan)
     :general (genbr/speakup speakup-chan)
-    :csneps (csneps/speakup speakup-chan)
     :zinc (zinc/speakup speakup-chan)
     (genbr/speakup speakup-chan)
     )
