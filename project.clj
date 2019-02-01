@@ -5,7 +5,7 @@
             :url "http://www.eclipse.org/legal/epl-v10.html"}
   :main bobtailbot.core
   :dependencies [
-                 ;[org.clojure/clojure "1.8.0"] ; My tested version.
+
 
 
 
