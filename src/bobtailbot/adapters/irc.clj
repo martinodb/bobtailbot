@@ -92,11 +92,13 @@
 
 
 
-(defn connect [nick host port irc-channel greeting hear-fn speakup-fn]
+(defn connect [nick host port group-or-chan greeting hear-fn speakup-fn respond-fn] ; respond-fn will be ignored.
   (println "Connecting...")
   (swap! curr-host (constantly host))
   (try
-    (let [socket (socket-client port host)]
+    (let [socket (socket-client port host)
+          irc-channel (str "#" group-or-chan)
+           ]
       (println (str "Connected to " host ":" port))
        
       

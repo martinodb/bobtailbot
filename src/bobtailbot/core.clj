@@ -10,6 +10,8 @@
             
             [bobtailbot.adapters.repl :as repl]
             [bobtailbot.adapters.irc :as irc]
+            
+            
             [clojure.core.async :as async :refer [go-loop <! >! close!]]
             
             [outpace.config :refer [defconfig]]))
@@ -26,11 +28,12 @@
 (defconfig nick "bobtailbot")
 (defconfig host "127.0.0.1")
 (defconfig port 6667)
+(defconfig group-or-chan nick) ; eg: "bobtailbot" ; if a prefix such as "#" is needed, the adapter must add it.
 ;;
 
 
 ;; irc configs
-(defconfig irc-channel "#bobtailbot")
+;(defconfig irc-channel (str "#" group-or-chan)) ; eg: "#bobtailbot"
 ;;
 
 
@@ -62,9 +65,10 @@
 
 (defn -main [& args]
    (case adapter
-     :repl (repl/launch-repl greeting respond)
-     :irc (irc/connect nick host port irc-channel greeting hear speakup)
-     (repl/launch-repl greeting respond)
+     :repl (repl/connect nick host port group-or-chan greeting hear speakup respond)
+     :irc   (irc/connect nick host port group-or-chan greeting hear speakup respond)
+     
+     (repl/connect nick host port group-or-chan greeting hear speakup respond)
      
      )
   )

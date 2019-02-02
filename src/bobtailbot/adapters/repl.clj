@@ -19,3 +19,5 @@
          ))))
 
 
+(defn connect [nick host port group-or-chan greeting hear-fn speakup-fn respond-fn] ; only greeting and respond-fn matter; the rest will be ignored.
+ (launch-repl greeting respond-fn))
