@@ -1,4 +1,4 @@
-(ns bobtailbot.repl
+(ns bobtailbot.adapters.repl
   (:gen-class)
   )
 

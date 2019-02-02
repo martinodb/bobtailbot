@@ -8,8 +8,8 @@
             [bobtailbot.brains.general.brain ]
             [bobtailbot.brains.zinc.brain ]
             
-            [bobtailbot.repl :as repl]
-            [bobtailbot.irc :as irc]
+            [bobtailbot.adapters.repl :as repl]
+            [bobtailbot.adapters.irc :as irc]
             [clojure.core.async :as async :refer [go-loop <! >! close!]]
             
             [outpace.config :refer [defconfig]]))

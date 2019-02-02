@@ -1,6 +1,6 @@
 ; original: https://github.com/AdamBoxall/clojure-irc-client
 
-(ns bobtailbot.irc
+(ns bobtailbot.adapters.irc
   (:gen-class)
   (:require [clojure.string :as string]
             [clojure.tools.cli :as cli]
