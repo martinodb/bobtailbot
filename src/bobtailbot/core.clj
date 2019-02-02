@@ -3,13 +3,16 @@
   
             [user :as u]
             
-            ;; A brain ns must always be: "bobtailbot.brains.<brain name>.brain"
+            ;; A brain ns must always be: "bobtailbot.brains.<brain-name>.brain"
             [bobtailbot.brains.quick-and-dirty.brain ]
             [bobtailbot.brains.general.brain ]
             [bobtailbot.brains.zinc.brain ]
             
-            [bobtailbot.adapters.repl :as repl]
-            [bobtailbot.adapters.irc :as irc]
+            ;; An adapter ns must always be "bobtailbot.adapters.<adapter-name>"
+            ;; Also, an adapter must always have a "connect" function as follows: "(<adapter-name>/connect nick host port group-or-chan greeting hear speakup respond)"
+            ;; If it doesn't need some of those parameters, it can simpy ignore them.
+            [bobtailbot.adapters.repl]
+            [bobtailbot.adapters.irc]
             
             
             [clojure.core.async :as async :refer [go-loop <! >! close!]]
@@ -22,6 +25,7 @@
 (defconfig brain :general) ; use the name of the brain you want, as a keyword. A default is given.
 
 (defconfig adapter :irc)
+
 
 
 ;; default non-repl chat configs
@@ -42,7 +46,7 @@
 
 (def brainns-str (str "bobtailbot.brains." (-> brain (name) (read-string)) ".brain")   )
 
-
+(def adapterns-str (str "bobtailbot.adapters." (-> adapter (name) (read-string)) )   )
 
 
 
@@ -60,17 +64,12 @@
 
 
 
+(defn connect [nick host port group-or-chan greeting hear speakup respond]
+  ((load-string (str "(fn [nick host port group-or-chan greeting hear speakup respond] " "(" adapterns-str "/connect "  "nick host port group-or-chan greeting hear speakup respond"  ")" ")"  )) nick host port group-or-chan greeting hear speakup respond) )
+
+
 
 
 
 (defn -main [& args]
-   (case adapter
-     :repl (repl/connect nick host port group-or-chan greeting hear speakup respond)
-     :irc   (irc/connect nick host port group-or-chan greeting hear speakup respond)
-     
-     (repl/connect nick host port group-or-chan greeting hear speakup respond)
-     
-     )
-  )
-
-
+   (do (connect nick host port group-or-chan greeting hear speakup respond)  ))
