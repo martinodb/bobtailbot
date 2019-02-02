@@ -12,4 +12,4 @@ pom.xml.asc
 
 hs_err_pid18519.log
 ns-dep-graph*.png
-# config.edn
+config.edn
