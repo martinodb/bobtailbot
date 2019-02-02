@@ -348,11 +348,11 @@
 
 
 
-(defrule Joe-Smith-loves-back
-  [Triple (= ?x subj)(= "loves" verb)(= "Joe Smith" obj)]
-  =>
-  (do (insert! (->Triple "my-Joe-fact" true "Joe Smith" "loves" ?x))
-      (println "Joe is loved by, and loves back: " ?x)))
+;(defrule Joe-Smith-loves-back
+  ;[Triple (= ?x subj)(= "loves" verb)(= "Joe Smith" obj)]
+  ;=>
+  ;(do (insert! (->Triple "my-Joe-fact" true "Joe Smith" "loves" ?x))
+      ;(println "Joe is loved by, and loves back: " ?x)))
 
 
 
