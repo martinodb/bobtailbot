@@ -52,7 +52,6 @@
      
      :print clojure.core/println 
      ;:print clojure.pprint/pprint
-     ;:timeout 120000
      :timeout 250000
      
      }
