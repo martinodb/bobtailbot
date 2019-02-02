@@ -12,12 +12,12 @@
 
 ;;;;;;;;;;;;;;;;;; ; From CSNePS.
                  [org.clojure/clojure "1.9.0"]
-                 [org.clojure/core.match "0.2.1"]
-                 [org.clojure/core.memoize "0.5.9"]
-                 [org.clojure/math.numeric-tower "0.0.4"]
-                 [org.clojure/math.combinatorics "0.1.4"]
-                 [org.clojure/tools.trace "0.7.9"]
-                 [org.clojure/tools.nrepl "0.2.3"]
+                 ;[org.clojure/core.match "0.2.1"]
+                 ;[org.clojure/core.memoize "0.5.9"]
+                 ;[org.clojure/math.numeric-tower "0.0.4"]
+                 ;[org.clojure/math.combinatorics "0.1.4"]
+                 ;[org.clojure/tools.trace "0.7.9"]
+                 ;[org.clojure/tools.nrepl "0.2.3"]
 
 ;;;;;;;;;;;;;;;;;;
 
@@ -27,17 +27,13 @@
                  
                  [com.cerner/clara-rules "0.16.0"]
                  [instaparse "1.4.8"]
-
                  
                   [org.clojure/core.async "0.4.490"]
                  
                  [com.gearswithingears/async-sockets "0.1.0"]
                  
-                 [org.clojure/tools.nrepl "0.2.3"] ; From CSNePS.
                  
-                 
-                 
-                 [stylefruits/gniazdo "1.1.1"]
+                 ;[stylefruits/gniazdo "1.1.1"]
                  
                  
                  ;; https://github.com/Raynes/fs
