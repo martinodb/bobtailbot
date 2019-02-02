@@ -28,7 +28,7 @@
                  [com.cerner/clara-rules "0.16.0"]
                  [instaparse "1.4.8"]
                  
-                  [org.clojure/core.async "0.4.490"]
+                 [org.clojure/core.async "0.4.490"]
                  
                  [com.gearswithingears/async-sockets "0.1.0"]
                  
@@ -54,7 +54,7 @@
                  
   :aliases {"config" ["run" "-m" "outpace.config.generate"]}
   :plugins [ 
-             [lein-swank "1.4.5"] ; from CSNePS
+             ;[lein-swank "1.4.5"] ; from CSNePS
              ]
   :repl-options {
      
@@ -65,9 +65,7 @@
      
      }
   
-  :repositories [
-      ["local" {:url ~(str (.toURI (java.io.File. "local-m2"))) :checksum :warn }  ]
-        ]
+  ; :repositories [ ["local" {:url ~(str (.toURI (java.io.File. "local-m2"))) :checksum :warn }  ]   ]
   
   
   
