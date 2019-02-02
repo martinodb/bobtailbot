@@ -3,9 +3,10 @@
   
             [user :as u]
             
-            [bobtailbot.brains.quick-and-dirty.brain :as qdbr]
-            [bobtailbot.brains.general.brain :as genbr]
-            [bobtailbot.brains.zinc.brain :as zinc]
+            ;; A brain ns must always be: "bobtailbot.brains.<brain name>.brain"
+            [bobtailbot.brains.quick-and-dirty.brain ]
+            [bobtailbot.brains.general.brain ]
+            [bobtailbot.brains.zinc.brain ]
             
             [bobtailbot.repl :as repl]
             [bobtailbot.irc :as irc]
@@ -15,7 +16,8 @@
 
 
 
-(defconfig brain :general)
+(defconfig brain :general) ; use the name of the brain you want, as a keyword. A default is given.
+
 (defconfig user-interface :irc)
 (defconfig greeting "Hello.  Let's chat.")
 (defconfig nick "bobtailbot")
@@ -24,41 +26,21 @@
 (defconfig irc-channel "#bobtailbot")
 
 
+(def brainns-str (str "bobtailbot.brains." (-> brain (name) (read-string)) ".brain")   )
 
 
 
 
 (defn respond [text]
-  (case brain
-    :quickanddirty (qdbr/respond text)
-    :general (genbr/respond text)
-    :zinc (zinc/respond text)
-    (genbr/respond text)
-    )
-  )
+  (load-string (str "(" brainns-str "/respond " "\"" text "\"" ")")))
 
 
 (defn hear [text]
-  (case brain
-    :quickanddirty  (qdbr/hear text)
-    :general (genbr/hear text)
-    :zinc (zinc/hear text)
-    (genbr/hear text)
-    )
-  )
-
-
-
+  (load-string (str "(" brainns-str "/hear " "\"" text "\"" ")")))
 
 
 (defn speakup [speakup-chan]
-  (case brain
-    :quickanddirty (qdbr/speakup speakup-chan)
-    :general (genbr/speakup speakup-chan)
-    :zinc (zinc/speakup speakup-chan)
-    (genbr/speakup speakup-chan)
-    )
-  )
+  ((load-string (str "(fn [x] " "(" brainns-str "/speakup "  "x"  ")" ")"  )) speakup-chan) )
 
 
 
