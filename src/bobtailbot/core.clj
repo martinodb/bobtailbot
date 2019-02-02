@@ -15,18 +15,31 @@
             [outpace.config :refer [defconfig]]))
 
 
+(defconfig greeting "Hello.  Let's chat.")
 
 (defconfig brain :general) ; use the name of the brain you want, as a keyword. A default is given.
 
-(defconfig user-interface :irc)
-(defconfig greeting "Hello.  Let's chat.")
+(defconfig adapter :irc)
+
+
+;; default non-repl chat configs
 (defconfig nick "bobtailbot")
 (defconfig host "127.0.0.1")
 (defconfig port 6667)
+;;
+
+
+;; irc configs
 (defconfig irc-channel "#bobtailbot")
+;;
+
+
+
 
 
 (def brainns-str (str "bobtailbot.brains." (-> brain (name) (read-string)) ".brain")   )
+
+
 
 
 
@@ -48,7 +61,7 @@
 
 
 (defn -main [& args]
-   (case user-interface
+   (case adapter
      :repl (repl/launch-repl greeting respond)
      :irc (irc/connect nick host port irc-channel greeting hear speakup)
      (repl/launch-repl greeting respond)
