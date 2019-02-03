@@ -18,10 +18,10 @@
 
                  [org.clojure/tools.cli "0.4.1"]
 
-                 [com.outpace/config "0.10.0"]
+                 [com.outpace/config "0.13.1"]
                  
-                 [com.cerner/clara-rules "0.16.0"]
-                 [instaparse "1.4.8"]
+                 [com.cerner/clara-rules "0.19.0"]
+                 [instaparse "1.4.10"]
                  
                  [org.clojure/core.async "0.4.490"]
                  
@@ -42,7 +42,7 @@
                  
   :profiles
   {:dev {:source-paths ["dev" "src" "test"]
-         :dependencies [ [org.clojure/tools.namespace "0.2.4"] ;from CSNePS
+         :dependencies [ [org.clojure/tools.namespace "0.2.10"] 
                                   ]
          :plugins [  [lein-ancient "0.6.15"]  ]    }
    
