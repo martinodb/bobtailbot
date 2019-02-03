@@ -118,49 +118,87 @@
           {:exit-message (usage summary)})))
 
 
+(defn dev-exit [status msg]
+  (println msg)
+  ;(System/exit status)
+  (println "Would have exited")
+  
+  )
+
+
+
 (defn exit [status msg]
   (println msg)
-  (System/exit status))
+  (System/exit status)
+  
+  )
 
 
 
-(defn -main [& args]
+
+
+
+
+
+(defn brainns-str "Get the brain namespace (as string) from brain"
+   [brain] (str "bobtailbot.brains." (-> brain (name) (read-string)) ".brain")   )
+
+(defn adapterns-str "Get the adapter namespace (as string) from adapter"
+   [adapter] (str "bobtailbot.adapters." (-> adapter (name) (read-string)) )   )
+
+
+
+
+(defn respond-b "Get the respond function of given brain, or respond to given text with given brain"
+   ([brain] (fn [text] (load-string (str "(" (brainns-str brain) "/respond " "\"" text "\"" ")"))) )
+   ([brain text] ((respond-b brain) text) ) )
+
+
+(defn hear-b "Get the hear function of given brain, or hear given text with given brain"
+   ([brain] (fn [text]   (load-string (str "(" (brainns-str brain) "/hear " "\"" text "\"" ")"))    ) )
+   ([brain text] ((hear-b brain) text) ) )
+
+(defn speakup-b "Get the speakup function of given brain, or speakup in given speakup-chan with given brain"
+   ([brain] (fn [speakup-chan]  ((load-string (str "(fn [x] " "(" (brainns-str brain) "/speakup "  "x"  ")" ")"  )) speakup-chan)  ) )
+   ([brain speakup-chan] ((speakup-b brain) speakup-chan) ) )
+
+
+(defn connect-ab "Connect with given adapter and brain"
+  [adapter brain nick host port group-or-chan greeting ]
+    ((load-string (str "(fn [nick host port group-or-chan greeting hear speakup respond] " "(" (adapterns-str adapter) "/connect "  "nick host port group-or-chan greeting hear speakup respond"  ")" ")"  )) nick host port group-or-chan greeting (hear-b brain) (speakup-b brain) (respond-b brain)) )
+
+
+
+
+
+
+
+
+(defn dev-main [& args] ; to try it in lein repl
   (let [{:keys [action options exit-message ok?] :as value-map} (validate-args args)
          brain (:brain options)
          adapter (:adapter options)
          
-         brainns-str (str "bobtailbot.brains." (-> brain  (name) (str) (string/trim) ) ".brain") ; 
-         adapterns-str (str "bobtailbot.adapters." (-> adapter  (name) (str) (string/trim) ) ) ; I shouldn't need string/trim, but I do, for some reason.
-         
-         respond  (fn [text] (load-string (str "(" brainns-str "/respond " "\"" text "\"" ")")) )
-         hear (fn [text] (load-string (str "(" brainns-str "/hear " "\"" text "\"" ")")) )
-         speakup (fn [speakup-chan] ((load-string (str "(fn [x] " "(" brainns-str "/speakup "  "x"  ")" ")"  )) speakup-chan)  )
-         
-         connect (fn [nick host port group-or-chan greeting hear speakup respond]
-                     ((load-string (str "(fn [nick host port group-or-chan greeting hear speakup respond] "
-                                        "(" adapterns-str "/connect "
-                                        "nick host port group-or-chan greeting hear speakup respond"  ")" ")"  ) )
-                           nick host port group-or-chan greeting hear speakup respond)  )    ] 
+ 
+                            ] 
           
           (do (println "value-map: " value-map) ;; for debugging
-          (println "brain : " brain)
-          (println "adapter: " adapter)
-          (println "brainns-str: " brainns-str)
-          (println "adapterns-str: " adapterns-str)
-          (println "respond: " respond)
-          ;(println "respond to question: " (respond "who does Mary love?"))
-          
-          (println "hear: " hear)
-          (println "speakup: " speakup)
-          (println "connect: " connect)
-          
-          (if exit-message  (exit (if ok? 0 1) exit-message) (do))
-          
-          
-          (case action
-           "start"  (connect (:nick options) (:host options) (:port options) (:group-or-chan options) (:greeting options) hear speakup respond  )
-           "stop"   "stop: unimplemented arg. Use 'quit' instead"
-           "status" "status: unimplemented arg.") )   )  )
+              (println "brain : " brain)
+              (println "adapter: " adapter)
+              (if exit-message  (dev-exit (if ok? 0 1) exit-message) (do))
+              (case action
+                "start"  (connect-ab adapter brain (:nick options) (:host options) (:port options) (:group-or-chan options) (:greeting options)  )
+                "stop"   "stop: unimplemented arg. Use 'quit' instead"
+                "status" "status: unimplemented arg."
+                 (str "No matching for action: " action)  ) )   )  )
+                 
+
+
+(defn -main [& args] ; don't run in lein repl.
+  (do (apply dev-main args)
+      (exit 0 "closing Bobtailbot ..")
+      
+       ))
 
 
 
