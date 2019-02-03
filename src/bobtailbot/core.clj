@@ -161,7 +161,7 @@
          adapter (:adapter options)
          
          brainns-str (str "bobtailbot.brains." (-> brain  (name) (str) (string/trim) ) ".brain") ; 
-         adapterns-str (str "bobtailbot.adapters." (-> adapter  (name) (str) (string/trim) ) ) ; eg: ":repl" -[read-string]-> :repl -[name]-> "repl"
+         adapterns-str (str "bobtailbot.adapters." (-> adapter  (name) (str) (string/trim) ) ) ; I shouldn't need string/trim, but I do, for some reason.
          
          respond  (fn [text] (load-string (str "(" brainns-str "/respond " "\"" text "\"" ")")) )
          hear (fn [text] (load-string (str "(" brainns-str "/hear " "\"" text "\"" ")")) )
