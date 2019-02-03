@@ -71,7 +71,7 @@
     
     ["-c" "--group-or-chan GROUP-OR-CHAN" "Group or channel" :default group-or-chan]
 
-   ["-h" "--help"]])
+   ["-h" "--help" "Help" :default false]])
 
 
 
@@ -106,7 +106,7 @@
   (let [{:keys [options arguments errors summary]} (parse-opts args cli-options)]
     (cond
       (:help options) ; help => exit OK with usage summary
-          {:exit-message (usage summary) :ok? true}
+          {:exit-message (usage summary) :ok? true :options options}
       errors ; errors => exit with description of errors
           {:exit-message (error-msg errors)}
       ;; custom validation on arguments
@@ -140,12 +140,9 @@
                      ((load-string (str "(fn [nick host port group-or-chan greeting hear speakup respond] "
                                         "(" adapterns-str "/connect "
                                         "nick host port group-or-chan greeting hear speakup respond"  ")" ")"  ) )
-                           nick host port group-or-chan greeting hear speakup respond)  )
-         
-          ]
-    (if exit-message
-      (exit (if ok? 0 1) exit-message)
-      (do (println "value-map: " value-map) ;; for debugging
+                           nick host port group-or-chan greeting hear speakup respond)  )    ] 
+          
+          (do (println "value-map: " value-map) ;; for debugging
           (println "brain : " brain)
           (println "adapter: " adapter)
           (println "brainns-str: " brainns-str)
@@ -157,10 +154,16 @@
           (println "speakup: " speakup)
           (println "connect: " connect)
           
+          (if exit-message  (exit (if ok? 0 1) exit-message) (do))
+          
           
           (case action
            "start"  (connect (:nick options) (:host options) (:port options) (:group-or-chan options) (:greeting options) hear speakup respond  )
            "stop"   "stop: unimplemented arg. Use 'quit' instead"
-           "status" "status: unimplemented arg.") ) )  )   )
+           "status" "status: unimplemented arg.") )   )  )
+
+
+
+
 
 
