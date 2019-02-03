@@ -205,7 +205,7 @@
    :TS-OPERATOR g-ts-operators
    :ANON-RULE-notest (fn [fact & facts]
                        {:ns-name (symbol this-ns)
-                        :name (str ns-prefix "my-anon-rule")
+                        :name (str ns-prefix (gensym "my-anon-rule"))
                         :lhs facts
                         :rhs `(insert! ~fact)})
                  
