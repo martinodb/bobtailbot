@@ -15,7 +15,7 @@
 
 ;;;;;;;;;;;;;;;;;;
 
-                 ;[org.clojure/tools.cli "0.3.5"]
+                 [org.clojure/tools.cli "0.4.1"]
 
                  [com.outpace/config "0.10.0"]
                  
