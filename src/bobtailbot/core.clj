@@ -160,7 +160,7 @@
          brain (:brain options)
          adapter (:adapter options)
          
-         brainns-str (str "bobtailbot.brains." (-> brain  (name) (str) ) ".brain") ; 
+         brainns-str (str "bobtailbot.brains." (-> brain  (name) (str) (string/trim) ) ".brain") ; 
          adapterns-str (str "bobtailbot.adapters." (-> adapter  (name) (str) (string/trim) ) ) ; eg: ":repl" -[read-string]-> :repl -[name]-> "repl"
          
          respond  (fn [text] (load-string (str "(" brainns-str "/respond " "\"" text "\"" ")")) )
