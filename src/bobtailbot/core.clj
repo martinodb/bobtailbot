@@ -36,11 +36,7 @@
 
 ;; default non-repl chat configs
 (defconfig nick "bobtailbot")
-
 (defconfig host "127.0.0.1")
-;(defconfig host (or (InetAddress/getByName "localhost") "127.0.0.1"))
-
-
 (defconfig port 6667)
 (defconfig group-or-chan nick) ; eg: "bobtailbot" ; if a prefix such as "#" is needed, the adapter must add it.
 ;;
@@ -49,33 +45,6 @@
 ;; irc configs
 ;(defconfig irc-channel (str "#" group-or-chan)) ; eg: "#bobtailbot"
 ;;
-
-
-
-
-
-;(def brainns-str (str "bobtailbot.brains." (-> brain (name) (read-string)) ".brain")   )
-
-;(def adapterns-str (str "bobtailbot.adapters." (-> adapter (name) (read-string)) )   )
-
-
-
-
-;(defn respond [text]
-  ;(load-string (str "(" brainns-str "/respond " "\"" text "\"" ")"))     )
-
-
-;(defn hear [text]
-  ;(load-string (str "(" brainns-str "/hear " "\"" text "\"" ")"))   )
-
-
-;(defn speakup [speakup-chan]
-  ;((load-string (str "(fn [x] " "(" brainns-str "/speakup "  "x"  ")" ")"  )) speakup-chan)    )
-
-
-
-;(defn   connect [nick host port group-or-chan greeting hear speakup respond]
-  ;((load-string (str "(fn [nick host port group-or-chan greeting hear speakup respond] " "(" adapterns-str "/connect "  "nick host port group-or-chan greeting hear speakup respond"  ")" ")"  )) nick host port group-or-chan greeting hear speakup respond)    )
 
 
 
@@ -195,9 +164,3 @@
            "status" "status: unimplemented arg.") ) )  )   )
 
 
-
-
-
-
-;(defn -main [& args]
-   ;(do (connect nick host port group-or-chan greeting hear speakup respond)  ))
