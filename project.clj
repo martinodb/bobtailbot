@@ -4,16 +4,17 @@
   :license {:name "Eclipse Public License"
             :url "http://www.eclipse.org/legal/epl-v10.html"}
   :main bobtailbot.core
+  :aot [bobtailbot.core]
+  
   :dependencies [
 
 
 
 
 
-;;;;;;;;;;;;;;;;; ; From CSNePS.
-                 [org.clojure/clojure "1.9.0"]
+                 ;[org.clojure/clojure "1.9.0"] ; From CSNePS.
+                 [org.clojure/clojure "1.10.0"]
 
-;;;;;;;;;;;;;;;;;;
 
                  [org.clojure/tools.cli "0.4.1"]
 
@@ -42,8 +43,9 @@
   :profiles
   {:dev {:source-paths ["dev" "src" "test"]
          :dependencies [ [org.clojure/tools.namespace "0.2.4"] ;from CSNePS
-                         
-         ]}}
+                                  ]}
+   ;:uberjar {:aot :all}
+                                  }
                  
   :aliases {"config" ["run" "-m" "outpace.config.generate"]}
   :plugins [ 
