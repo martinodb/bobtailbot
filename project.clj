@@ -45,7 +45,7 @@
          :dependencies [ [org.clojure/tools.namespace "0.2.10"] 
                                   ]
          :plugins [  [lein-ancient "0.6.15"]  ]    }
-   ;:uberjar {:aot :all} 
+   :uberjar {:aot :all} 
    }
 
 
