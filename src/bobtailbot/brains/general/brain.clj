@@ -534,7 +534,7 @@ Dynamic rules is something I wouldn't mind adding to Clara, although that comes 
                                               
                                               )
        
-      :else "unknown input"
+      :else "Sorry, I didn't get that."
        )))
 
 
@@ -542,8 +542,9 @@ Dynamic rules is something I wouldn't mind adding to Clara, although that comes 
 
 (defn g-respond-sync-top [text]
 (let [ukw (unk-words text)]
+ (println "text: " text)
  (cond 
-   (re-find (re-pattern "hello")) "Hi! I understand simple sentences of the form SVO, such as 'Anna likes Bob Smith', and rules like '?x likes ?y when ?y likes ?x'. Give it a try!"
+   (re-find (re-pattern "hello") text) "Hi! I understand simple sentences of the form SVO, such as 'Anna likes Bob Smith', and rules like '?x likes ?y when ?y likes ?x'. Give it a try!"
    (empty? ukw) (g-respond-sync text)
    :else (str "I don't know these words: " (string/join ", " ukw))
    )
@@ -557,7 +558,7 @@ Dynamic rules is something I wouldn't mind adding to Clara, although that comes 
 ;;; Only use "hear" and "speakup" for multi-user interfaces like irc. The bot may report events asyncronously, not just respond to questions.
 (defn g-hear [text-in] (future 
                         (reset! last-utterance
-                           {:type :response , :text (g-respond-sync text-in)} )))
+                           {:type :response , :text (g-respond-sync-top text-in)} )))
 
 
 (defn g-speakup [speakup-chan] (add-watch last-utterance :utt-ready
