@@ -3,6 +3,13 @@
   
             [user :as u]
             
+            [taoensso.timbre :as timbre   :refer [log  trace  debug  info  warn  error  fatal  report logf tracef debugf infof warnf errorf fatalf reportf  spy get-env]]
+            [taoensso.timbre.appenders.core :as appenders]
+            
+            [taoensso.timbre.tools.logging :as tlog :refer [use-timbre]] ; to use with libraries that use clojure.tools.logging
+            
+            
+            
             [clojure.tools.cli :refer [parse-opts]]
             [clojure.string :as string]
             
@@ -24,6 +31,39 @@
             
      (:import (java.net InetAddress))
      (:gen-class) )
+
+
+
+
+;;;;;;; logging
+(def log-fname "bobtailbot-history.log")
+
+(defn hush-log "send log messages to file and not to stdout"
+    [] (timbre/merge-config!
+           {:appenders {
+              :spit (appenders/spit-appender {:fname log-fname})
+              :println {:enabled? false}}}))
+
+
+(defn say-n-log "send log messages to file and also to stdout"
+    [] (timbre/merge-config!
+           {:appenders {
+              :spit (appenders/spit-appender {:fname log-fname})
+              ;:println {:enabled? true}
+              
+              }}))
+
+
+
+(defn clean-log "wipe the log file clean" [] (spit log-fname "") )
+
+(defn setup-tlog "Set up Timbre logging for clojure.tools.logging"
+   [] (use-timbre) )
+
+
+;;;;;;;;;
+
+
 
 
 (defconfig greeting "Hello.  Let's chat.")
@@ -182,7 +222,16 @@
  
                             ] 
           
-          (do (println "value-map: " value-map) ;; for debugging
+          (do (clean-log) ; delete previous log entries. This is useful for testing.
+              (setup-tlog) ; use Timbre for clojure.tools.logging
+              
+              ;;pick one
+              ;(hush-log) ; log to file, not to stdout.
+              (say-n-log) ; log to file and also to stdout.
+              ;;;;
+              
+              
+              (println "value-map: " value-map) ;; for debugging
               (println "brain : " brain)
               (println "adapter: " adapter)
               (if exit-message  (dev-exit (if ok? 0 1) exit-message) (do))

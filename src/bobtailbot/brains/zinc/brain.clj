@@ -9,7 +9,8 @@
             
             
             ;[csneps.core.snuser :as s]
-            [zinc.core.snuser :as s]
+            [zinc.core.snuser :as s ]
+            [zinc.MOD-logging :as Mlogg :refer [wdm wtim wlog wdm2 wtim2 wlog2]] ;; added by martinodb.
             
             
             ;[instaparse.core :as insta]

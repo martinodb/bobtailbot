@@ -4,17 +4,11 @@
   :license {:name "Eclipse Public License"
             :url "http://www.eclipse.org/legal/epl-v10.html"}
   :main bobtailbot.core
-  :aot [bobtailbot.core]
+  ;:aot [bobtailbot.core]
   
   :dependencies [
 
-
-
-
-
-                 ;[org.clojure/clojure "1.9.0"] ; From CSNePS.
                  [org.clojure/clojure "1.10.0"]
-
 
                  [org.clojure/tools.cli "0.4.1"]
 
@@ -28,14 +22,15 @@
                  [com.gearswithingears/async-sockets "0.1.0"]
                  
                  
-                 
-                 
                  ;; https://github.com/Raynes/fs
                  ;; Tools to manipulate files and dirs
                  [me.raynes/fs "1.4.6"]
                  
                  ;;
                  [org.clojars.martinodb/zinc "1.0.0-SNAPSHOT"] ; clojars version
+                 
+                 [com.taoensso/timbre "4.10.0"] ; logging.
+                 ;[org.clojure/tools.logging "0.4.1"]
                  
                  
                  ]
