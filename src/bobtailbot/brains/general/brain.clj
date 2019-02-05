@@ -545,7 +545,14 @@ Dynamic rules is something I wouldn't mind adding to Clara, although that comes 
 (defn g-respond-sync-top [text]
 (let [ukw (unk-words text)]
  (println "text: " text)
- (cond 
+ (cond
+    (= text "Forget all facts") (dosync   (ref-set g-fact-set '#{}   )
+                                          (let [new-session (-> @g-curr-session 
+                                                             (#(apply insert %1 %2) @g-fact-set)
+                                                             (fire-rules))]
+                                             (ref-set g-curr-session new-session))
+                                                              ;(str "facts added: " (pr-str (g-load-user-facts text)))
+                                                               (do "OK, all facts forgotten."))
    (re-find (re-pattern "hello") text) "Hi! I understand simple sentences of the form SVO, such as 'Anna likes Bob Smith', and rules like '?x likes ?y when ?y likes ?x'. Give it a try!"
    (empty? ukw) (g-respond-sync text)
    :else (str "I don't know these words: " (string/join ", " ukw))
