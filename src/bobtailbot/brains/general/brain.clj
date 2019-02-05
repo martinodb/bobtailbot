@@ -323,24 +323,26 @@
 
 
 
+(def fact-file (str dir-prefix "store/g_fact_set.edn"))
+(def rule-file (str dir-prefix "store/g_rule_list.edn"))
 
 
 (def g-default-fact-set
   (set [
-         (->Triple "fact-1" true :Joe_Smith "loves"  :Liz_Taylor)
+         (->Triple "example-fact" true :Example_Person_One "likes"  :Example_Person_Two)
          ]
         ) )
 
-(def g-fact-set (disk-ref (str dir-prefix "store/g_fact_set.edn") g-default-fact-set g-edn-readers))
+(def g-fact-set   (disk-ref    fact-file    g-default-fact-set    g-edn-readers))
 
 
 
 
 (def g-default-rule-list
 
-  "Gary Cooper loves ?x when ?x loves Gary Cooper ;")
+  "Example Person One likes ?x when ?x likes Example Person One ;")
 
-(def g-rule-list (disk-ref (str dir-prefix "store/g_rule_list.edn") g-default-rule-list g-edn-readers))
+(def g-rule-list   (disk-ref   rule-file   g-default-rule-list    g-edn-readers))
 
 
 
