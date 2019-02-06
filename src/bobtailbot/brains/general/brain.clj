@@ -553,7 +553,7 @@ Dynamic rules is something I wouldn't mind adding to Clara, although that comes 
                                           (do "OK, all facts forgotten."))
    (= text "Forget all rules") (do (println "forgetting all rules..")
                                    (dosync 
-                                     (ref-set g-rule-list g-empty-rule-list )
+                                     (ref-set g-rule-list g-default-rule-list )
                                      (let [new-session (-> (mk-session (symbol this-ns)
                                          (g-load-user-rules @g-rule-list))
                                          ( #(apply insert %1 %2) @g-fact-set)
