@@ -39,9 +39,11 @@ So, to get started quickly (for Ubuntu and similar):
 If you are using `lein repl`, then after editing `config.edn` or any other file,
    do `(user/refresh)`, and then again `(-main)`. Sometimes, if you edit namespace names and things like that, it's better to do `quit` and `lein repl` again, though.
 
-# _Example interaction_
+# _Example interactions_
 
-![Example interaction](https://raw.githubusercontent.com/martinodb/bobtailbot/master/doc/2017-ex-int.png "Example interaction")
+![Example interaction with default brain: facts, rules, queries](https://raw.githubusercontent.com/martinodb/bobtailbot/master/doc/screencap-2019-02-06%2013-00-32.png "Example interaction with default brain: facts, rules, queries")
+
+![Example interaction with default brain: introducing vocabulary](https://raw.githubusercontent.com/martinodb/bobtailbot/master/doc/screencap-2019-02-06%2019-56-18.png "Example interaction with default brain: introducing vocabulary")
 
 # _Development_
 
