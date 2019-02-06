@@ -598,9 +598,9 @@ Dynamic rules is something I wouldn't mind adding to Clara, although that comes 
 ))
 
 
-;;; example:  {:add-voc-type :verb , :content {:inf \"admire\", :past \"admired\", :pp \"admired\", :er \"admirer\", :ing \"admiring\", :pres3 \"admires\"} }
-;;; 
-
+;;; example, typing this on irc:  {:add-voc-type :verb , :content {:inf \"admire\", :past \"admired\", :pp \"admired\", :er \"admirer\", :ing \"admiring\", :pres3 \"admires\"} }
+;;; Becomes this in verb_set.edn: {:inf "admire", :past "admired", :pp "admired", :er "admirer", :ing "admiring", :pres3 "admires"}
+;;; Note: if you eliminate a verb from vocab but it remains in a rule, instaparse gives an error and the bot breaks. I have to fix that.
 
 ;;; Only use "hear" and "speakup" for multi-user interfaces like irc. The bot may report events asyncronously, not just respond to questions.
 (defn g-hear [text-in] (future 
