@@ -67,7 +67,8 @@
     (re-find #"PRIVMSG" line)
        (let [
           msg-user (second (re-find #"^\:(\S+)\!" line))
-          msg-content (second (re-find (re-pattern "^:.+:(.*)") line))
+          ;msg-content (second (re-find (re-pattern "^:.+:(.*)") line))
+          msg-content (second (re-find (re-pattern ":.+?:(.*)") line)) ; lazy quantifier
           ;;Geany regex bug, so I use "re-pattern" instead.
           ]
               (cond 

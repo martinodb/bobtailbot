@@ -541,6 +541,34 @@ Dynamic rules is something I wouldn't mind adding to Clara, although that comes 
 
 
 
+
+
+(defn add-voc "add vocabulary"
+  [text]
+    (let [voc-exp (read-string text)
+          vtype (:add-voc-type voc-exp)
+          voc-entry (:content voc-exp)]
+       (cond
+         (= vtype :verb)   
+            (do (dosync (alter verb-set #(into #{} (conj % voc-entry))))
+                  "Verb added" )
+         (= vtype :noun)
+            (do (dosync (alter noun-set #(into #{} (conj % voc-entry))))
+                  "Noun added" )
+         (= vtype :adj)
+            (do (dosync (alter adj-set #(into #{} (conj % voc-entry))))
+                  "Adjective added" )
+          :else (str "I don't know this word type: " vtype)
+         )
+           ))
+
+
+
+
+
+
+
+
 (defn g-respond-sync-top [text]
 (let [ukw (unk-words text)]
  (println "text: " text)
@@ -563,15 +591,15 @@ Dynamic rules is something I wouldn't mind adding to Clara, although that comes 
                                               
                                               ))
    (re-find (re-pattern "hello") text) "Hello! I understand simple sentences of the form SVO, such as 'Anna likes Bob Smith', and rules like '?x likes ?y when ?y likes ?x'. Give it a try!"
-   (re-find (re-pattern "add\\s+(verb|noun|adj|adv)") text) (g-respond-sync text)
-   (empty? ukw) (g-respond-sync text) 
+   (:add-voc-type (read-string text))  (add-voc  text)
+   (empty? ukw) (g-respond-sync text)
    :else (str "I don't know these words: " (string/join ", " ukw))
    )
 ))
 
 
-
-
+;;; example:  {:add-voc-type :verb , :content {:inf \"admire\", :past \"admired\", :pp \"admired\", :er \"admirer\", :ing \"admiring\", :pres3 \"admires\"} }
+;;; 
 
 
 ;;; Only use "hear" and "speakup" for multi-user interfaces like irc. The bot may report events asyncronously, not just respond to questions.
