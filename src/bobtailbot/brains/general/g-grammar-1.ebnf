@@ -2,7 +2,7 @@
 <SENTENCE> =   (ADD-VOCAB | RULES-QUERIES | NQUERY | FACTS) <";">* ;
 
 
-<ADD-VOCAB> = (ADD-VERB | ADD-NOUN | ADD-ADJ | ADD-ADV);
+
 
 ADD-VOCAB = <"add"> VOC-TYPE VOC-MAP <";">* ;
 VOC-TYPE = ("verb" | "noun" | "adj" | "adv") ;
