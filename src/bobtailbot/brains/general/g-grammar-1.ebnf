@@ -4,9 +4,9 @@
 
 
 
-ADD-VOCAB = <"add"> VOC-TYPE VOC-MAP <";">* ;
+ADD-VOCAB = <"add"> <whitespace>+ VOC-TYPE <whitespace>+ VOC-MAP (<whitespace> | <";">)* ;
 VOC-TYPE = ("verb" | "noun" | "adj" | "adv") ;
-VOC-MAP = "{"  (VMkey <whitespace> VMval (<whitespace>)?)+  "}" ;
+VOC-MAP = "{" <whitespace>*  (VMkey <whitespace>+ VMval (<whitespace> | <",">)*)+ <whitespace>*  "}" ;
 
 
 <VMkey> = #"\:[A-Za-z0-9\-_]+" ;
