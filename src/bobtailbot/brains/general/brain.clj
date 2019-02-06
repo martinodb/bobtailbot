@@ -329,7 +329,7 @@
 
 (def g-default-fact-set
   (set [
-         (->Triple "example-fact" true :Example_Person_One "likes"  :Example_Person_Two)
+         (->Triple "example-fact" true :Example_Person_One "xxexamplefies"  :Example_Person_Two)
          ]
         ) )
 
@@ -338,9 +338,8 @@
 
 
 
-(def g-default-rule-list
+(def g-default-rule-list   "Example Person One xxexamplefies ?x when ?x xxexamplefies Example Person One ;")
 
-  "Example Person One likes ?x when ?x likes Example Person One ;")
 
 (def g-rule-list   (disk-ref   rule-file   g-default-rule-list    g-edn-readers))
 
@@ -546,13 +545,23 @@ Dynamic rules is something I wouldn't mind adding to Clara, although that comes 
 (let [ukw (unk-words text)]
  (println "text: " text)
  (cond
-    (= text "Forget all facts") (dosync   (ref-set g-fact-set '#{}   )
+    (= text "Forget all facts") (dosync   (ref-set g-fact-set g-default-fact-set   )
                                           (let [new-session (-> @g-curr-session 
                                                              (#(apply insert %1 %2) @g-fact-set)
                                                              (fire-rules))]
                                              (ref-set g-curr-session new-session))
-                                                              ;(str "facts added: " (pr-str (g-load-user-facts text)))
-                                                               (do "OK, all facts forgotten."))
+                                          (do "OK, all facts forgotten."))
+   (= text "Forget all rules") (do (println "forgetting all rules..")
+                                   (dosync 
+                                     (ref-set g-rule-list g-empty-rule-list )
+                                     (let [new-session (-> (mk-session (symbol this-ns)
+                                         (g-load-user-rules @g-rule-list))
+                                         ( #(apply insert %1 %2) @g-fact-set)
+                                         (fire-rules))]
+                                       (ref-set g-curr-session new-session))
+                                              "OK, all rules forgotten."
+                                              
+                                              ))
    (re-find (re-pattern "hello") text) "Hi! I understand simple sentences of the form SVO, such as 'Anna likes Bob Smith', and rules like '?x likes ?y when ?y likes ?x'. Give it a try!"
    (empty? ukw) (g-respond-sync text)
    :else (str "I don't know these words: " (string/join ", " ukw))
