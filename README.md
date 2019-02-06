@@ -41,7 +41,11 @@ If you are using `lein repl`, then after editing `config.edn` or any other file,
 
 # _Example interactions_
 
+## _Example interaction with default brain: facts, rules, queries_
+
 ![Example interaction with default brain: facts, rules, queries](https://raw.githubusercontent.com/martinodb/bobtailbot/master/doc/screencap-2019-02-06%2013-00-32.png "Example interaction with default brain: facts, rules, queries")
+
+## _Example interaction with default brain: introducing vocabulary_
 
 ![Example interaction with default brain: introducing vocabulary](https://raw.githubusercontent.com/martinodb/bobtailbot/master/doc/screencap-2019-02-06%2019-56-18.png "Example interaction with default brain: introducing vocabulary")
 
