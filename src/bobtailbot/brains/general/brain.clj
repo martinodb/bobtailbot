@@ -596,8 +596,14 @@ Dynamic rules is something I wouldn't mind adding to Clara, although that comes 
 (defn get-ans-vars [raw-q-result] (re-seq #"\:\?[\S&&[^\#]]+\s+[\S&&[^\{\}]]+" raw-q-result))
 ;(defn get-ans-vars [raw-q-result] (re-seq #"\:\?\S+\s+\"[a-zA-z0-9_\-\s]*\"" raw-q-result))
 
-(defn remove-iitt [text] (string/replace text #"is it true that" ""  ))
 
-(defn get-who [x-str] (->> x-str (re-seq #"\:\?x\s+\:(\S+)" ) (map second) (map #(clojure.string/replace % "_" " ")) (seq->str)  ))
+;;; #"\:\?x\s+\:(\S+)"  ---> (re-pattern "\\:\\?x\\s+\\:(\\S+)")
+;;; #"\"([a-z\']+)\"|\'([a-z]+)\'"  --> (re-pattern "\\\"([a-z\\\']+)\\\"|\\\'([a-z]+)\\\'")
 
-(defn gram-voc [] (into #{} (map #(if (second %) (second %) (nth % 2)) (re-seq #"\"([a-z\']+)\"|\'([a-z]+)\'" (raw-g-grammar-1-w-annex)))))
+ 
+
+(defn remove-iitt [text] (string/replace text (re-pattern "is it true that") ""  ))
+
+(defn get-who [x-str] (->> x-str (re-seq (re-pattern "\\:\\?x\\s+\\:(\\S+)") ) (map second) (map #(clojure.string/replace % "_" " ")) (seq->str)  ))
+
+(defn gram-voc [] (into #{} (map #(if (second %) (second %) (nth % 2)) (re-seq (re-pattern "\\\"([a-z\\\']+)\\\"|\\\'([a-z]+)\\\'")  (raw-g-grammar-1-w-annex)))))
