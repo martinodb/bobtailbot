@@ -187,14 +187,21 @@
 
 
 (declare gram-voc)
-(defn rem-tp [text] (string/replace text #"[\?|\!]+\s*\z" "" ))
+(defn rem-tp "remove trailing punctuation" [text] (string/replace text #"[\?|\!]+\s*\z" "" ))
 
-(defn words-in [text] (into #{} (re-seq #"\S+" (rem-tp text))) )
-(defn NNPtk-in [text] (into #{} (re-seq #"[A-Z]\S+" (rem-tp text))))
-(defn vars-in [text] (into #{} (re-seq #"\?\S+" (rem-tp text))))
+(defn words-in "Return the words in the text as a set"
+  [text] (into #{} (re-seq #"\S+" (rem-tp text))) )
 
-(defn poss-voc-in [text] (set/difference (words-in text)(NNPtk-in text) (vars-in text)))
-(defn unk-words [text](set/difference (poss-voc-in text) (gram-voc)) )
+(defn NNPtk-in "Return the name tokens in the text as a set"
+  [text] (into #{} (re-seq #"[A-Z]\S+" (rem-tp text))))
+
+(defn vars-in "Return the var names in the text as a set"
+   [text] (into #{} (re-seq #"\?\S+" (rem-tp text))))
+
+(defn poss-voc-in "Return possible new vocabulary entries as a set (remove proper names and vars)"
+  [text] (set/difference (words-in text)(NNPtk-in text) (vars-in text)))
+
+(defn unk-words "Return unknown words as a set" [text](set/difference (poss-voc-in text) (gram-voc)) )
 
 
 
@@ -545,7 +552,7 @@ Dynamic rules is something I wouldn't mind adding to Clara, although that comes 
 
 (defn add-voc "add vocabulary"
   [text]
-    (let [voc-exp (read-string text)
+    (let [voc-exp (edn/read-string text)
           vtype (:add-voc-type voc-exp)
           voc-entry (:content voc-exp)]
        (cond
@@ -591,7 +598,7 @@ Dynamic rules is something I wouldn't mind adding to Clara, although that comes 
                                               
                                               ))
    (re-find (re-pattern "hello") text) "Hello! I understand simple sentences of the form SVO, such as 'Anna likes Bob Smith', and rules like '?x likes ?y when ?y likes ?x'. Give it a try!"
-   (:add-voc-type (read-string text))  (add-voc  text)
+   (:add-voc-type (edn/read-string text))  (add-voc  text)
    (empty? ukw) (g-respond-sync text)
    :else (str "I don't know these words: " (string/join ", " ukw))
    )
