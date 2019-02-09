@@ -74,7 +74,8 @@
                       (cond 
                         (re-find #"^quit" msg-content) (swap! connected (constantly false))
                          :else (do  (hear-fn msg-content)
-                                 ))))) (catch Exception e (hear-fn (str "&caught exception: " (.getMessage e)))   )   ) )
+                                 )))))
+        (catch Exception e (hear-fn (str "&caught exception: " (.getMessage e)))   )   ) )
 
 (defn message-listener [socket irc-channel hear-fn]
   (async/go-loop []
