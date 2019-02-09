@@ -56,6 +56,8 @@
 
 
 (def default-verb-set (set [
+  {:inf "xxexamplefy", :past "xxexamplefied", :pp "xxexamplefied" , :er "xxexamplefier", :ing "xxexamplefying", :pres3 "xxexamplefies"}
+  
   {:inf "walk", :past "walked", :pp "walked" , :er "walker", :ing "walking", :pres3 "walks"}
   {:inf "talk", :past "talked", :pp "talked" , :er "talker", :ing "talking", :pres3 "talks"}
   {:inf "breath", :past "breathed", :pp "breathed" , :er "breather", :ing "breathing", :pres3 "breathes"}
@@ -81,6 +83,8 @@
 
 
 (def default-noun-set (set [
+  {:sing "xxthing", :plural "xxthings"}
+  
   {:sing "thing", :plural "things"}
   {:sing "object", :plural "objects"}
   {:sing "animal", :plural "animals"}
@@ -96,6 +100,8 @@
 
 
 (def default-adj-set (set [
+  {:a "xxexamply" :comp "xxexamplier" :sup "xxexampliest"}
+  
   {:a "heavy" :comp "heavier" :sup "heaviest"}
   {:a "tall" :comp "taller" :sup "tallest"}
   {:a "hard" :comp "harder" :sup "hardest"}

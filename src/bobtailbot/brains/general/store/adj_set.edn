@@ -1,1 +1,6 @@
-#{{:a "great", :comp "greater", :sup "greatest"} {:a "good", :comp "better", :sup "best"} {:a "tall", :comp "taller", :sup "tallest"} {:a "hard", :comp "harder", :sup "hardest"} {:a "heavy", :comp "heavier", :sup "heaviest"}}
+#{{:a "xxexamply", :comp "xxexamplier", :sup "xxexampliest"}
+  {:a "great", :comp "greater", :sup "greatest"}
+  {:a "good", :comp "better", :sup "best"}
+  {:a "tall", :comp "taller", :sup "tallest"}
+  {:a "hard", :comp "harder", :sup "hardest"}
+  {:a "heavy", :comp "heavier", :sup "heaviest"}}

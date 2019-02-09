@@ -3,6 +3,7 @@
           [clojure.string :as string :refer [trim]]
           [clojure.java.io :as io]
           [me.raynes.fs :as fs]
+          [clojure.pprint :as pp :refer [pprint]]
 ))
 
 ;; CREDIT:
@@ -39,7 +40,10 @@
 (defn dump-to-path
   "Store a value's representation to a given path"
   [path value]
-  (spit path (pr-str value)))
+  ;(spit path (pr-str value))
+  (pprint value (io/writer path))
+  
+  )
 
 (defn load-from-path
   "Load a value from its representation stored in a given path.
