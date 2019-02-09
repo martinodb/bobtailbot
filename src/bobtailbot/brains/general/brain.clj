@@ -599,6 +599,7 @@ Dynamic rules is something I wouldn't mind adding to Clara, although that comes 
                                               "OK, all rules forgotten."
                                               
                                               ))
+   (re-find (re-pattern "&caught") text) (str "There was a problem: " text)
    (re-find (re-pattern "hello") text) "Hello! I understand simple sentences of the form SVO, such as 'Anna likes Bob Smith', and rules like '?x likes ?y when ?y likes ?x'. Give it a try!"
    (:add-voc-type (edn/read-string escqtext))  (add-voc  escqtext)
    (empty? ukw) (g-respond-sync text)

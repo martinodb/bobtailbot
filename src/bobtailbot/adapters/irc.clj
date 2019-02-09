@@ -56,30 +56,30 @@
 
 
 (defn handle-line [socket line irc-channel hear-fn]
-  (println line)
-  (cond
-    (re-find #"^ERROR :Closing Link:" line)
-       (close-socket-client socket)
-    (re-find #"^PING" line)
-       (write socket (str "PONG " (re-find #":.*" line)) :print)
-    (re-find (re-pattern @ready-server-msg) line)
-      (swap! connected (constantly true))
-    (re-find #"PRIVMSG" line)
-       (let [
-          msg-user (second (re-find #"^\:(\S+)\!" line))
-          ;msg-content (second (re-find (re-pattern "^:.+:(.*)") line))
-          msg-content (second (re-find (re-pattern ":.+?:(.*)") line)) ; lazy quantifier
-          ;;Geany regex bug, so I use "re-pattern" instead.
-          ]
-              (cond 
-                (re-find #"^quit" msg-content) (swap! connected (constantly false))
-                 :else (do  (hear-fn msg-content)
-                            )))))
+  (try (do (println line)
+           (cond
+             (re-find #"^ERROR :Closing Link:" line)
+               (close-socket-client socket)
+             (re-find #"^PING" line)
+               (write socket (str "PONG " (re-find #":.*" line)) :print)
+             (re-find (re-pattern @ready-server-msg) line)
+               (swap! connected (constantly true))
+             (re-find #"PRIVMSG" line)
+                (let [
+                      msg-user (second (re-find #"^\:(\S+)\!" line))
+                      ;msg-content (second (re-find (re-pattern "^:.+:(.*)") line))
+                      msg-content (second (re-find (re-pattern ":.+?:(.*)") line)) ; lazy quantifier
+                      ;;Geany regex bug, so I use "re-pattern" instead.
+                       ]
+                      (cond 
+                        (re-find #"^quit" msg-content) (swap! connected (constantly false))
+                         :else (do  (hear-fn msg-content)
+                                 ))))) (catch Exception e (hear-fn (str "&caught exception: " (.getMessage e)))   )   ) )
 
 (defn message-listener [socket irc-channel hear-fn]
   (async/go-loop []
     (when-let [line (async/<! (:in socket))]
-      (try (handle-line socket line irc-channel hear-fn) (catch Exception e (println "caught exception: " (.getMessage e))))
+      (handle-line socket line irc-channel hear-fn)
       (recur))))
 
 (defn speaker-up [socket irc-channel speakup-fn]
