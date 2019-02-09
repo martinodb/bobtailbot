@@ -47,7 +47,7 @@ If you are using `lein repl`, then after editing `config.edn` or any other file,
 
 ## _Example interaction with default brain: introducing vocabulary_
 
-![Example interaction with default brain: introducing vocabulary](https://raw.githubusercontent.com/martinodb/bobtailbot/master/doc/screencap-2019-02-06%2019-56-18-v2.png "Example interaction with default brain: introducing vocabulary")
+![Example interaction with default brain: introducing vocabulary](https://raw.githubusercontent.com/martinodb/bobtailbot/master/doc/screepcap-2019-02-09%2023-38-34.png "Example interaction with default brain: introducing vocabulary")
 
 # _Development_
 
