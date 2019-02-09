@@ -79,7 +79,7 @@
 (defn message-listener [socket irc-channel hear-fn]
   (async/go-loop []
     (when-let [line (async/<! (:in socket))]
-      (handle-line socket line irc-channel hear-fn)
+      (try (handle-line socket line irc-channel hear-fn) (catch Exception e (println "caught exception: " (.getMessage e))))
       (recur))))
 
 (defn speaker-up [socket irc-channel speakup-fn]
