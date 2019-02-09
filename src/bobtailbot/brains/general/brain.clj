@@ -557,8 +557,9 @@ Dynamic rules is something I wouldn't mind adding to Clara, although that comes 
           voc-entry (:content voc-exp)]
        (cond
          (= vtype :verb)   
-            (do (dosync (alter verb-set #(into #{} (conj % voc-entry))))
-                  "Verb added" )
+             (dosync (if (contains? @verb-set voc-entry) 
+                            (str "I already know this verb: " (:inf voc-entry))
+                            (do (alter verb-set #(into #{} (conj % voc-entry))) (str "Verb added: " (:inf voc-entry)) ) )    )
          (= vtype :noun)
             (do (dosync (alter noun-set #(into #{} (conj % voc-entry))))
                   "Noun added" )
