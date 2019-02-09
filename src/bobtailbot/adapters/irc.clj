@@ -68,22 +68,19 @@
              (re-find #"PRIVMSG" e-line)
                 (let [
                       msg-user (second (re-find #"^\:(\S+)\!" e-line))
-                      ;msg-content (second (re-find (re-pattern "^:.+:(.*)") line))
-                      ;msg-content (second (re-find (re-pattern ":.+?:(.*)") line)) ; lazy quantifier
                       msg-content (second (re-find (re-pattern ":[^:]+:(.*)") e-line)) ; 
-                      ;;Geany regex bug, so I use "re-pattern" instead.
+                      ;;Scintilla can't handle the Clojure regex reader macro , so I use "re-pattern" instead.
                        ]
                       (cond 
                         (re-find #"^quit" msg-content) (swap! connected (constantly false))
                          :else (do
-                                  (println "msg-user: " msg-user "\n" "msg-content: " msg-content)  
+                                  ;(println "msg-user: " msg-user "\n" "msg-content: " msg-content) ; debugging
                                  (hear-fn msg-content)
                                  )))))
         (catch Exception e
            (do (println "stacktrace: " (println e))
                (hear-fn 
                  (str "&caught exception: " (or (.getMessage e) "(no message)")
-                    ; ", exception data: " (ex-data e)
                     )  )   )   ) ) ) )
 
 (defn message-listener [socket irc-channel hear-fn]
