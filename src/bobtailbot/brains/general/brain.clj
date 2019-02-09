@@ -577,7 +577,9 @@ Dynamic rules is something I wouldn't mind adding to Clara, although that comes 
 
 
 (defn g-respond-sync-top [text]
-(let [ukw (unk-words text)]
+(let [ukw (unk-words text)
+      escqtext  (string/replace text (re-pattern "\\\"") "\\\\\"")
+          ]
  (println "text: " text)
  (cond
     (= text "Forget all facts") (dosync   (ref-set g-fact-set g-default-fact-set   )
@@ -598,7 +600,7 @@ Dynamic rules is something I wouldn't mind adding to Clara, although that comes 
                                               
                                               ))
    (re-find (re-pattern "hello") text) "Hello! I understand simple sentences of the form SVO, such as 'Anna likes Bob Smith', and rules like '?x likes ?y when ?y likes ?x'. Give it a try!"
-   (:add-voc-type (edn/read-string text))  (add-voc  text)
+   (:add-voc-type (edn/read-string escqtext))  (add-voc  escqtext)
    (empty? ukw) (g-respond-sync text)
    :else (str "I don't know these words: " (string/join ", " ukw))
    )
@@ -610,9 +612,7 @@ Dynamic rules is something I wouldn't mind adding to Clara, although that comes 
 ;;; Note: if you eliminate a verb from vocab but it remains in a rule, instaparse gives an error and the bot breaks. I have to fix that.
 
 ;;; Only use "hear" and "speakup" for multi-user interfaces like irc. The bot may report events asyncronously, not just respond to questions.
-(defn g-hear [text-in] (future 
-                        (reset! last-utterance
-                           {:type :response , :text (g-respond-sync-top text-in)} )))
+
 
 
 (defn g-speakup [speakup-chan] (add-watch last-utterance :utt-ready
@@ -620,9 +620,17 @@ Dynamic rules is something I wouldn't mind adding to Clara, although that comes 
                                                 (>!! speakup-chan (:text new-state) ))))
 
 ;; Only use for repl and similar, single-user interfaces. It's syncronous (blocking). 
-(def g-respond g-respond-sync-top)
+;(def g-respond g-respond-sync-top)
+(defn g-respond [text] (try (g-respond-sync-top text) (catch Exception e (str "caught exception: " (.getMessage e))) ) )
 
 
+(defn g-hear [text-in] (future 
+                        (reset! last-utterance
+                           {:type :response , :text (g-respond text-in)} )))
+
+
+
+; (#(try (load-string %) (catch Exception e (str "caught exception: " (.getMessage e))) ) )
 
 
 (def hear g-hear)
