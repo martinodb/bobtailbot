@@ -21,7 +21,7 @@
             
             
             ;[duratom.core :as dac :refer [duratom destroy]]
-            [bobtailbot.tools :as tools :refer [disk-atom disk-ref]]
+            [bobtailbot.tools :as tools :refer [dump-to-path  load-from-path-or-create  disk-atom  disk-ref]]
             
             [clojure.set :as set]
             
@@ -72,15 +72,28 @@
 
 (def verb-set-edn-readers {})
 
-(def verb-set (disk-ref (str dir-prefix "store/verb_set.edn") default-verb-set verb-set-edn-readers ))
+;(def verb-set (disk-ref (str dir-prefix "store/verb_set.edn") default-verb-set verb-set-edn-readers ))
 
 
-(defn Vinf [] (set (map :inf @verb-set)))
-(defn Vpast [] (set (map :past @verb-set)))
-(defn Vpp [] (set (map :pp @verb-set)))
-(defn Ver [] (set (map :er @verb-set)))
-(defn Ving [] (set (map :ing @verb-set)))
-(defn Vpres3 []  (set (map :pres3 @verb-set)))
+(defn get-verb-set [] (load-from-path-or-create (str dir-prefix "store/verb_set.edn") default-verb-set verb-set-edn-readers ))
+(defn set-verb-set [verb-set] (dump-to-path (str dir-prefix "store/verb_set.edn") verb-set  )) ; "set the verb set". Don't confuse "set", the verb, with "set" the noun.
+
+
+
+;(defn Vinf [] (set (map :inf @verb-set)))
+;(defn Vpast [] (set (map :past @verb-set)))
+;(defn Vpp [] (set (map :pp @verb-set)))
+;(defn Ver [] (set (map :er @verb-set)))
+;(defn Ving [] (set (map :ing @verb-set)))
+;(defn Vpres3 []  (set (map :pres3 @verb-set)))
+
+(defn Vinf [] (set (map :inf (get-verb-set))))
+(defn Vpast [] (set (map :past (get-verb-set))))
+(defn Vpp [] (set (map :pp (get-verb-set))))
+(defn Ver [] (set (map :er (get-verb-set))))
+(defn Ving [] (set (map :ing (get-verb-set))))
+(defn Vpres3 []  (set (map :pres3 (get-verb-set))))
+
 
 
 (def default-noun-set (set [
@@ -95,8 +108,11 @@
   ]))
 
 (def noun-set-edn-readers {})
-(def noun-set (disk-ref (str dir-prefix "store/noun_set.edn") default-noun-set noun-set-edn-readers ))
-(defn  Nsimp-sg [] (set (map :sing @noun-set)))
+
+(defn get-noun-set [] (load-from-path-or-create (str dir-prefix "store/noun_set.edn") default-noun-set noun-set-edn-readers ))
+(defn set-noun-set [noun-set] (dump-to-path (str dir-prefix "store/noun_set.edn") noun-set ))
+
+(defn  Nsimp-sg [] (set (map :sing (get-noun-set))))
 
 
 
@@ -112,8 +128,12 @@
   ]))
 
 (def adj-set-edn-readers {})
-(def adj-set (disk-ref (str dir-prefix "store/adj_set.edn") default-adj-set adj-set-edn-readers ))
-(defn Adj [] (set (map :a @adj-set)))
+
+(defn get-adj-set [] (load-from-path-or-create (str dir-prefix "store/adj_set.edn") default-adj-set adj-set-edn-readers ))
+(defn set-adj-set [adj-set] (dump-to-path (str dir-prefix "store/adj_set.edn") adj-set  ))
+
+
+(defn Adj [] (set (map :a (get-adj-set))))
 
 
 
@@ -153,8 +173,8 @@
 (defn raw-g-grammar-1-w-annex [] (str (raw-g-grammar-1) (g-grammar-1-annex)))
 
 
-(def grammar-martintest
-  (insta/parser  (slurp (str dir-prefix "grammar-martintest.ebnf")) :auto-whitespace :standard ))
+;(def grammar-martintest
+  ;(insta/parser  (slurp (str dir-prefix "grammar-martintest.ebnf")) :auto-whitespace :standard ))
 
 (defn g-grammar-1 []
   (insta/parser (raw-g-grammar-1-w-annex)  :auto-whitespace :standard ))
@@ -228,7 +248,7 @@
     :PRENEG-TRIP-FACT-IND2 (fn [t-subj t-verb t-obj]
                              `(->Triple "my-fact" false ~t-subj ~t-verb ~t-obj ))
     :EMBNEG-TRIP-FACT-IND2 (fn [t-subj t-verb-inf t-obj]
-                              (let [t-verb-pres3 (:pres3 (first (filter #(= (:inf %) t-verb-inf ) @verb-set)))]
+                              (let [t-verb-pres3 (:pres3 (first (filter #(= (:inf %) t-verb-inf ) (get-verb-set))))]
                                 `(->Triple "my-fact" false ~t-subj ~t-verb-pres3 ~t-obj )))
     :R-TRIP-FACT-IND2 (fn [t-subj t-verb t-obj]
                       {:type Triple
@@ -263,7 +283,7 @@
                                              (list '= t-obj 'obj) ]
                                 :fact-binding :?#thing })
     :EMBNEG-Q-TRIP-FACT-IND2 (fn [t-subj t-verb-inf t-obj]
-                               (let [t-verb-pres3 (:pres3 (first (filter #(= (:inf %) t-verb-inf ) @verb-set)))]
+                               (let [t-verb-pres3 (:pres3 (first (filter #(= (:inf %) t-verb-inf ) (get-verb-set))))]
                                   { :type Triple
                                     :constraints [(list '= false 'affirm)
                                                  (list '= t-subj 'subj)
@@ -321,7 +341,7 @@
       (= intype :T-DOES-QUESTION)
         (let [t-subj (joinNNPstr (second actual-ptree))
               t-verb-inf (second (nth actual-ptree 2))
-              t-verb-pres3 (:pres3 (first (filter #(= (:inf %) t-verb-inf ) @verb-set))) 
+              t-verb-pres3 (:pres3 (first (filter #(= (:inf %) t-verb-inf ) (get-verb-set)))) 
               t-obj (joinNNPstr (nth actual-ptree 3))]
            (str t-subj " " t-verb-pres3 " " t-obj "?"))
       (= intype :T-WHO-QUESTION)
@@ -331,7 +351,7 @@
       (= intype :T-WHOM-QUESTION)
         (let [t-subj  (joinNNPstr (second actual-ptree))
               t-verb-inf (second (nth actual-ptree 2))
-              t-verb-pres3 (:pres3 (first (filter #(= (:inf %) t-verb-inf ) @verb-set)))]
+              t-verb-pres3 (:pres3 (first (filter #(= (:inf %) t-verb-inf ) (get-verb-set))))]
            (str "match " t-subj " " t-verb-pres3 " " "?x" ))
       :else "g-rephrase-from-tree failed" )))
 
@@ -438,26 +458,26 @@ Dynamic rules is something I wouldn't mind adding to Clara, although that comes 
         parsetree  ((g-grammar) text)
         intype (first (first parsetree))]
    (cond 
-     (= intype :ADD-VOCAB)
-       (let [voctype (second (second (first parsetree)))]
-         (cond
-            (= voctype "verb") 
-               (do
-               (dosync (alter verb-set #(into #{} (conj % (parsed-voc-map parsetree  )))))
-               (pr-str (parsed-voc-map parsetree  ))
-               )
-            (= voctype "noun") 
-               (do
-               (dosync (alter noun-set #(into #{} (conj % (parsed-voc-map parsetree  )))))
-               (pr-str (parsed-voc-map parsetree  ))
-               )
-            (= voctype "adj") 
-               (do
-               (dosync (alter adj-set #(into #{} (conj % (parsed-voc-map parsetree  )))))
-               (pr-str (parsed-voc-map parsetree  ))
-               )
-            :else "unknown vocabulary type"
-             ))
+     ;(= intype :ADD-VOCAB)
+       ;(let [voctype (second (second (first parsetree)))]
+         ;(cond
+            ;(= voctype "verb") 
+               ;(do
+               ;(dosync (alter verb-set #(into #{} (conj % (parsed-voc-map parsetree  )))))
+               ;(pr-str (parsed-voc-map parsetree  ))
+               ;)
+            ;(= voctype "noun") 
+               ;(do
+               ;(dosync (alter noun-set #(into #{} (conj % (parsed-voc-map parsetree  )))))
+               ;(pr-str (parsed-voc-map parsetree  ))
+               ;)
+            ;(= voctype "adj") 
+               ;(do
+               ;(dosync (alter adj-set #(into #{} (conj % (parsed-voc-map parsetree  )))))
+               ;(pr-str (parsed-voc-map parsetree  ))
+               ;)
+            ;:else "unknown vocabulary type"
+             ;))
        (or (= intype :TRIP-FACT-IND2 ) (= intype :PRENEG-TRIP-FACT-IND2) (= intype :EMBNEG-TRIP-FACT-IND2) (= intype :NOT-FACTS ) (= intype :PREAFF-FACTS ))
          (cond 
           (= (g-respond-sync yntext) "Yes, that's right.") (do "I know, right.")
@@ -557,30 +577,55 @@ Dynamic rules is something I wouldn't mind adding to Clara, although that comes 
 
 
 
+;(defn add-voc "add vocabulary"
+  ;[text]
+    ;(let [voc-exp (edn/read-string text)
+          ;vtype (:add-voc-type voc-exp)
+          ;voc-entry (:content voc-exp)]
+       ;(cond
+         ;(= vtype :verb)   
+             ;(dosync (if (contains? @verb-set voc-entry) 
+                            ;(str "I already know this verb: " (:inf voc-entry))
+                            ;(do (alter verb-set #(into #{} (conj % voc-entry))) (str "Verb added: " (:inf voc-entry)) ) )    )
+         ;(= vtype :noun)
+             ;(dosync (if (contains? @noun-set voc-entry) 
+                            ;(str "I already know this noun: " (:sing voc-entry))
+                            ;(do (alter noun-set #(into #{} (conj % voc-entry))) (str "Noun added: " (:sing voc-entry)) ) )    )
+         ;(= vtype :adj)
+             ;(dosync (if (contains? @adj-set voc-entry) 
+                            ;(str "I already know this adjective: " (:a voc-entry))
+                            ;(do (alter adj-set #(into #{} (conj % voc-entry))) (str "Adjective added: " (:a voc-entry)) ) )    )
+          ;:else (str "I don't know this word type: " vtype)
+         ;)
+           ;))
+
+
 (defn add-voc "add vocabulary"
   [text]
     (let [voc-exp (edn/read-string text)
           vtype (:add-voc-type voc-exp)
-          voc-entry (:content voc-exp)]
+          voc-entry (:content voc-exp)
+          
+          i-verb-set (get-verb-set)
+          i-noun-set (get-noun-set)
+          i-adj-set (get-adj-set)
+          ]
        (cond
          (= vtype :verb)   
-             (dosync (if (contains? @verb-set voc-entry) 
+             (dosync (if (contains? i-verb-set voc-entry) 
                             (str "I already know this verb: " (:inf voc-entry))
-                            (do (alter verb-set #(into #{} (conj % voc-entry))) (str "Verb added: " (:inf voc-entry)) ) )    )
+                            (do (->> (conj i-verb-set voc-entry) (into #{}) (set-verb-set) ) (str "Verb added: " (:inf voc-entry)) ) )    )
          (= vtype :noun)
-             (dosync (if (contains? @noun-set voc-entry) 
+             (dosync (if (contains? i-noun-set voc-entry) 
                             (str "I already know this noun: " (:sing voc-entry))
-                            (do (alter noun-set #(into #{} (conj % voc-entry))) (str "Noun added: " (:sing voc-entry)) ) )    )
+                            (do (->> (conj i-noun-set voc-entry) (into #{}) (set-noun-set) ) (str "Noun added: " (:sing voc-entry)) ) )    )
          (= vtype :adj)
-             (dosync (if (contains? @adj-set voc-entry) 
+             (dosync (if (contains? i-adj-set voc-entry) 
                             (str "I already know this adjective: " (:a voc-entry))
-                            (do (alter adj-set #(into #{} (conj % voc-entry))) (str "Adjective added: " (:a voc-entry)) ) )    )
+                            (do (->> (conj i-adj-set voc-entry) (into #{}) (set-adj-set) ) (str "Adjective added: " (:a voc-entry)) ) )    )
           :else (str "I don't know this word type: " vtype)
          )
            ))
-
-
-
 
 
 

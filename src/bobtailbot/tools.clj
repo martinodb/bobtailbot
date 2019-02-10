@@ -57,10 +57,12 @@
     (catch Exception e (println (.getMessage e)))))
 
 (defn load-from-path-or-create
-  [path edn-readers]
-  (try
-    (if (.exists (io/as-file path)) (load-from-path path edn-readers) (do (io/file path) ""))
-    (catch Exception e (println (.getMessage e)))))
+  ([path edn-readers] 
+     (load-from-path-or-create path "" edn-readers) )
+  ([path init edn-readers]
+   (try
+     (if (.exists (io/as-file path)) (load-from-path path edn-readers) (do (dump-to-path path init) (load-from-path-or-create path init edn-readers)))
+     (catch Exception e (println (.getMessage e)))) ) )
 
 (defn persist-fn
   "Yields an atom watch-fn that dumps new states to a path"
