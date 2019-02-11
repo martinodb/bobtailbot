@@ -21,7 +21,7 @@
             
             
             ;[duratom.core :as dac :refer [duratom destroy]]
-            [bobtailbot.tools :as tools :refer [dump-to-path  load-from-path-or-create  disk-atom  disk-ref]]
+            [bobtailbot.tools :as tools :refer [dump-to-path dump-to-path-records load-from-path-or-create  disk-atom  disk-ref]]
             
             [clojure.set :as set]
             
@@ -369,7 +369,7 @@
 
 ;(def g-fact-set   (disk-ref    fact-file-p    g-default-fact-set    g-edn-readers))
 (defn get-g-fact-set []   (load-from-path-or-create    fact-file-p    g-default-fact-set    g-edn-readers))
-(defn set-g-fact-set [g-fact-set]   (dump-to-path    fact-file-p   g-fact-set))
+(defn set-g-fact-set [g-fact-set]   (dump-to-path-records    fact-file-p   g-fact-set))
 
 
 ;(defn get-verb-set [] (load-from-path-or-create (str dir-prefix "store/verb_set.edn") default-verb-set verb-set-edn-readers ))

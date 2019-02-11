@@ -27,29 +27,46 @@
 
 
 
-
-
-
-
-
-
-
-
-
-
-(defn dump-to-path
-  "Store a value's representation to a given path"
+(defn dump-to-path-records
+  "Store a value's representation to a given path. Use this for records. It looks ugly but it works."
   [path value]
   (spit path (pr-str value)) ; this works but the file contents look ugly.
   ;(pprint value (io/writer path)) ; this one is bad, the edn readers dont work.
   
   ;(pprint (pr-str value) (io/writer path)) ; doesn't work either. It prints a string, with double quotes.
   
-  ;(spit path (pr-str (with-out-str (pprint value )))) nope, doesn't work either. Prints to a string with escaped stuff.
+  ;(spit path (pr-str (with-out-str (pprint value )))) ; nope, doesn't work either. Prints to a string with escaped stuff.
   
+  ;(->> (pprint value) (with-out-str) (symbol) (pr-str) (spit path)) ; Bad. edn readers dont work.
   
+  ;(->> (pr-str value)  (symbol) (pprint) (with-out-str) (spit path)) ; works, but looks just as ugly.
   
   )
+
+
+
+
+(defn dump-to-path-no-records
+  "Store a value's representation to a given path. Don't use this for records, only for maps. It looks good but it can't handle records."
+  [path value]
+  ;(spit path (pr-str value)) ; this works but the file contents look ugly.
+  (pprint value (io/writer path)) ; this one is bad, the edn readers dont work.
+  
+  ;(pprint (pr-str value) (io/writer path)) ; doesn't work either. It prints a string, with double quotes.
+  
+  ;(spit path (pr-str (with-out-str (pprint value )))) ; nope, doesn't work either. Prints to a string with escaped stuff.
+  
+  ;(->> (pprint value) (with-out-str) (symbol) (pr-str) (spit path)) ; Bad. edn readers dont work.
+  
+  ;(->> (pr-str value)  (symbol) (pprint) (with-out-str) (spit path)) ; works, but looks just as ugly.
+  
+  )
+  
+
+
+(def dump-to-path dump-to-path-no-records)
+
+
 
 (defn load-from-path
   "Load a value from its representation stored in a given path.
