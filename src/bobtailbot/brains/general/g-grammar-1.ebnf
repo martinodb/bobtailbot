@@ -4,9 +4,13 @@
 
 
 
+
+(* ADD-VOCAB is currently implemented using the reader to read maps directly, without instaparse, but I'm leaving this here as a stub, in case I decide to use a more complex syntax to introduce vocabulary *)
 ADD-VOCAB = <"add"> <whitespace>+ VOC-TYPE <whitespace>+ VOC-MAP (<whitespace> | <";">)* ;
 VOC-TYPE = ("verb" | "noun" | "adj" | "adv") ;
 VOC-MAP = "{" <whitespace>*  (VMkey <whitespace>+ VMval (<whitespace> | <",">)*)+ <whitespace>*  "}" ;
+
+
 
 
 <VMkey> = #"\:[A-Za-z0-9\-_]+" ;
