@@ -357,8 +357,8 @@
 
 
 
-(def fact-file (str dir-prefix "store/g_fact_set.edn"))
-(def rule-file (str dir-prefix "store/g_rule_list.edn"))
+(def fact-file-p (str dir-prefix "store/g_fact_set.edn"))
+(def rule-file-p (str dir-prefix "store/g_rule_list.edn"))
 
 
 (def g-default-fact-set
@@ -367,7 +367,14 @@
          ]
         ) )
 
-(def g-fact-set   (disk-ref    fact-file    g-default-fact-set    g-edn-readers))
+;(def g-fact-set   (disk-ref    fact-file-p    g-default-fact-set    g-edn-readers))
+(defn get-g-fact-set []   (load-from-path-or-create    fact-file-p    g-default-fact-set    g-edn-readers))
+(defn set-g-fact-set [g-fact-set]   (dump-to-path    fact-file-p   g-fact-set))
+
+
+;(defn get-verb-set [] (load-from-path-or-create (str dir-prefix "store/verb_set.edn") default-verb-set verb-set-edn-readers ))
+;(defn set-verb-set [verb-set] (dump-to-path (str dir-prefix "store/verb_set.edn") verb-set  )) ; "set the verb set". Don't confuse "set", the verb, with "set" the noun.
+
 
 
 
@@ -375,8 +382,9 @@
 (def g-default-rule-list   "Example Person One xxexamplefies ?x when ?x xxexamplefies Example Person One ;")
 
 
-(def g-rule-list   (disk-ref   rule-file   g-default-rule-list    g-edn-readers))
-
+;(def g-rule-list   (disk-ref   rule-file-p   g-default-rule-list    g-edn-readers))
+(defn get-g-rule-list []   (load-from-path-or-create    rule-file-p    g-default-rule-list    g-edn-readers))
+(defn set-g-rule-list [g-rule-list]   (dump-to-path    rule-file-p   g-rule-list))
 
 
 (def last-utterance (atom {}))
@@ -420,8 +428,8 @@
 
 
 
-(def g-default-session (-> (mk-session (symbol this-ns) (g-load-user-rules @g-rule-list))
-                    ( #(apply insert %1 %2) @g-fact-set)
+(def g-default-session (-> (mk-session (symbol this-ns) (g-load-user-rules (get-g-rule-list)))
+                    ( #(apply insert %1 %2) (get-g-fact-set))
                     (fire-rules)))
 
 (def g-curr-session (ref g-default-session))
@@ -482,30 +490,37 @@ Dynamic rules is something I wouldn't mind adding to Clara, although that comes 
          (cond 
           (= (g-respond-sync yntext) "Yes, that's right.") (do "I know, right.")
           (= (g-respond-sync yntext) "Definitely not, that's false.") (do "That's impossible.")
-          (= (g-respond-sync yntext) "Not that I know of.") (dosync  (alter g-fact-set #(into #{} (reduce conj % (map eval (g-load-user-facts text)))))
+          (= (g-respond-sync yntext) "Not that I know of.") (do
+                                                              (->> (reduce conj (get-g-fact-set) (map eval (g-load-user-facts text)))
+                                                                   (into #{})
+                                                                    (set-g-fact-set))
                                                               (let [new-session (-> @g-curr-session 
-                                                                                 (#(apply insert %1 %2) @g-fact-set)
+                                                                                 (#(apply insert %1 %2) (get-g-fact-set))
                                                                                  (fire-rules))]
-                                                                    (ref-set g-curr-session new-session))
+                                                                    (dosync (ref-set g-curr-session new-session)))
                                                               ;(str "facts added: " (pr-str (g-load-user-facts text)))
                                                                (do "OK, got it."))
           :else "Oops, a bug in my respond function"  )
           
        (= intype :AND-FACTS)
-        (dosync  (alter g-fact-set #(into #{} (reduce conj % (map eval (first (g-load-user-facts text))))))
-                                    (let [new-session (-> @g-curr-session 
-                                                        (#(apply insert %1 %2) @g-fact-set)
-                                                        (fire-rules))]
-                                          (ref-set g-curr-session new-session))
-                                    (str "facts added: " (pr-str (first (g-load-user-facts text)))))
+          (dosync
+            (->>  (reduce conj (get-g-fact-set) (map eval (first (g-load-user-facts text))))
+                (into #{})
+                (set-g-fact-set) )
+            (let [new-session
+                  (-> @g-curr-session 
+                    (#(apply insert %1 %2) (get-g-fact-set))
+                    (fire-rules))]
+              (ref-set g-curr-session new-session))
+            (str "facts added: " (pr-str (first (g-load-user-facts text)))))
+       
        (= intype :QUERY )
          (try
            (do 
-             (let [ new-rule-list (str @g-rule-list text)
-                    new-session   (-> (mk-session (symbol this-ns)
-                                        (g-load-user-rules new-rule-list))
-                                        ( #(apply insert %1 %2) @g-fact-set)
-                                        (fire-rules))
+             (let [ new-rule-list (str (get-g-rule-list) text)
+                    new-session   (-> (mk-session (symbol this-ns) (g-load-user-rules new-rule-list))
+                                      ( #(apply insert %1 %2) (get-g-fact-set))
+                                      (fire-rules))
                     anon-query  (first (insta/transform g-transforms parsetree))
                     raw-query-result  (query new-session anon-query)
                     raw-query-result-set (into #{} raw-query-result)
@@ -519,24 +534,16 @@ Dynamic rules is something I wouldn't mind adding to Clara, although that comes 
        (= intype :YNQUESTION )
          (try
            (do 
-             (let [ new-rule-list (str @g-rule-list text)
-                    new-session   (-> (mk-session (symbol this-ns)
-                                        (g-load-user-rules new-rule-list))
-                                        ( #(apply insert %1 %2) @g-fact-set)
+             (let [ new-rule-list (str (get-g-rule-list) text)
+                    new-session   (-> (mk-session (symbol this-ns)  (g-load-user-rules new-rule-list))
+                                      ( #(apply insert %1 %2) (get-g-fact-set))
                                         (fire-rules))
                     anon-query  (first (insta/transform g-transforms parsetree))
                     raw-query-result  (query new-session anon-query)
-                    ;raw-query-result-set (into #{} raw-query-result)
-                    raw-query-result-str (apply str raw-query-result)
-                    ;raw-query-result-set-str (apply str raw-query-result-set)
-                    
-                    
-                    
-                    ]
-                    ;(println "raw-query-result-str: " raw-query-result-str)
+                    raw-query-result-str (apply str raw-query-result)   ]
                     (cond
-                      (and (= raw-query-result-str "")  @negating ) (do (reset! negating false)  "Not that I know of.")
-                      (and (= raw-query-result-str "")  (not @negating) ) (do 
+                      (and (= raw-query-result-str "")  @negating ) (do (println "negating. negtext: " negtext) (reset! negating false)  "Not that I know of.")
+                      (and (= raw-query-result-str "")  (not @negating) ) (do (println "not negating yet. negtext:" negtext)
                                                                              (reset! negating true)
                                                                              (let [neg-qr (g-respond-sync negtext)]
                                                                                    (if (= neg-qr "Yes, that's right.") 
@@ -544,11 +551,7 @@ Dynamic rules is something I wouldn't mind adding to Clara, although that comes 
                                                                                      
                                                                                      (do (reset! negating false)  "Not that I know of."))))
                        
-                       :else "Yes, that's right."
-                       
-                       
-                       
-                       )
+                       :else "Yes, that's right." )
                        
                        ))
             (catch Exception e (do (println (.getMessage e)) "That's not a valid query." )))
@@ -557,17 +560,15 @@ Dynamic rules is something I wouldn't mind adding to Clara, although that comes 
        (= intype :T-WHO-QUESTION) (get-who (g-respond-sync (g-rephrase-from-tree parsetree)))
        (= intype :T-WHOM-QUESTION) (get-who (g-respond-sync (g-rephrase-from-tree parsetree)))
        
-       (= intype :ANON-RULE) (dosync (alter g-rule-list #(str % text ";"))
-                                              (let [new-session (-> (mk-session (symbol this-ns)
-                                                (g-load-user-rules @g-rule-list))
-                                                ( #(apply insert %1 %2) @g-fact-set)
-                                                (fire-rules))]
-                                                (ref-set g-curr-session new-session))
-                                              
-                                              ;(str "rules loaded: " (apply str (g-load-user-rules text)))
-                                              "OK, got it. That's a rule."
-                                              
-                                              )
+       (= intype :ANON-RULE)
+           (do (->>  (str (get-g-rule-list) text ";")
+                          (set-g-rule-list) )
+                   (let [new-session 
+                           (-> (mk-session (symbol this-ns)   (g-load-user-rules (get-g-rule-list)))
+                              ( #(apply insert %1 %2) (get-g-fact-set))
+                              (fire-rules))]
+                       (dosync (ref-set g-curr-session new-session)) )
+                   "OK, got it. That's a rule."  )
        
       :else "Sorry, I didn't get that."
        )))
@@ -636,23 +637,20 @@ Dynamic rules is something I wouldn't mind adding to Clara, although that comes 
           ]
  (println "text: " text)
  (cond
-    (= text "Forget all facts") (dosync   (ref-set g-fact-set g-default-fact-set   )
+    (= text "Forget all facts") (do   (set-g-fact-set g-default-fact-set   )
                                           (let [new-session (-> @g-curr-session 
-                                                             (#(apply insert %1 %2) @g-fact-set)
+                                                             (#(apply insert %1 %2) (get-g-fact-set))
                                                              (fire-rules))]
-                                             (ref-set g-curr-session new-session))
+                                             (dosync (ref-set g-curr-session new-session)) )
                                           (do "OK, all facts forgotten."))
    (= text "Forget all rules") (do (println "forgetting all rules..")
-                                   (dosync 
-                                     (ref-set g-rule-list g-default-rule-list )
-                                     (let [new-session (-> (mk-session (symbol this-ns)
-                                         (g-load-user-rules @g-rule-list))
-                                         ( #(apply insert %1 %2) @g-fact-set)
-                                         (fire-rules))]
-                                       (ref-set g-curr-session new-session))
-                                              "OK, all rules forgotten."
-                                              
-                                              ))
+                                   (set-g-rule-list g-default-rule-list )
+                                   (let [new-session (-> (mk-session (symbol this-ns) (g-load-user-rules (get-g-rule-list)))
+                                                         ( #(apply insert %1 %2) (get-g-fact-set))
+                                                          (fire-rules))]
+                                       (dosync (ref-set g-curr-session new-session))  )
+                                   "OK, all rules forgotten."  )
+   
    (re-find (re-pattern "(?i)&caught") text) (str "There was a problem: " text)
    (re-find (re-pattern "(?i)^\\s*(:?hello|hi|hey|howdy|what's\\s+up|how\\s+are\\s+you)") text) "Hello! I understand simple sentences of the form SVO, such as 'Anna likes Bob Smith', and rules like '?x likes ?y when ?y likes ?x'. Give it a try!"
    (:add-voc-type (edn/read-string text))  (add-voc  text)
