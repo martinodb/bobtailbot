@@ -455,24 +455,38 @@ Dynamic rules is something I wouldn't mind adding to Clara, although that comes 
         negtext (str "it's false that " cleantext)
         yntext (str cleantext " ?")
         
+        
+        ans-yes "Yes, that's right."
+        ans-ikr "I know, right."
+        ans-no "Definitely not, that's false."
+        ans-imp "That's impossible."
+        ans-dunno "Not that I know of."
+        ans-okgotit "OK, got it."
+        ans-ok-rule "OK, got it. That's a rule."
+        ans-oops-rf "Oops, a bug in my respond function"
+        ans-invalid-query "That's not a valid query."
+        ans-sorrywhat "Sorry, I didn't get that."
+        
+        
         parsetree  ((g-grammar) text)
         intype (first (first parsetree))]
    (cond 
        (or (= intype :TRIP-FACT-IND2 ) (= intype :PRENEG-TRIP-FACT-IND2) (= intype :EMBNEG-TRIP-FACT-IND2) (= intype :NOT-FACTS ) (= intype :PREAFF-FACTS ))
-         (cond 
-          (= (g-respond-sync yntext) "Yes, that's right.") (do "I know, right.")
-          (= (g-respond-sync yntext) "Definitely not, that's false.") (do "That's impossible.")
-          (= (g-respond-sync yntext) "Not that I know of.") (do
-                                                              (->> (reduce conj (get-g-fact-set) (map eval (g-load-user-facts text)))
-                                                                   (into #{})
-                                                                    (set-g-fact-set))
-                                                              (let [new-session (-> @g-curr-session 
-                                                                                 (#(apply insert %1 %2) (get-g-fact-set))
-                                                                                 (fire-rules))]
-                                                                    (dosync (ref-set g-curr-session new-session)))
-                                                              ;(str "facts added: " (pr-str (g-load-user-facts text)))
-                                                               (do "OK, got it."))
-          :else "Oops, a bug in my respond function"  )
+         (let [yntextr (g-respond-sync yntext)]
+           (cond 
+             (= yntextr ans-yes) (do ans-ikr)
+             (= yntextr ans-no) (do ans-imp)
+             (= yntextr ans-dunno) (do
+                  (->> (reduce conj (get-g-fact-set) (map eval (g-load-user-facts text)))
+                       (into #{})
+                       (set-g-fact-set))
+                  (let [new-session (-> @g-curr-session 
+                                      (#(apply insert %1 %2) (get-g-fact-set))
+                                      (fire-rules))]
+                      (dosync (ref-set g-curr-session new-session)))
+                  ;(str "facts added: " (pr-str (g-load-user-facts text)))
+                 (do ans-okgotit))
+             :else ans-oops-rf  ))
           
        (= intype :AND-FACTS)
           (dosync
@@ -502,7 +516,7 @@ Dynamic rules is something I wouldn't mind adding to Clara, although that comes 
                           "satisfiers: " (string/join "  " (get-ans-vars raw-query-result-set-str)) "    " 
                           ;"raw query result (no duplicates):  " raw-query-result-set-str 
                           )))
-            (catch Exception e (do (println (.getMessage e)) "That's not a valid query." )))
+            (catch Exception e (do (println (.getMessage e)) ans-invalid-query )))
        (= intype :YNQUESTION )
          (try
            (do 
@@ -514,19 +528,19 @@ Dynamic rules is something I wouldn't mind adding to Clara, although that comes 
                     raw-query-result  (query new-session anon-query)
                     raw-query-result-str (apply str raw-query-result)   ]
                     (cond
-                      (and (= raw-query-result-str "")  @negating ) (do (println "negating. negtext: " negtext) (reset! negating false)  "Not that I know of.")
+                      (and (= raw-query-result-str "")  @negating ) (do (println "negating. negtext: " negtext) (reset! negating false)  ans-dunno)
                       (and (= raw-query-result-str "")  (not @negating) ) (do (println "not negating yet. negtext:" negtext)
                                                                              (reset! negating true)
                                                                              (let [neg-qr (g-respond-sync negtext)]
-                                                                                   (if (= neg-qr "Yes, that's right.") 
-                                                                                     (do  (reset! negating false)  "Definitely not, that's false.")
+                                                                                   (if (= neg-qr ans-yes) 
+                                                                                     (do  (reset! negating false)  ans-no)
                                                                                      
-                                                                                     (do (reset! negating false)  "Not that I know of."))))
+                                                                                     (do (reset! negating false)  ans-dunno))))
                        
-                       :else "Yes, that's right." )
+                       :else ans-yes )
                        
                        ))
-            (catch Exception e (do (println (.getMessage e)) "That's not a valid query." )))
+            (catch Exception e (do (println (.getMessage e)) ans-invalid-query )))
        
        (= intype :T-DOES-QUESTION) (g-respond-sync (g-rephrase-from-tree parsetree))
        (= intype :T-WHO-QUESTION) (get-who (g-respond-sync (g-rephrase-from-tree parsetree)))
@@ -540,9 +554,9 @@ Dynamic rules is something I wouldn't mind adding to Clara, although that comes 
                               ( #(apply insert %1 %2) (get-g-fact-set))
                               (fire-rules))]
                        (dosync (ref-set g-curr-session new-session)) )
-                   "OK, got it. That's a rule."  )
+                   ans-ok-rule  )
        
-      :else "Sorry, I didn't get that."
+      :else ans-sorrywhat
        )))
 
 
