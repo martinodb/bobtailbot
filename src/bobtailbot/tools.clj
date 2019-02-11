@@ -40,8 +40,11 @@
 (defn dump-to-path
   "Store a value's representation to a given path"
   [path value]
-  ;(spit path (pr-str value))
-  (pprint value (io/writer path))
+  (spit path (pr-str value))
+  ;(pprint value (io/writer path))
+  
+  
+  
   
   )
 
