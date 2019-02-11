@@ -20,7 +20,6 @@
             [schema.core :as sc]
             
             
-            ;[duratom.core :as dac :refer [duratom destroy]]
             [bobtailbot.tools :as tools :refer [dump-to-path dump-to-path-records load-from-path-or-create  disk-atom  disk-ref]]
             
             [clojure.set :as set]
@@ -80,12 +79,7 @@
 
 
 
-;(defn Vinf [] (set (map :inf @verb-set)))
-;(defn Vpast [] (set (map :past @verb-set)))
-;(defn Vpp [] (set (map :pp @verb-set)))
-;(defn Ver [] (set (map :er @verb-set)))
-;(defn Ving [] (set (map :ing @verb-set)))
-;(defn Vpres3 []  (set (map :pres3 @verb-set)))
+
 
 (defn Vinf [] (set (map :inf (get-verb-set))))
 (defn Vpast [] (set (map :past (get-verb-set))))
@@ -367,13 +361,11 @@
          ]
         ) )
 
-;(def g-fact-set   (disk-ref    fact-file-p    g-default-fact-set    g-edn-readers))
+
 (defn get-g-fact-set []   (load-from-path-or-create    fact-file-p    g-default-fact-set    g-edn-readers))
 (defn set-g-fact-set [g-fact-set]   (dump-to-path-records    fact-file-p   g-fact-set))
 
 
-;(defn get-verb-set [] (load-from-path-or-create (str dir-prefix "store/verb_set.edn") default-verb-set verb-set-edn-readers ))
-;(defn set-verb-set [verb-set] (dump-to-path (str dir-prefix "store/verb_set.edn") verb-set  )) ; "set the verb set". Don't confuse "set", the verb, with "set" the noun.
 
 
 
@@ -466,26 +458,6 @@ Dynamic rules is something I wouldn't mind adding to Clara, although that comes 
         parsetree  ((g-grammar) text)
         intype (first (first parsetree))]
    (cond 
-     ;(= intype :ADD-VOCAB)
-       ;(let [voctype (second (second (first parsetree)))]
-         ;(cond
-            ;(= voctype "verb") 
-               ;(do
-               ;(dosync (alter verb-set #(into #{} (conj % (parsed-voc-map parsetree  )))))
-               ;(pr-str (parsed-voc-map parsetree  ))
-               ;)
-            ;(= voctype "noun") 
-               ;(do
-               ;(dosync (alter noun-set #(into #{} (conj % (parsed-voc-map parsetree  )))))
-               ;(pr-str (parsed-voc-map parsetree  ))
-               ;)
-            ;(= voctype "adj") 
-               ;(do
-               ;(dosync (alter adj-set #(into #{} (conj % (parsed-voc-map parsetree  )))))
-               ;(pr-str (parsed-voc-map parsetree  ))
-               ;)
-            ;:else "unknown vocabulary type"
-             ;))
        (or (= intype :TRIP-FACT-IND2 ) (= intype :PRENEG-TRIP-FACT-IND2) (= intype :EMBNEG-TRIP-FACT-IND2) (= intype :NOT-FACTS ) (= intype :PREAFF-FACTS ))
          (cond 
           (= (g-respond-sync yntext) "Yes, that's right.") (do "I know, right.")
@@ -578,27 +550,6 @@ Dynamic rules is something I wouldn't mind adding to Clara, although that comes 
 
 
 
-;(defn add-voc "add vocabulary"
-  ;[text]
-    ;(let [voc-exp (edn/read-string text)
-          ;vtype (:add-voc-type voc-exp)
-          ;voc-entry (:content voc-exp)]
-       ;(cond
-         ;(= vtype :verb)   
-             ;(dosync (if (contains? @verb-set voc-entry) 
-                            ;(str "I already know this verb: " (:inf voc-entry))
-                            ;(do (alter verb-set #(into #{} (conj % voc-entry))) (str "Verb added: " (:inf voc-entry)) ) )    )
-         ;(= vtype :noun)
-             ;(dosync (if (contains? @noun-set voc-entry) 
-                            ;(str "I already know this noun: " (:sing voc-entry))
-                            ;(do (alter noun-set #(into #{} (conj % voc-entry))) (str "Noun added: " (:sing voc-entry)) ) )    )
-         ;(= vtype :adj)
-             ;(dosync (if (contains? @adj-set voc-entry) 
-                            ;(str "I already know this adjective: " (:a voc-entry))
-                            ;(do (alter adj-set #(into #{} (conj % voc-entry))) (str "Adjective added: " (:a voc-entry)) ) )    )
-          ;:else (str "I don't know this word type: " vtype)
-         ;)
-           ;))
 
 
 (defn add-voc "add vocabulary"
@@ -691,7 +642,7 @@ Dynamic rules is something I wouldn't mind adding to Clara, although that comes 
 (def respond g-respond)
 
 (defn get-ans-vars [raw-q-result] (re-seq #"\:\?[\S&&[^\#]]+\s+[\S&&[^\{\}]]+" raw-q-result))
-;(defn get-ans-vars [raw-q-result] (re-seq #"\:\?\S+\s+\"[a-zA-z0-9_\-\s]*\"" raw-q-result))
+
 
 
 ;;; #"\:\?x\s+\:(\S+)"  ---> (re-pattern "\\:\\?x\\s+\\:(\\S+)")
