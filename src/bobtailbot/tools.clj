@@ -40,9 +40,12 @@
 (defn dump-to-path
   "Store a value's representation to a given path"
   [path value]
-  (spit path (pr-str value))
-  ;(pprint value (io/writer path))
+  (spit path (pr-str value)) ; this works but the file contents look ugly.
+  ;(pprint value (io/writer path)) ; this one is bad, the edn readers dont work.
   
+  ;(pprint (pr-str value) (io/writer path)) ; doesn't work either. It prints a string, with double quotes.
+  
+  ;(spit path (pr-str (with-out-str (pprint value )))) nope, doesn't work either. Prints to a string with escaped stuff.
   
   
   
