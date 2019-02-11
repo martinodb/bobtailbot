@@ -20,7 +20,7 @@
             [schema.core :as sc]
             
             
-            [bobtailbot.tools :as tools :refer [dump-to-path dump-to-path-records load-from-path-or-create  disk-atom  disk-ref]]
+            [bobtailbot.tools :as tools :refer [dump-to-path dump-to-path-records load-from-path-or-create ]]
             
             [clojure.set :as set]
             
