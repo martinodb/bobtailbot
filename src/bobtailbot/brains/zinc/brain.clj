@@ -18,16 +18,26 @@
             ))
 
 
-;; IMPORTANT!!!
-;; Change this prefix if you change this file's name (or path).
-;;Also remember to change the ns declaration.
-(def parent-ns "bobtailbot.brains.zinc")
-(def this-ns-unqual "brain")
-;;;;;;;
-(def this-ns (str parent-ns "." this-ns-unqual))
-(def ns-prefix (str this-ns "/"))
-(def this-dir (str "./src/" (-> parent-ns (string/replace #"\." "/" ) (string/replace #"-" "_")) ))
-(def dir-prefix (str this-dir "/" ))
+
+;;; The following snippet should get the ns and dir for this brain and its data without modification:
+;;;;;
+(def D (symbol ::XXXDummy))
+(def this-ns-sym (-> #'D meta :ns .name))
+(def this-ns-str (str this-ns-sym))
+(def this-ns-unqual-str (re-find  (re-pattern "[^\\.]+$") this-ns-str))
+(def parent-ns-str (re-find  (re-pattern ".*(?=\\.)") this-ns-str))
+(def parent-ns parent-ns-str)
+(def this-dir-tail (re-find (re-pattern ".*(?=\\/[^\\/]+$)")  (-> #'D meta :file)))
+(def this-dir (str "./src/" this-dir-tail))
+(def data-this-dir (str "./data/" this-dir-tail))
+;;;;;;;;;;;;
+;;; Actually used:
+(def this-ns this-ns-str) ; eg: "bobtailbot.brains.general.brain"
+(def ns-prefix (str this-ns "/")) ; eg: "bobtailbot.brains.general.brain/"
+(def dir-prefix (str this-dir "/" )) ; eg: "./src/bobtailbot/brains/general/"
+(def data-dir-prefix (str data-this-dir "/")) ; eg: "./data/bobtailbot/brains/general/"
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
 
 
 
