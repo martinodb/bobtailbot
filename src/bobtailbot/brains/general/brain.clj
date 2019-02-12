@@ -41,13 +41,18 @@
 (def this-ns-unqual-str (re-find  (re-pattern "[^\\.]+$") this-ns-str))
 (def parent-ns-str (re-find  (re-pattern ".*(?=\\.)") this-ns-str))
 (def parent-ns parent-ns-str)
+
+(def this-dir-tail (re-find (re-pattern ".*(?=\\/[^\\/]+$)")  (-> #'D meta :file)))
+(def this-dir (str "./src/" this-dir-tail))
+(def data-this-dir (str "./data/" this-dir-tail))
+
 ;;;;;;;;;;;;
 ;;; Actually used:
 ;(def this-ns (str parent-ns "." this-ns-unqual))
 (def this-ns this-ns-str)
 (def ns-prefix (str this-ns "/"))
-(def this-dir (str "./src/" (-> parent-ns (string/replace #"\." "/" ) (string/replace #"-" "_")) ))
 (def dir-prefix (str this-dir "/" ))
+(def data-dir-prefix (str data-this-dir "/"))
 ;;;;;;;;;;;;;;;;;
 
 
@@ -84,11 +89,11 @@
 
 (def verb-set-edn-readers {})
 
-;(def verb-set (disk-ref (str dir-prefix "store/verb_set.edn") default-verb-set verb-set-edn-readers ))
+;(def verb-set (disk-ref (str data-dir-prefix "store/verb_set.edn") default-verb-set verb-set-edn-readers ))
 
 
-(defn get-verb-set [] (load-from-path-or-create (str dir-prefix "store/verb_set.edn") default-verb-set verb-set-edn-readers ))
-(defn set-verb-set [verb-set] (dump-to-path (str dir-prefix "store/verb_set.edn") verb-set  )) ; "set the verb set". Don't confuse "set", the verb, with "set" the noun.
+(defn get-verb-set [] (load-from-path-or-create (str data-dir-prefix "store/verb_set.edn") default-verb-set verb-set-edn-readers ))
+(defn set-verb-set [verb-set] (dump-to-path (str data-dir-prefix "store/verb_set.edn") verb-set  )) ; "set the verb set". Don't confuse "set", the verb, with "set" the noun.
 
 
 
@@ -116,8 +121,8 @@
 
 (def noun-set-edn-readers {})
 
-(defn get-noun-set [] (load-from-path-or-create (str dir-prefix "store/noun_set.edn") default-noun-set noun-set-edn-readers ))
-(defn set-noun-set [noun-set] (dump-to-path (str dir-prefix "store/noun_set.edn") noun-set ))
+(defn get-noun-set [] (load-from-path-or-create (str data-dir-prefix "store/noun_set.edn") default-noun-set noun-set-edn-readers ))
+(defn set-noun-set [noun-set] (dump-to-path (str data-dir-prefix "store/noun_set.edn") noun-set ))
 
 (defn  Nsimp-sg [] (set (map :sing (get-noun-set))))
 
@@ -136,8 +141,8 @@
 
 (def adj-set-edn-readers {})
 
-(defn get-adj-set [] (load-from-path-or-create (str dir-prefix "store/adj_set.edn") default-adj-set adj-set-edn-readers ))
-(defn set-adj-set [adj-set] (dump-to-path (str dir-prefix "store/adj_set.edn") adj-set  ))
+(defn get-adj-set [] (load-from-path-or-create (str data-dir-prefix "store/adj_set.edn") default-adj-set adj-set-edn-readers ))
+(defn set-adj-set [adj-set] (dump-to-path (str data-dir-prefix "store/adj_set.edn") adj-set  ))
 
 
 (defn Adj [] (set (map :a (get-adj-set))))
@@ -364,8 +369,8 @@
 
 
 
-(def fact-file-p (str dir-prefix "store/g_fact_set.edn"))
-(def rule-file-p (str dir-prefix "store/g_rule_list.edn"))
+(def fact-file-p (str data-dir-prefix "store/g_fact_set.edn"))
+(def rule-file-p (str data-dir-prefix "store/g_rule_list.edn"))
 
 
 (def g-default-fact-set

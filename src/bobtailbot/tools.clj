@@ -26,13 +26,15 @@
 
 
 
+;(let [file-name "path/to/whatever.txt"]
+  ;(make-parents file-name)
+  ;(spit file-name "whatever"))
 
 (defn dump-to-path-records
   "Store a value's representation to a given path. Use this for records. It looks ugly but it works."
   [path value]
-  (spit path (pr-str value))
-  
-  )
+  (do (io/make-parents path)
+      (spit path (pr-str value))) )
 
 
 
@@ -40,8 +42,8 @@
 (defn dump-to-path-no-records
   "Store a value's representation to a given path. Don't use this for records, only for maps. It looks good but it can't handle records."
   [path value]
-  (pprint value (io/writer path))
-  )
+  (do (io/make-parents path)
+  (pprint value (io/writer path)) )  )
   
 
 
