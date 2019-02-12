@@ -61,30 +61,86 @@
    [] (use-timbre) )
 
 
-;;;;;;;;;
 
 
 
 
-(defconfig greeting "Hello.  Let's chat.")
-
+;;;;;;;; GLOBAL CONFIGS ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;; Default brain and adapter.
 (defconfig brain :general) ; use the name of the brain you want, as a keyword. A default is given.
-
 (defconfig adapter :irc)
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-
-
-;; default non-repl chat configs
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;; Default chat config options. They can be overriden by each adapter's options. CLI options override all.
+;;;;;;;;; All configs can be set in the file "config.edn"
 (defconfig nick "bobtailbot")
 (defconfig host "127.0.0.1")
 (defconfig port 6667)
 (defconfig group-or-chan nick) ; eg: "bobtailbot" ; if a prefix such as "#" is needed, the adapter must add it.
-;;
+(defconfig greeting "Hello.  Let's chat.")
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 
-;; irc configs
-;(defconfig irc-channel (str "#" group-or-chan)) ; eg: "#bobtailbot"
-;;
+
+
+
+
+
+
+(defn brainns-str "Get the brain namespace (as string) from brain"
+   [brain] (str "bobtailbot.brains." (-> brain (name) (read-string)) ".brain")   )
+
+(defn adapterns-str "Get the adapter namespace (as string) from adapter"
+   [adapter] (str "bobtailbot.adapters." (-> adapter (name) (read-string)) )   )
+
+
+(defn respond-b "Get the respond function of given brain, or respond to given text with given brain"
+   ([brain] (fn [text] (load-string (str "(" (brainns-str brain) "/respond " "\"" text "\"" ")"))) )
+   ([brain text] ((respond-b brain) text) ) )
+
+
+(defn hear-b "Get the hear function of given brain, or hear given text with given brain"
+   ([brain] (fn [text]   (load-string (str "(" (brainns-str brain) "/hear " "\"" text "\"" ")"))    ) )
+   ([brain text] ((hear-b brain) text) ) )
+
+(defn speakup-b "Get the speakup function of given brain, or speakup in given speakup-chan with given brain"
+   ([brain] (fn [speakup-chan]  ((load-string (str "(fn [x] " "(" (brainns-str brain) "/speakup "  "x"  ")" ")"  )) speakup-chan)  ) )
+   ([brain speakup-chan] ((speakup-b brain) speakup-chan) ) )
+
+
+(defn connect-ab "Connect with given adapter and brain"
+  [adapter brain nick host port group-or-chan greeting ]
+    ((load-string (str "(fn [nick host port group-or-chan greeting hear speakup respond] " "(" (adapterns-str adapter) "/connect "  "nick host port group-or-chan greeting hear speakup respond"  ")" ")"  )) nick host port group-or-chan greeting (hear-b brain) (speakup-b brain) (respond-b brain)) )
+
+
+
+(defn get-default "Get the default config option for an adapter"
+  [op adapter]
+   (let [adapterns-s (adapterns-str adapter)
+         adapter-op (load-string (str adapterns-s "/" op))
+         global-op (load-string (str "bobtailbot.core" "/" op))
+         use-global? (load-string (str adapterns-s "/" "use-global?"))
+        ]
+    (if use-global? (do global-op)(do adapter-op)) ) )
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -94,22 +150,22 @@
 
 (def cli-options
   [
-   ["-g" "--greeting GREETING" "Greeting" :default greeting]
-   ["-b" "--brain BRAIN" "Brain" :default brain]
    ["-a" "--adapter ADAPTER" "Adapter" :default adapter]
-   ["-n" "--nick NICK" "Nick" :default nick]
+   ["-b" "--brain BRAIN" "Brain" :default brain]
    
+   ["-g" "--greeting GREETING" "Greeting" :default (get-default "greeting" adapter)]
+   ["-n" "--nick NICK" "Nick" :default (get-default "nick" adapter)]
    ["-H" "--host HOST" "Remote host"
-    :default host ;; configured default host is localhost.
+    :default (get-default "host" adapter) ;; configured default host is localhost.
     :default-desc "localhost"
     :parse-fn #(InetAddress/getByName %)]
     
    ["-p" "--port PORT" "Port number"
-    :default port
+    :default (get-default "port" adapter)
     :parse-fn #(Integer/parseInt %)
     :validate [#(< 0 % 0x10000) "Must be a number between 0 and 65536"]]
     
-    ["-c" "--group-or-chan GROUP-OR-CHAN" "Group or channel" :default group-or-chan]
+    ["-c" "--group-or-chan GROUP-OR-CHAN" "Group or channel" :default (get-default "group-or-chan" adapter)]
 
    ["-h" "--help" "Help" :default false]])
 
@@ -176,36 +232,6 @@
 
 
 
-
-
-
-
-(defn brainns-str "Get the brain namespace (as string) from brain"
-   [brain] (str "bobtailbot.brains." (-> brain (name) (read-string)) ".brain")   )
-
-(defn adapterns-str "Get the adapter namespace (as string) from adapter"
-   [adapter] (str "bobtailbot.adapters." (-> adapter (name) (read-string)) )   )
-
-
-
-
-(defn respond-b "Get the respond function of given brain, or respond to given text with given brain"
-   ([brain] (fn [text] (load-string (str "(" (brainns-str brain) "/respond " "\"" text "\"" ")"))) )
-   ([brain text] ((respond-b brain) text) ) )
-
-
-(defn hear-b "Get the hear function of given brain, or hear given text with given brain"
-   ([brain] (fn [text]   (load-string (str "(" (brainns-str brain) "/hear " "\"" text "\"" ")"))    ) )
-   ([brain text] ((hear-b brain) text) ) )
-
-(defn speakup-b "Get the speakup function of given brain, or speakup in given speakup-chan with given brain"
-   ([brain] (fn [speakup-chan]  ((load-string (str "(fn [x] " "(" (brainns-str brain) "/speakup "  "x"  ")" ")"  )) speakup-chan)  ) )
-   ([brain speakup-chan] ((speakup-b brain) speakup-chan) ) )
-
-
-(defn connect-ab "Connect with given adapter and brain"
-  [adapter brain nick host port group-or-chan greeting ]
-    ((load-string (str "(fn [nick host port group-or-chan greeting hear speakup respond] " "(" (adapterns-str adapter) "/connect "  "nick host port group-or-chan greeting hear speakup respond"  ")" ")"  )) nick host port group-or-chan greeting (hear-b brain) (speakup-b brain) (respond-b brain)) )
 
 
 

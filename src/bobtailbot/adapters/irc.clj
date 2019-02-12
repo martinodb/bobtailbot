@@ -2,10 +2,27 @@
 
 (ns bobtailbot.adapters.irc
   (:gen-class)
-  (:require [clojure.string :as string]
+  (:require [outpace.config :refer [defconfig]]
+            [clojure.string :as string]
             [clojure.tools.cli :as cli]
             [clojure.core.async :as async]
             [com.gearswithingears.async-sockets :refer :all]))
+
+
+
+;; specific configs
+(defconfig use-global? false) ; true: use global configs. false: override global configs. (CLI options override this)
+(defconfig nick "bobtailbot")
+(defconfig host "127.0.0.1")
+(defconfig port 6667)
+(defconfig group-or-chan nick) ; eg: "bobtailbot" ; if a prefix such as "#" is needed, the adapter must add it.
+(defconfig greeting "Hello.  Let's chat.")
+
+
+
+
+
+
 
 
 (def connected (atom false))
