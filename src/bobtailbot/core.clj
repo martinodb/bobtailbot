@@ -14,7 +14,7 @@
             [clojure.string :as string]
             
             ;; A brain ns must always be: "bobtailbot.brains.<brain-name>.brain"
-            [bobtailbot.brains.quick-and-dirty.brain ]
+            [bobtailbot.brains.template.brain ]
             [bobtailbot.brains.general.brain ]
             [bobtailbot.brains.zinc.brain ]
             

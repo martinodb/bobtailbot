@@ -1,4 +1,4 @@
-(ns bobtailbot.brains.quick-and-dirty.brain
+(ns bobtailbot.brains.template.brain
   "Only basic I/O functionality"
   (:require [clojure.string :as string]
             [clojure.core.async :as async 
