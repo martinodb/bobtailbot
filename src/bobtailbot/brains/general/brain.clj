@@ -402,8 +402,8 @@
 
 
 
-(sc/defn ^:always-validate g-load-user-rules-safe :- [clara.rules.schema/Production]
-  "Converts a business rule string into Clara productions. Safe version."
+(sc/defn ^:always-validate g-load-user-rules :- [clara.rules.schema/Production]
+  "Converts a business rule string into Clara productions."
   [business-rules :- sc/Str]
 
   (let [parse-tree ((g-grammar) business-rules)]
@@ -414,19 +414,17 @@
     (insta/transform g-transforms parse-tree)))
 
 
-(defn g-load-user-rules-unsafe 
-  "Converts a business rule string into Clara productions. Unsafe version."
-  [business-rules]
+(defn g-load-user-facts
+  "Converts facts into Clara record entries."
+  [facts]
 
-  (let [parse-tree ((g-grammar) business-rules)]
+  (let [parse-tree ((g-grammar) facts)]
 
     (when (insta/failure? parse-tree)
       (throw (ex-info (print-str parse-tree) {:failure parse-tree})))
 
     (insta/transform g-transforms parse-tree)))
 
-(def g-load-user-rules g-load-user-rules-safe)
-(def g-load-user-facts g-load-user-rules-unsafe)
 
 
 
