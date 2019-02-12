@@ -55,7 +55,8 @@ To write a new brain, you can start by looking at the [available brains](https:/
 Then you have to [add its namespace](https://github.com/martinodb/bobtailbot/blob/master/src/bobtailbot/core.clj) as a requirement in `bobtailbot.core`.
 
 Every brain must have a `brain.clj` file, so that the full namespace is `bobtailbot.brains.<brain-name>.brain`. It must also have the functions `respond`, `hear` and `speakup`. The first one is used for syncronous, strictly interactive UIs such as a repl, while the other two are used for asyncronous UI such as IRC, where the bot must be able to hear without saying anything, and OTOH it may speak up at any moment, for instance when it detects some kind of event outside of the chat environment.
-Also make sure to edit the vars `parent-ns` and `this-ns-unqual` in your `brain.clj` file. The former should be `"bobtailbot.brains.<brain-name>"` and the latter should be `"brain"`.
+Brain data are stored by convention in the directory `./data/bobtailbot/brains/<brain-name>/store`. In the example brains there's a snippet that detects the namespace and gives you the string `data-dir-prefix` to prepend to your storage file names. Just copy-paste it and leave it unmodified, or use one of those brains as a template.
+
 
 To write a new adapter, look at the [available adapters](https://github.com/martinodb/bobtailbot/tree/master/src/bobtailbot/adapters) , pick one, save it with a new name, etc (same thing as with brains). Every adapter must have a function `(connect [nick host port group-or-chan greeting hear-fn speakup-fn respond-fn])`.
 You'll get the idea of how it works by looking at [bobtailbot.core](https://github.com/martinodb/bobtailbot/blob/master/src/bobtailbot/core.clj).
