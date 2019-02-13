@@ -25,6 +25,9 @@
             [bobtailbot.adapters.irc]
             
             
+            [bobtailbot.tools :as tools :refer [locals-map keyed]]
+            
+            
             [clojure.core.async :as async :refer [go-loop <! >! close!]]
             
             [outpace.config :refer [defconfig]])
@@ -115,6 +118,12 @@
     ;((load-string (str "(fn [nick host port group-or-chan greeting hear speakup respond] " "(" (adapterns-str adapter) "/connect "  "nick host port group-or-chan greeting hear speakup respond"  ")" ")"  )) nick host port group-or-chan greeting (hear-b brain) (speakup-b brain) (respond-b brain)) )
 
 
+
+
+
+
+
+
 (defn connect-ab "Connect with given adapter and brain"
   [{:keys [adapter brain nick host port group-or-chan greeting] :as opts-ab} ]
     (let [hear (hear-b brain)
@@ -125,7 +134,11 @@
         ((load-string (str
         "(fn [{:keys [nick host port group-or-chan greeting hear speakup respond] :as opts-conn}] " 
          "(" (adapterns-str adapter) "/connect "  "opts-conn"  ")" ")"  )) 
-        {:nick nick :host host :port port :group-or-chan group-or-chan :greeting greeting :hear hear :speakup speakup :respond respond}   ) ) ) )
+        ;{:nick nick :host host :port port :group-or-chan group-or-chan :greeting greeting :hear hear :speakup speakup :respond respond} 
+        
+        (select-keys (locals-map) [:nick :host :port :group-or-chan :greeting :hear :speakup :respond])
+        
+          ) ) ) )
 
 
 

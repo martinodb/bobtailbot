@@ -30,6 +30,32 @@
   ;(make-parents file-name)
   ;(spit file-name "whatever"))
 
+
+
+;;; by Justin Smith.
+;;; https://gist.github.com/noisesmith/3490f2d3ed98e294e033b002bc2de178
+(defmacro locals-map [] (into {} (for [[sym val] &env] [(keyword (name sym)) sym])))
+;;; Another option. This one doesn't capture the local environment, it requires explicit arguments:
+;; https://github.com/clj-commons/useful/blob/master/src/flatland/useful/map.clj#L6
+(let [transforms {:keys keyword
+                  :strs str
+                  :syms identity}]
+  (defmacro keyed
+      "Create a map in which, for each symbol S in vars, (keyword S) is a
+  key mapping to the value of S in the current scope. If passed an optional
+  :strs or :syms first argument, use strings or symbols as the keys instead."
+    ([vars] `(keyed :keys ~vars))
+    ([key-type vars]
+       (let [transform (comp (partial list `quote)
+                             (transforms key-type))]
+         (into {} (map (juxt transform identity) vars))))))
+
+
+
+
+
+
+
 (defn dump-to-path-records
   "Store a value's representation to a given path. Use this for records. It looks ugly but it works."
   [path value]
