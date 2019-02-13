@@ -110,9 +110,28 @@
    ([brain speakup-chan] ((speakup-b brain) speakup-chan) ) )
 
 
+;(defn connect-ab "Connect with given adapter and brain"
+  ;[adapter brain nick host port group-or-chan greeting ]
+    ;((load-string (str "(fn [nick host port group-or-chan greeting hear speakup respond] " "(" (adapterns-str adapter) "/connect "  "nick host port group-or-chan greeting hear speakup respond"  ")" ")"  )) nick host port group-or-chan greeting (hear-b brain) (speakup-b brain) (respond-b brain)) )
+
+
 (defn connect-ab "Connect with given adapter and brain"
-  [adapter brain nick host port group-or-chan greeting ]
-    ((load-string (str "(fn [nick host port group-or-chan greeting hear speakup respond] " "(" (adapterns-str adapter) "/connect "  "nick host port group-or-chan greeting hear speakup respond"  ")" ")"  )) nick host port group-or-chan greeting (hear-b brain) (speakup-b brain) (respond-b brain)) )
+  [{:keys [adapter brain nick host port group-or-chan greeting] :as opts-ab} ]
+    (let [hear (hear-b brain)
+          speakup (speakup-b brain)
+          respond (respond-b brain)
+         ]
+      (do (println "opts-conn: " {:nick nick :host host :port port :group-or-chan group-or-chan :greeting greeting :hear hear :speakup speakup :respond respond} 
+                   "\n" "(respond 'hello'): " (respond "hello"))
+        ((load-string (str
+        "(fn [{:keys [nick host port group-or-chan greeting hear speakup respond] :as opts-conn}] " 
+         "(" (adapterns-str adapter) "/connect "  "opts-conn"  ")" ")"  )) 
+        {:nick nick :host host :port port :group-or-chan group-or-chan :greeting greeting :hear hear :speakup speakup :respond respond}
+        
+        
+        ) ) ) )
+
+
 
 
 
@@ -242,8 +261,7 @@
 
 (defn dev-main [& args] ; to try it in lein repl
   (let [{:keys [action options exit-message ok?] :as value-map} (validate-args args)
-         brain (:brain options)
-         adapter (:adapter options)
+         {:keys [brain adapter nick host port group-or-chan greeting ] :as opts-ab} options
          
  
                             ] 
@@ -260,9 +278,10 @@
               (println "value-map: " value-map) ;; for debugging
               (println "brain : " brain)
               (println "adapter: " adapter)
+              (println "opts-ab: " opts-ab)
               (if exit-message  (dev-exit (if ok? 0 1) exit-message) (do))
               (case action
-                "start"  (connect-ab adapter brain (:nick options) (:host options) (:port options) (:group-or-chan options) (:greeting options)  )
+                "start"  (connect-ab opts-ab )
                 "stop"   "stop: unimplemented arg. Use 'quit' instead"
                 "status" "status: unimplemented arg."
                  (str "No matching for action: " action)  ) )   )  )

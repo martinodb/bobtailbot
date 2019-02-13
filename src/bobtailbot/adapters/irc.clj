@@ -119,7 +119,7 @@
 
 
 
-(defn connect [nick host port group-or-chan greeting hear-fn speakup-fn respond-fn] ; respond-fn will be ignored.
+(defn connect [{:keys [nick host port group-or-chan greeting hear speakup respond]}];[nick host port group-or-chan greeting hear-fn speakup-fn respond-fn] ; respond-fn will be ignored.
   (println "Connecting...")
   (swap! curr-host (constantly host))
   (try
@@ -129,7 +129,7 @@
       (println (str "Connected to " host ":" port))
        
       
-       (message-listener socket irc-channel hear-fn)
+       (message-listener socket irc-channel hear)
        (Thread/sleep 1000)
        (login-as-guest socket nick)
        (println (str "connected? :" @connected))
@@ -140,7 +140,7 @@
        (Thread/sleep 1000)
        (write socket (str "PRIVMSG " irc-channel " :" greeting) true)
        (Thread/sleep 500)
-       (speaker-up socket irc-channel speakup-fn)
+       (speaker-up socket irc-channel speakup)
        (while (= @connected true) (Thread/sleep 100))
        (println "disconnecting now")
        (write socket "QUIT")

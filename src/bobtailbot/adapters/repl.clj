@@ -25,7 +25,7 @@
 
 
 
-(defn launch-repl [greeting respond-fn]
+(defn launch-repl [greeting respond]
   (do
     (if greeting (do (println greeting)
                      (flush)))
@@ -34,13 +34,14 @@
   (let [input (read-line)]
     (if-not (= input "quit")
      (do
-       (println (try (respond-fn input)
-                     (catch Exception e (str "Sorry: " e " - " (.getMessage e)))))
-       (recur nil respond-fn))
+       ;(println (try (respond-fn input)
+                     ;(catch Exception e (do (str "Sorry: " e " - " (.getMessage e)))  )))
+       (println (respond input)    )
+       (recur nil respond))
      (do (println "Bye!")
          ;(System/exit 0)
          ))))
 
 
-(defn connect [nick host port group-or-chan greeting hear-fn speakup-fn respond-fn] ; only greeting and respond-fn matter; the rest will be ignored.
- (launch-repl greeting respond-fn))
+(defn connect [{:keys [nick host port group-or-chan greeting hear speakup respond]}] ;[nick host port group-or-chan greeting hear-fn speakup-fn respond-fn] ; only greeting and respond-fn matter; the rest will be ignored.
+ (launch-repl greeting respond))
