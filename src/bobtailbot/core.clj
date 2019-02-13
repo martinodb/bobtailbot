@@ -121,15 +121,11 @@
           speakup (speakup-b brain)
           respond (respond-b brain)
          ]
-      (do (println "opts-conn: " {:nick nick :host host :port port :group-or-chan group-or-chan :greeting greeting :hear hear :speakup speakup :respond respond} 
-                   "\n" "(respond 'hello'): " (respond "hello"))
+      (do   ;;; DEBUGGING (println "opts-conn: " {:nick nick :host host :port port :group-or-chan group-or-chan :greeting greeting :hear hear :speakup speakup :respond respond}  "\n" "(respond 'hello'): " (respond "hello"))
         ((load-string (str
         "(fn [{:keys [nick host port group-or-chan greeting hear speakup respond] :as opts-conn}] " 
          "(" (adapterns-str adapter) "/connect "  "opts-conn"  ")" ")"  )) 
-        {:nick nick :host host :port port :group-or-chan group-or-chan :greeting greeting :hear hear :speakup speakup :respond respond}
-        
-        
-        ) ) ) )
+        {:nick nick :host host :port port :group-or-chan group-or-chan :greeting greeting :hear hear :speakup speakup :respond respond}   ) ) ) )
 
 
 
@@ -275,10 +271,10 @@
               ;;;;
               
               
-              (println "value-map: " value-map) ;; for debugging
-              (println "brain : " brain)
-              (println "adapter: " adapter)
-              (println "opts-ab: " opts-ab)
+              ;; DEBUGGING (println "value-map: " value-map) ;; for debugging
+              ;; DEBUGGING (println "brain : " brain)
+              ;; DEBUGGING (println "adapter: " adapter)
+              ;; DEBUGGING (println "opts-ab: " opts-ab)
               (if exit-message  (dev-exit (if ok? 0 1) exit-message) (do))
               (case action
                 "start"  (connect-ab opts-ab )
