@@ -119,7 +119,7 @@
 
 
 
-(defn connect [{:keys [nick host port group-or-chan greeting hear speakup respond]}];[nick host port group-or-chan greeting hear-fn speakup-fn respond-fn] ; respond-fn will be ignored.
+(defn connect [{:keys [nick host port group-or-chan greeting hear speakup ]}]; respond will be ignored.
   (println "Connecting...")
   (swap! curr-host (constantly host))
   (try

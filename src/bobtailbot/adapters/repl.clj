@@ -42,5 +42,5 @@
          ))))
 
 
-(defn connect [{:keys [nick host port group-or-chan greeting hear speakup respond]}]  ;;; only greeting and respond matter, the rest will be ignored.
+(defn connect [{:keys [ greeting respond]}]  ;;; only greeting and respond matter. The others (nick host port group-or-chan greeting) will be ignored. 
  (launch-repl greeting respond))
