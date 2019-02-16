@@ -451,7 +451,94 @@ Dynamic rules is something I wouldn't mind adding to Clara, although that comes 
 (declare remove-iitt)
 (declare get-who)
 
-(def negating (atom false))
+;(def negating (atom false))
+
+
+
+(def ans-yes "Yes, that's right.")
+(def ans-ikr "I know, right.")       
+(def ans-no "Definitely not, that's false.")      
+(def ans-imp "That's impossible.")    
+(def ans-dunno "Not that I know of.")       
+(def ans-okgotit "OK, got it.")      
+(def ans-ok-rule "OK, got it. That's a rule.")        
+(def ans-oops-rf "Oops, a bug in my respond function")      
+(def ans-invalid-query "That's not a valid query.")      
+(def ans-sorrywhat "Sorry, I didn't get that.")
+(def ans-contradiction "There's a contradiction! The answer to that question is both yes and no.")
+
+
+
+(defn g-respond-sync-yes-dunno "respond to yes/no question with either 'yes' or 'dunno'. Question must be in simple form (eg: 'Carol likes Bob?'), not in 'does' form"
+[qtext]
+   (try
+      (do 
+         (let [ cqtext (remove-iitt qtext) ; remove leading 'is it true that'
+                parsetree  ((g-grammar) cqtext)
+                new-rule-list (str (get-g-rule-list) cqtext)
+                new-session   (-> (mk-session (symbol this-ns)  (g-load-user-rules new-rule-list))
+                                      ( #(apply insert %1 %2) (get-g-fact-set))
+                                      (fire-rules))
+                anon-query  (first (insta/transform g-transforms parsetree))
+                raw-query-result  (query new-session anon-query)
+                raw-query-result-str (apply str raw-query-result)
+                    ]
+                    
+                    (if (= raw-query-result-str "") 
+                       (do ans-dunno)
+                       (do ans-yes)) ))
+            (catch Exception e (do (println (.getMessage e)) ans-invalid-query ))))
+
+
+
+
+
+(defn g-respond-sync-ynquestion "answer yes/no question in simple form (eg: 'Carol likes Bob?'), not in 'does' form"
+[qtext]
+         (try
+           (do 
+             (let [ 
+                    negqtext (str "it's false that " qtext)
+                    query-ans (g-respond-sync-yes-dunno qtext )   
+                    negquery-ans (g-respond-sync-yes-dunno negqtext)
+                    
+                    
+                    ]
+                    (cond
+                      (and (= query-ans ans-dunno)  (= negquery-ans ans-dunno) ) (do  ans-dunno)
+                      (and (= query-ans ans-dunno)  (= negquery-ans ans-yes) ) (do  ans-no)
+                      (and (= query-ans ans-yes)  (= negquery-ans ans-dunno) ) (do  ans-yes)
+                      (and (= query-ans ans-yes)  (= negquery-ans ans-yes) ) (do  ans-contradiction)
+                       
+                       :else ans-oops-rf )
+                       
+                       ))
+            (catch Exception e (do (println (.getMessage e)) ans-invalid-query ))))
+
+
+
+
+(defn g-respond-sync-query "respond to a simple query of the form 'match ?x ..' with a response of the form 'satisfiers: ..'"
+[qtext]
+ (try
+           (do 
+             (let [ parsetree  ((g-grammar) qtext)
+                    new-rule-list (str (get-g-rule-list) qtext)
+                    new-session   (-> (mk-session (symbol this-ns) (g-load-user-rules new-rule-list))
+                                      ( #(apply insert %1 %2) (get-g-fact-set))
+                                      (fire-rules))
+                    anon-query  (first (insta/transform g-transforms parsetree))
+                    raw-query-result  (query new-session anon-query)
+                    raw-query-result-set (into #{} raw-query-result)
+                    ;raw-query-result-str (apply str raw-query-result)
+                    raw-query-result-set-str (apply str raw-query-result-set)]
+                    (str 
+                          "satisfiers: " (string/join "  " (get-ans-vars raw-query-result-set-str)) "    " 
+                          ;"raw query result (no duplicates):  " raw-query-result-set-str 
+                          )))
+            (catch Exception e (do (println (.getMessage e)) ans-invalid-query ))))
+
+
 
 
 
@@ -459,28 +546,21 @@ Dynamic rules is something I wouldn't mind adding to Clara, although that comes 
 
 [text]
 (let  [ 
-        cleantext (remove-iitt text)
-        negtext (str "it's false that " cleantext)
-        yntext (str cleantext " ?")
+        ;cleantext (remove-iitt text)
+        ;negtext (str "it's false that " cleantext)
+        ;yntext (str cleantext " ?") ; a cludge to quickly turn statement into a question.
         
         
-        ans-yes "Yes, that's right."
-        ans-ikr "I know, right."
-        ans-no "Definitely not, that's false."
-        ans-imp "That's impossible."
-        ans-dunno "Not that I know of."
-        ans-okgotit "OK, got it."
-        ans-ok-rule "OK, got it. That's a rule."
-        ans-oops-rf "Oops, a bug in my respond function"
-        ans-invalid-query "That's not a valid query."
-        ans-sorrywhat "Sorry, I didn't get that."
+
         
         
         parsetree  ((g-grammar) text)
         intype (first (first parsetree))]
    (cond 
        (or (= intype :TRIP-FACT-IND2 ) (= intype :PRENEG-TRIP-FACT-IND2) (= intype :EMBNEG-TRIP-FACT-IND2) (= intype :NOT-FACTS ) (= intype :PREAFF-FACTS ))
-         (let [yntextr (g-respond-sync yntext)]
+         (let [
+               yntext (str text " ?") ; quickly turn statement into a question.
+               yntextr (g-respond-sync yntext)]
            (cond 
              (= yntextr ans-yes) (do ans-ikr)
              (= yntextr ans-no) (do ans-imp)
@@ -509,50 +589,13 @@ Dynamic rules is something I wouldn't mind adding to Clara, although that comes 
             (str "facts added: " (pr-str (first (g-load-user-facts text)))))
        
        (= intype :QUERY )
-         (try
-           (do 
-             (let [ new-rule-list (str (get-g-rule-list) text)
-                    new-session   (-> (mk-session (symbol this-ns) (g-load-user-rules new-rule-list))
-                                      ( #(apply insert %1 %2) (get-g-fact-set))
-                                      (fire-rules))
-                    anon-query  (first (insta/transform g-transforms parsetree))
-                    raw-query-result  (query new-session anon-query)
-                    raw-query-result-set (into #{} raw-query-result)
-                    ;raw-query-result-str (apply str raw-query-result)
-                    raw-query-result-set-str (apply str raw-query-result-set)]
-                    (str 
-                          "satisfiers: " (string/join "  " (get-ans-vars raw-query-result-set-str)) "    " 
-                          ;"raw query result (no duplicates):  " raw-query-result-set-str 
-                          )))
-            (catch Exception e (do (println (.getMessage e)) ans-invalid-query )))
+         (g-respond-sync-query text)
        (= intype :YNQUESTION )
-         (try
-           (do 
-             (let [ new-rule-list (str (get-g-rule-list) text)
-                    new-session   (-> (mk-session (symbol this-ns)  (g-load-user-rules new-rule-list))
-                                      ( #(apply insert %1 %2) (get-g-fact-set))
-                                        (fire-rules))
-                    anon-query  (first (insta/transform g-transforms parsetree))
-                    raw-query-result  (query new-session anon-query)
-                    raw-query-result-str (apply str raw-query-result)   ]
-                    (cond
-                      (and (= raw-query-result-str "")  @negating ) (do (println "negating. negtext: " negtext) (reset! negating false)  ans-dunno)
-                      (and (= raw-query-result-str "")  (not @negating) ) (do (println "not negating yet. negtext:" negtext)
-                                                                             (reset! negating true)
-                                                                             (let [neg-qr (g-respond-sync negtext)]
-                                                                                   (if (= neg-qr ans-yes) 
-                                                                                     (do  (reset! negating false)  ans-no)
-                                                                                     
-                                                                                     (do (reset! negating false)  ans-dunno))))
-                       
-                       :else ans-yes )
-                       
-                       ))
-            (catch Exception e (do (println (.getMessage e)) ans-invalid-query )))
+           (g-respond-sync-ynquestion text)
        
-       (= intype :T-DOES-QUESTION) (g-respond-sync (g-rephrase-from-tree parsetree))
-       (= intype :T-WHO-QUESTION) (get-who (g-respond-sync (g-rephrase-from-tree parsetree)))
-       (= intype :T-WHOM-QUESTION) (get-who (g-respond-sync (g-rephrase-from-tree parsetree)))
+       (= intype :T-DOES-QUESTION) (g-respond-sync-ynquestion (g-rephrase-from-tree parsetree))
+       (= intype :T-WHO-QUESTION) (get-who (g-respond-sync-query (g-rephrase-from-tree parsetree)))
+       (= intype :T-WHOM-QUESTION) (get-who (g-respond-sync-query (g-rephrase-from-tree parsetree)))
        
        (= intype :ANON-RULE)
            (do (->>  (str (get-g-rule-list) text ";")
@@ -569,7 +612,13 @@ Dynamic rules is something I wouldn't mind adding to Clara, although that comes 
 
 
 
-
+ ;new-rule-list (str (get-g-rule-list) text)
+                    ;new-session   (-> (mk-session (symbol this-ns)  (g-load-user-rules new-rule-list))
+                                      ;( #(apply insert %1 %2) (get-g-fact-set))
+                                        ;(fire-rules))
+                    ;anon-query  (first (insta/transform g-transforms parsetree))
+                    ;raw-query-result  (query new-session anon-query)
+                    ;raw-query-result-str (apply str raw-query-result)   
 
 
 
