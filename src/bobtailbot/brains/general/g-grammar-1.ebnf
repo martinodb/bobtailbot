@@ -23,7 +23,7 @@ PREAFF = (<"it's"> | <"it is">) (<"true"> | <"the case">) <"that">  ;
 
 NQUERY = <"query"> NAME ;
 
-<RULES-QUERIES> = (RULE | QUERY | YNQUESTION | T-DOES-QUESTION | T-WHO-QUESTION | T-WHOM-QUESTION)+ ;
+<RULES-QUERIES> = (RULE | QUERY | YNQUESTION | NEG-YNQUESTION | T-DOES-QUESTION | T-WHO-QUESTION | T-WHOM-QUESTION)+ ;
 
 <RULE> = (NAMED-RULE | ANON-RULE);
 NAMED-RULE = (NAMED-RULE-wtest | NAMED-RULE-notest);
@@ -115,6 +115,7 @@ Q-PREAFF-FACTS = <PREAFF> Q-FACTS;
 
 
 
+
 YNQUESTION = (YNQUESTION-wtest | YNQUESTION-notest);
 YNQUESTION-wtest = YNQ-BODY-wtest;
 YNQUESTION-notest = YNQ-BODY-notest;
@@ -124,6 +125,18 @@ YNQUESTION-notest = YNQ-BODY-notest;
 
 <YNQLHS-wtest> = QLHS-wtest ;
 <YNQLHS-notest> = QLHS-notest ;
+
+
+NEG-YNQUESTION = (NEG-YNQUESTION-wtest | NEG-YNQUESTION-notest);
+NEG-YNQUESTION-wtest = NEG-YNQ-BODY-wtest;
+NEG-YNQUESTION-notest = NEG-YNQ-BODY-notest;
+
+<NEG-YNQ-BODY-wtest> = <"is it ">? <"false that"> YNQLHS-wtest <"?">+ <';'>* ;
+<NEG-YNQ-BODY-notest> = <"is it ">? <"false that"> YNQLHS-notest <"?">+ <';'>* ;
+
+
+
+
 
 
 

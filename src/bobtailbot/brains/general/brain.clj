@@ -236,6 +236,9 @@
 
 
 
+(defn negate [rormap] "find booleans in input rormap (a record or map) and negate them"
+(postwalk #(if (or (= % true) (= % false)) (not %) % ) rormap)   )
+
 
 
 (def g-transforms
@@ -297,9 +300,9 @@
     
     
     ;CAREFUL: this only works because the Triple record only has one boolean (affirm).
-    :Q-NOT-FACTS   (fn [map] (postwalk #(if (or (= % true) (= % false)) (not %) % ) map)) 
-    :R-NOT-FACTS   (fn [map] (postwalk #(if (or (= % true) (= % false)) (not %) % ) map)) 
-    :NOT-FACTS   (fn [map] (postwalk #(if (or (= % true) (= % false)) (not %) % ) map)) 
+    :Q-NOT-FACTS   negate ;(fn [map] (postwalk #(if (or (= % true) (= % false)) (not %) % ) map)) 
+    :R-NOT-FACTS  negate ; (fn [map] (postwalk #(if (or (= % true) (= % false)) (not %) % ) map)) 
+    :NOT-FACTS  negate ; (fn [map] (postwalk #(if (or (= % true) (= % false)) (not %) % ) map)) 
     
     :Q-PREAFF-FACTS identity
     :R-PREAFF-FACTS identity
@@ -330,6 +333,11 @@
     :YNQUESTION-notest   (fn [& facts]
                      {:name "anon-query"
                       :lhs facts
+                      :params #{}
+                       })
+    :NEG-YNQUESTION-notest   (fn [& facts]
+                     {:name "anon-query"
+                      :lhs (map negate facts)
                       :params #{}
                        })
                  })
@@ -449,6 +457,7 @@ Dynamic rules is something I wouldn't mind adding to Clara, although that comes 
 ;;silly reason.
 (declare get-ans-vars)
 (declare remove-iitt)
+(declare replace-iift)
 (declare get-who)
 
 ;(def negating (atom false))
@@ -473,7 +482,7 @@ Dynamic rules is something I wouldn't mind adding to Clara, although that comes 
 [qtext]
    (try
       (do 
-         (let [ cqtext (remove-iitt qtext) ; remove leading 'is it true that'
+         (let [ cqtext (-> qtext (remove-iitt) (replace-iift)) ; remove leading 'is it true that', replace leading 'is it false that' with 'it is false that'
                 parsetree  ((g-grammar) cqtext)
                 new-rule-list (str (get-g-rule-list) cqtext)
                 new-session   (-> (mk-session (symbol this-ns)  (g-load-user-rules new-rule-list))
@@ -590,7 +599,7 @@ Dynamic rules is something I wouldn't mind adding to Clara, although that comes 
        
        (= intype :QUERY )
          (g-respond-sync-query text)
-       (= intype :YNQUESTION )
+       (or (= intype :YNQUESTION )  (= intype :NEG-YNQUESTION ))
            (g-respond-sync-ynquestion text)
        
        (= intype :T-DOES-QUESTION) (g-respond-sync-ynquestion (g-rephrase-from-tree parsetree))
@@ -724,6 +733,8 @@ Dynamic rules is something I wouldn't mind adding to Clara, although that comes 
 
 
 (defn remove-iitt [text] (string/replace text (re-pattern "is it true that") ""  ))
+(defn replace-iift [text] (string/replace text (re-pattern "is it false that") "it's false that"  )) ; turn it into a simple yes-no question, like "it's false that Carol likes Bob?"
+
 
 (defn get-who [x-str] (->> x-str (re-seq (re-pattern "\\:\\?x\\s+\\:(\\S+)") ) (map second) (map #(clojure.string/replace % "_" " ")) (seq->str)  ))
 
