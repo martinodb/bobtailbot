@@ -115,7 +115,7 @@
 
 
 
-(defn respond-sync-stub [text]
+(defn respond-stub [text]
   (if (question-mark? text) "Nice question."
         (case text 
          "alert on"  (do (reset! alert-wanted? true)
@@ -135,7 +135,7 @@
 
 
 
-(defn respond-sync-raw [text] "evaluate commands in this ns"
+(defn respond-raw [text] "evaluate commands in this ns"
 (->> text (#(str "(do (in-ns '" this-ns ")" % ")"))
           (#(try (load-string %) (catch Exception e (str "caught exception: " (.getMessage e))) ) ) 
           (#(or % "OK")) ))
@@ -148,10 +148,8 @@
 
 
 ;; Only use for repl and similar, single-user interfaces. It's syncronous (blocking). 
-;(def respond respond-sync-stub)
-(def respond respond-sync-raw)
-
-
+;(def respond respond-stub)
+(def respond respond-raw)
 
 
 
