@@ -93,6 +93,12 @@
 ;;;
 
 
+
+(def mode (atom {:hear true :speakup true }))
+
+
+
+
 (def init-alert-gen? (atom false))
 (def alert-wanted? (atom false))
 (defn question-mark? [text] (re-find  #"\?$" text) )
@@ -147,13 +153,34 @@
 
 
 
-;;; Only use "hear" and "speakup" for multi-user interfaces like irc. The bot may report events asyncronously, not just respond to questions.
-(defn hear [text-in] (future 
+
+
+
+
+(defn hear-normal [text-in] (future 
                         (reset! last-utterance
                            {:type :response , :text (respond text-in)} )))
 
 
-(defn speakup [speakup-chan] (add-watch last-utterance :utt-ready
+(defn speakup-top [speakup-chan] (add-watch last-utterance :utt-ready
                                           (fn [k r old-state new-state]
-                                                (>!! speakup-chan (:text new-state) ))))
+                                                (if (= (:speakup @mode) true) (>!! speakup-chan (:text new-state) ) nil ))))
+                                                
+
+
+(defn hear-top "top-level hear function"
+ [text-in]
+ (cond
+  (= text-in "bot listen") (do (swap! mode assoc :hear true) (swap! mode assoc :speakup true) (reset! last-utterance {:type :response , :text "OK, listening"}))
+  (= text-in "bot standby") (do (reset! last-utterance {:type :response , :text "OK, standby mode. Say 'bot listen' to wake up"}) (swap! mode assoc :hear false) (swap! mode assoc :speakup false)  )
+  (= (:hear @mode) true) (hear-normal text-in)
+  (= (:hear @mode) false) nil
+  :else (do (println "problem with hear-top"))
+   ))
+
+
+
+;;; Only use "hear" and "speakup" for multi-user interfaces like irc. The bot may report events asyncronously, not just respond to questions.
+(def hear hear-top)
+(def speakup speakup-top )
 
