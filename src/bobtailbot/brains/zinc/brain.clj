@@ -84,7 +84,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 
-
+(def default-kb-file (str data-dir-prefix "store/dkbf.sneps")) ; default kb file.
 
 
 
@@ -130,11 +130,6 @@
 
 
 
-
-
-
-
-
 (defn respond-raw [text] "evaluate commands in this ns"
 (->> text (#(str "(do (in-ns '" this-ns ")" % ")"))
           (#(try (load-string %) (catch Exception e (str "caught exception: " (.getMessage e))) ) ) 
@@ -147,6 +142,11 @@
 (cond
   (= text "bot resp-mode raw") (do (reset! last-utterance {:type :response , :text "OK, raw resp-mode. Say 'bot resp-mode <mode-name>' to switch"}) (swap! mode assoc :resp-mode :raw) )
   (= text "bot resp-mode stub") (do (reset! last-utterance {:type :response , :text "OK, stub resp-mode. Say 'bot resp-mode <mode-name>' to switch"}) (swap! mode assoc :resp-mode :stub) )
+  
+  (= text "bot save") (do (respond-raw "(writeKBToTextFile default-kb-file )") )
+  (= text "bot load") (do (respond-raw "(load default-kb-file )") )
+  (= text "bot clearkb") (do (respond-raw "(clearkb true)") )
+  
   (= (:resp-mode @mode) :raw) (respond-raw text)
   (= (:resp-mode @mode) :stub) (respond-stub text)
   :else "Oops! Problem with my respond function"
