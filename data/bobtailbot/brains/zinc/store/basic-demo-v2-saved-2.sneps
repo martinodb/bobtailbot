@@ -1,0 +1,23 @@
+;;; CSNePS KB
+;;; =========
+;;; Mon Feb 18 04:12:29 CET 2019
+;;; Assumes that all required Contexts, Types, Slots, and Caseframes have now been loaded.
+(in-ns 'zinc.core.snuser)
+(zinc.core.build/assert '(Isa (every x (Isa x Thing)) Thing) 'DefaultCT)
+(zinc.core.build/assert '(Isa (every x (Isa x Category)) Thing) 'DefaultCT)
+(zinc.core.build/assert '(Isa (every x (Isa x Act)) Entity) 'DefaultCT)
+(zinc.core.build/assert '(Isa (every x (Isa x Action)) Action) 'DefaultCT)
+(zinc.core.build/assert '(Isa (every x (Isa x Proposition)) Proposition) 'DefaultCT)
+(zinc.core.build/assert '(Isa (every x (Isa x Propositional)) Propositional) 'DefaultCT)
+(zinc.core.build/assert '(Isa Fido Dog) 'DefaultCT)
+(zinc.core.build/assert '(Isa (every x (Isa x Propositional)) Entity) 'DefaultCT)
+(zinc.core.build/assert '(Isa (every x (Isa x Action)) Thing) 'DefaultCT)
+(zinc.core.build/assert '(Isa (every x (Isa x Act)) Act) 'DefaultCT)
+(zinc.core.build/assert '(Isa (every x (Isa x Proposition)) Propositional) 'DefaultCT)
+(zinc.core.build/assert '(Isa (every x (Isa x Policy)) Policy) 'DefaultCT)
+(zinc.core.build/assert '(Equiv "Clark Kent" Superman) 'DefaultCT)
+(zinc.core.build/assert '(Isa (every x (Isa x Thing)) Entity) 'DefaultCT)
+(zinc.core.build/assert '(Isa (every x (Isa x WhQuestion)) WhQuestion) 'DefaultCT)
+(zinc.core.build/assert '(Isa (every x (Isa x WhQuestion)) Propositional) 'DefaultCT)
+(zinc.core.build/assert '(Isa (every x (Isa x Category)) Category) 'DefaultCT)
+(zinc.core.build/assert '(Isa (every x (Isa x Policy)) Entity) 'DefaultCT)

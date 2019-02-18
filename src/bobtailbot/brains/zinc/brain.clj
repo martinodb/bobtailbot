@@ -9,13 +9,58 @@
             
             
             ;[csneps.core.snuser :as s]
-            [zinc.core.snuser :as s ]
+            [zinc.core.snuser :as s :refer [adopt-rule adopt-rules allTerms  ask askif askifnot askwh assert assert! assertAll clearkb defineCaseframe defineSlot defineTerm defineType describe-terms exit find-term goaltrace  krnovice list-focused-inference-tasks list-variables list-terms listkb load  nogoaltrace quit unassert] ]
             [zinc.MOD-logging :as Mlogg :refer [wdm wtim wlog wdm2 wtim2 wlog2]] ;; added by martinodb.
             
             
             ;[instaparse.core :as insta]
             ;[schema.core :as sc]
-            ))
+            )
+     
+     
+     (:require [zinc.MOD-logging :as Mlogg :refer [wdm wtim wlog wdm2 wtim2 wlog2]] ;; added by martinodb.
+            [zinc.core.contexts :as ct]
+            [zinc.core.caseframes :as cf]
+            [zinc.core.relations :as slot]
+            [zinc.core :as zinc]
+            [zinc.core.build :as build]
+            [zinc.snip :as snip]
+            [zinc.gui :as gui]
+            [zinc.utils.ontology :as onto-tools]
+            [clojure.tools.cli :refer [parse-opts]]
+            [reply.main])
+     
+      (:use clojure.stacktrace)
+     
+      (:refer-clojure :exclude [+ - * / < <= > >= == not= assert find load exit quit])
+     
+     
+     
+     
+     
+     
+     
+     (:use [clojure.pprint :only (cl-format)]
+        [clojure.core.memoize :only (memo-clear!)]
+        [clojure.walk]
+        [zinc.core.caseframes :only (list-caseframes sameFrame description)]
+        [zinc.demo :only (demo)]
+        [clojure.set :only (union difference)]
+        [zinc.core.relations :only (list-slots)]
+        [zinc.core.contexts :only (currentContext defineContext listContexts setCurrentContext remove-from-context)]
+        
+        ;[zinc.core.build :only (find *PRECISION* defrule unassert rewrite-propositional-expr)]
+        [zinc.core.build :only (find *PRECISION* defrule rewrite-propositional-expr)] ; remove 'unassert'.
+        
+        [zinc.core :only (showTypes list-types semantic-type-of)]
+        [zinc.core.printer :only (writeKBToTextFile)]
+        [zinc.snip :only (definePath pathsfrom cancel-infer-of cancel-infer-from cancel-focused-infer adopt unadopt attach-primaction ig-debug-all)]
+        [zinc.core.arithmetic]
+        [zinc.util]
+        [zinc.debug :only (debug set-debug-nodes set-debug-features)])
+       
+       (:import [edu.buffalo.csneps.util CountingLatch])
+            )
 
 
 
