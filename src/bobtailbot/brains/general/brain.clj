@@ -569,7 +569,7 @@ Dynamic rules is something I wouldn't mind adding to Clara, although that comes 
        (or (= intype :TRIP-FACT-IND2 ) (= intype :PRENEG-TRIP-FACT-IND2) (= intype :EMBNEG-TRIP-FACT-IND2) (= intype :NOT-FACTS ) (= intype :PREAFF-FACTS ))
          (let [
                yntext (str text " ?") ; quickly turn statement into a question.
-               yntextr (g-respond-sync yntext)]
+               yntextr (g-respond-sync-ynquestion yntext)]
            (cond 
              (= yntextr ans-yes) (do ans-ikr)
              (= yntextr ans-no) (do ans-imp)
