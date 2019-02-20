@@ -143,8 +143,8 @@
 (defn respond-top "top-level respond function"
 [text]
 (cond
-  (= text "bot resp-mode raw") (do (reset! last-utterance {:type :response , :text "OK, raw resp-mode. Say 'bot resp-mode <mode-name>' to switch"}) (swap! mode assoc :resp-mode :raw) )
-  (= text "bot resp-mode stub") (do (reset! last-utterance {:type :response , :text "OK, stub resp-mode. Say 'bot resp-mode <mode-name>' to switch"}) (swap! mode assoc :resp-mode :stub) )
+  (= text "bot resp-mode raw") (do (swap! mode assoc :resp-mode :raw) (reset! last-utterance {:type :response , :text "OK, raw resp-mode. Say 'bot resp-mode <mode-name>' to switch"}) nil  )
+  (= text "bot resp-mode stub") (do (swap! mode assoc :resp-mode :stub) (reset! last-utterance {:type :response , :text "OK, stub resp-mode. Say 'bot resp-mode <mode-name>' to switch"}) nil )
   
   (= text "bot save") (do (respond-raw "(writeKBToTextFile default-kb-file )") )
   (= text "bot load") (do (respond-raw "(load default-kb-file )") )
@@ -158,7 +158,7 @@
 
 
 
-
+(def respond respond-top) ;; Only use 'respond' for repl and similar, single-user interfaces. It's syncronous (blocking). 
 
 (defn hear-normal [text-in] (future 
                         (reset! last-utterance
@@ -173,10 +173,10 @@
 (defn hear-top "top-level hear function"
  [text-in]
  (cond
-  (= text-in "bot listen") (do (swap! mode assoc :hear true) (swap! mode assoc :speakup true) (reset! last-utterance {:type :response , :text "OK, listening"}))
-  (= text-in "bot standby") (do (reset! last-utterance {:type :response , :text "OK, standby mode. Say 'bot listen' to wake up"}) (swap! mode assoc :hear false) (swap! mode assoc :speakup false)  )
-  (= text-in "bot deaf") (do (reset! last-utterance {:type :response , :text "OK, deaf mode. Say 'bot listen' to go back to normal"}) (swap! mode assoc :hear false)   )
-  (= text-in "bot mute") (do (reset! last-utterance {:type :response , :text "OK, mute mode. Say 'bot listen' to go back to normal"})  (swap! mode assoc :speakup false)  )
+  (= text-in "bot listen") (do (swap! mode assoc :hear true) (swap! mode assoc :speakup true) (reset! last-utterance {:type :response , :text "OK, listening"}) nil)
+  (= text-in "bot standby") (do (reset! last-utterance {:type :response , :text "OK, standby mode. Say 'bot listen' to wake up"}) (swap! mode assoc :hear false) (swap! mode assoc :speakup false) nil )
+  (= text-in "bot deaf") (do (reset! last-utterance {:type :response , :text "OK, deaf mode. Say 'bot listen' to go back to normal"}) (swap! mode assoc :hear false) nil  )
+  (= text-in "bot mute") (do (reset! last-utterance {:type :response , :text "OK, mute mode. Say 'bot listen' to go back to normal"})  (swap! mode assoc :speakup false) nil )
   (= (:hear @mode) true) (hear-normal text-in)
   (= (:hear @mode) false) nil
   :else (do (println "problem with hear-top"))
@@ -184,7 +184,7 @@
 
 
 
-(def respond respond-top) ;; Only use 'respond' for repl and similar, single-user interfaces. It's syncronous (blocking). 
+
 ;;; Only use "hear" and "speakup" for multi-user interfaces like irc. The bot may report events asyncronously, not just respond to questions.
 (def hear hear-top)
 (def speakup speakup-top )
