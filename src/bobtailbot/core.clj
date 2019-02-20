@@ -3,6 +3,8 @@
   
             [user :as u]
             
+            [me.raynes.fs :as fs :refer [list-dir]]
+            
             [taoensso.timbre :as timbre   :refer [log  trace  debug  info  warn  error  fatal  report logf tracef debugf infof warnf errorf fatalf reportf  spy get-env]]
             [taoensso.timbre.appenders.core :as appenders]
             
@@ -14,15 +16,15 @@
             [clojure.string :as string]
             
             ;; A brain ns must always be: "bobtailbot.brains.<brain-name>.brain"
-            [bobtailbot.brains.template.brain ]
-            [bobtailbot.brains.general.brain ]
-            [bobtailbot.brains.zinc.brain ]
+            ;[bobtailbot.brains.template.brain ] ; brains are now dynamically loaded. Uncomment if dynamic loading gives problems.
+            ;[bobtailbot.brains.general.brain ]
+            ;[bobtailbot.brains.zinc.brain ]
             
             ;; An adapter ns must always be "bobtailbot.adapters.<adapter-name>"
             ;; Also, an adapter must always have a "connect" function as follows: "(<adapter-name>/connect nick host port group-or-chan greeting hear speakup respond)"
             ;; If it doesn't need some of those parameters, it can simpy ignore them.
-            [bobtailbot.adapters.repl]
-            [bobtailbot.adapters.irc]
+            ;[bobtailbot.adapters.repl] ; adapters are now dynamically loaded. Uncomment if dynamic loading gives problems.
+            ;[bobtailbot.adapters.irc]
             
             
             [bobtailbot.tools :as tools :refer [locals-map keyed]]
@@ -32,9 +34,36 @@
             
             [outpace.config :refer [defconfig]])
             
-     (:import (java.net InetAddress))
-     (:gen-class) )
+     (:import (java.net InetAddress) (java.io File))
+     ;(:gen-class) ; commented out because I do it below. Should I?
+     )
 
+
+
+;;;;;;;;;;;;;;;
+
+(defn brainns-str "Get the brain namespace (as string) from brain"
+   [brain] (str "bobtailbot.brains." (-> brain (name) (read-string)) ".brain")   )
+
+(defn adapterns-str "Get the adapter namespace (as string) from adapter"
+   [adapter] (str "bobtailbot.adapters." (-> adapter (name) (read-string)) )   )
+
+;;;;;;; Dynamically load brains and adapters
+(def brain-dirs (vec (list-dir "src/bobtailbot/brains")) )
+(def adapter-files (vec (list-dir "src/bobtailbot/adapters")) )
+(println (str "brain-dirs: " brain-dirs "\n" "adapter-files: " adapter-files))
+(def brain-names (vec (map #(-> (.getName %) (pr-str) (read-string) ) brain-dirs) )) ; using ".getName" directly gives me a syntax error for some reason. I have to use pr-str bc otherwise it's lazy seq.
+(def adapter-names (vec (map #(-> (.getName %) (pr-str) (read-string) (string/replace  (re-pattern "\\.clj") ""  ) ) adapter-files)    )  ) ; using ".getName" directly gives me a syntax error for some reason.
+(println (str "brain-names: " brain-names  "\n" "adapter-names: " adapter-names ))
+(def req-brains-string (str "(require '["(string/join "] '[" (map brainns-str brain-names)) "])"))
+(def req-adapters-string (str "(require '["(string/join "] '[" (map adapterns-str adapter-names)) "])"))
+;;;;;;;;;;
+
+;;; Initialize. Putting these in a function gives me an error.
+(load-string req-brains-string)
+(load-string req-adapters-string)
+(gen-class)
+;;;;;;;;;;;;;;
 
 
 
@@ -92,11 +121,7 @@
 
 
 
-(defn brainns-str "Get the brain namespace (as string) from brain"
-   [brain] (str "bobtailbot.brains." (-> brain (name) (read-string)) ".brain")   )
 
-(defn adapterns-str "Get the adapter namespace (as string) from adapter"
-   [adapter] (str "bobtailbot.adapters." (-> adapter (name) (read-string)) )   )
 
 
 (defn respond-b "Get the respond function of given brain, or respond to given text with given brain"
