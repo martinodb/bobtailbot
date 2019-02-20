@@ -86,7 +86,10 @@
 
 (def default-kb-file (str data-dir-prefix "store/dkbf.sneps")) ; default kb file.
 
-
+(defn load-from-store "load <filename> from zinc brain store"
+[filename]
+(load (str data-dir-prefix "store/" filename))
+)
 
 
 (def last-utterance (atom {}))
@@ -155,12 +158,6 @@
 
 
 
-;; Only use for repl and similar, single-user interfaces. It's syncronous (blocking). 
-;(def respond respond-stub)
-(def respond respond-top)
-
-
-
 
 
 (defn hear-normal [text-in] (future 
@@ -171,7 +168,6 @@
 (defn speakup-top [speakup-chan] (add-watch last-utterance :utt-ready
                                           (fn [k r old-state new-state]
                                                 (if (= (:speakup @mode) true) (>!! speakup-chan (:text new-state) ) nil ))))
-                                                
 
 
 (defn hear-top "top-level hear function"
@@ -188,7 +184,7 @@
 
 
 
+(def respond respond-top) ;; Only use 'respond' for repl and similar, single-user interfaces. It's syncronous (blocking). 
 ;;; Only use "hear" and "speakup" for multi-user interfaces like irc. The bot may report events asyncronously, not just respond to questions.
 (def hear hear-top)
 (def speakup speakup-top )
-
