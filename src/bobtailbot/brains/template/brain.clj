@@ -67,9 +67,9 @@
 
 
 ;;; Only use "hear" and "speakup" for multi-user interfaces like irc. The bot may report events asyncronously, not just respond to questions.
-(defn hear [text-in] (future 
+(defn hear [text] (future 
                         (reset! last-utterance
-                           {:type :response , :text (respond-sync text-in)} )))
+                           {:type :response , :text (respond-sync text)} )))
 
 
 (defn speakup [speakup-chan] (add-watch last-utterance :utt-ready

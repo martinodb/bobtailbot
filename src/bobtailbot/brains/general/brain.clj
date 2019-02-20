@@ -708,9 +708,9 @@ Dynamic rules is something I wouldn't mind adding to Clara, although that comes 
 (defn g-respond [text] (try (g-respond-sync-top text) (catch Exception e (str "caught exception: " (.getMessage e))) ) )
 
 
-(defn g-hear [text-in] (future 
+(defn g-hear [text] (future 
                         (reset! last-utterance
-                           {:type :response , :text (g-respond text-in)} )))
+                           {:type :response , :text (g-respond text)} )))
 
 
 
