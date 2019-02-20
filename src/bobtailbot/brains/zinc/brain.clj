@@ -83,6 +83,7 @@
 (def data-dir-prefix (str data-this-dir "/")) ; eg: "./data/bobtailbot/brains/general/"
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+(def unsup-repl "Sorry, this option is not supported in syncronous UIs like repl, only in asyncronous ones like IRC")
 
 (def default-kb-file (str data-dir-prefix "store/dkbf.sneps")) ; default kb file.
 
@@ -143,9 +144,15 @@
 (defn respond-top "top-level respond function"
 [text]
 (cond
+   (contains? #{"bot listen" "bot standby" "bot deaf" "bot mute"} text) (do unsup-repl) ; in async UIs these options are managed in hear-top. In sync UIs like repl they are not supported.
+  (= text "bot resp-mode raw") (do (swap! mode assoc :resp-mode :raw) "OK, raw resp-mode. Say 'bot resp-mode <mode-name>' to switch"   )
+  (= text "bot resp-mode stub") (do (swap! mode assoc :resp-mode :stub) "OK, stub resp-mode. Say 'bot resp-mode <mode-name>' to switch"  )
+  
   (= text "bot save") (do (respond-raw "(writeKBToTextFile default-kb-file )") )
   (= text "bot load") (do (respond-raw "(load default-kb-file )") )
   (= text "bot clearkb") (do (respond-raw "(clearkb true)") )
+  
+ 
   
   (= (:resp-mode @mode) :raw) (respond-raw text)
   (= (:resp-mode @mode) :stub) (respond-stub text)
@@ -175,8 +182,6 @@
   (= text "bot deaf") (do (reset! last-utterance {:type :response , :text "OK, deaf mode. Say 'bot listen' to go back to normal"}) (swap! mode assoc :hear false) nil  )
   (= text "bot mute") (do (reset! last-utterance {:type :response , :text "OK, mute mode. Say 'bot listen' to go back to normal"})  (swap! mode assoc :speakup false) nil )
   
-  (= text "bot resp-mode raw") (do (swap! mode assoc :resp-mode :raw) (reset! last-utterance {:type :response , :text "OK, raw resp-mode. Say 'bot resp-mode <mode-name>' to switch"}) nil  )
-  (= text "bot resp-mode stub") (do (swap! mode assoc :resp-mode :stub) (reset! last-utterance {:type :response , :text "OK, stub resp-mode. Say 'bot resp-mode <mode-name>' to switch"}) nil )
   
   (= (:hear @mode) true) (hear-normal text)
   (= (:hear @mode) false) nil
