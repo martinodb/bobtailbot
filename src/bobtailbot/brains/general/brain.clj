@@ -184,9 +184,11 @@
   (insta/parser (raw-g-grammar-1-w-annex)  :auto-whitespace :standard ))
 
 
+(def g-grammar-1-atom (atom (g-grammar-1)))
+(defn g-grammar-1-a-fn [] (do @g-grammar-1-atom))
 
-
-(def g-grammar g-grammar-1)
+(def g-grammar g-grammar-1-a-fn)
+;(def g-grammar g-grammar-1)
 ;(def g-grammar grammar-martintest)
 
 
