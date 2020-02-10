@@ -44,11 +44,12 @@ If you are using `lein repl`, then after editing `config.edn` or any other file,
 ## _Example interaction with default brain: facts, rules, queries_
 
 ![Example interaction with default brain: facts, rules, queries](https://raw.githubusercontent.com/martinodb/bobtailbot/master/doc/screencap-2019-02-06%2013-00-32-v2.png "Example interaction with default brain: facts, rules, queries")
-*{:add-voc-type :verb , :content {:inf "admire",:past "admired", :pp "admired",:er "admirer", :ing "admiring", :pres3 "admires"}}*
+
 
 ## _Example interaction with default brain: introducing vocabulary_
 
 ![Example interaction with default brain: introducing vocabulary](https://raw.githubusercontent.com/martinodb/bobtailbot/master/doc/screepcap-2019-02-09%2023-38-34.png "Example interaction with default brain: introducing vocabulary")
+*You can edit this example:`{:add-voc-type :verb , :content {:inf "admire",:past "admired", :pp "admired",:er "admirer", :ing "admiring", :pres3 "admires"}}`*
 
 # _Development_
 
