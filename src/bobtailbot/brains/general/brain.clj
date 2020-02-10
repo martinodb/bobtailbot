@@ -191,8 +191,6 @@
 (def g-grammar g-grammar-1-a-fn)
 (def reload-g-grammar reload-g-grammar-1)
 
-;(def g-grammar g-grammar-1)
-;(def g-grammar grammar-martintest)
 
 (defn dump-to-path-rlg "dump to path and reload grammar" [path value] (do 
                             (dump-to-path path value)
