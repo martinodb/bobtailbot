@@ -243,7 +243,7 @@
 
 
 
-(defn negate [rormap] "find booleans in input rormap (a record or map) and negate them"
+(defn negate "find booleans in input rormap (a record or map) and negate them" [rormap] 
 (postwalk #(if (or (= % true) (= % false)) (not %) % ) rormap)   )
 
 
