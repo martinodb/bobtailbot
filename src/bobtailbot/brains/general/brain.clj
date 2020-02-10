@@ -48,7 +48,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 
-
+(declare dump-to-path-rlg)
 
 
 
@@ -85,7 +85,7 @@
 
 
 (defn get-verb-set [] (load-from-path-or-create (str data-dir-prefix "store/verb_set.edn") default-verb-set verb-set-edn-readers ))
-(defn set-verb-set [verb-set] (dump-to-path (str data-dir-prefix "store/verb_set.edn") verb-set  )) ; "set the verb set". Don't confuse "set", the verb, with "set" the noun.
+(defn set-verb-set [verb-set] (dump-to-path-rlg (str data-dir-prefix "store/verb_set.edn") verb-set  )) ; "set the verb set". Don't confuse "set", the verb, with "set" the noun.
 
 
 
@@ -114,7 +114,7 @@
 (def noun-set-edn-readers {})
 
 (defn get-noun-set [] (load-from-path-or-create (str data-dir-prefix "store/noun_set.edn") default-noun-set noun-set-edn-readers ))
-(defn set-noun-set [noun-set] (dump-to-path (str data-dir-prefix "store/noun_set.edn") noun-set ))
+(defn set-noun-set [noun-set] (dump-to-path-rlg (str data-dir-prefix "store/noun_set.edn") noun-set ))
 
 (defn  Nsimp-sg [] (set (map :sing (get-noun-set))))
 
@@ -134,7 +134,7 @@
 (def adj-set-edn-readers {})
 
 (defn get-adj-set [] (load-from-path-or-create (str data-dir-prefix "store/adj_set.edn") default-adj-set adj-set-edn-readers ))
-(defn set-adj-set [adj-set] (dump-to-path (str data-dir-prefix "store/adj_set.edn") adj-set  ))
+(defn set-adj-set [adj-set] (dump-to-path-rlg (str data-dir-prefix "store/adj_set.edn") adj-set  ))
 
 
 (defn Adj [] (set (map :a (get-adj-set))))
@@ -186,10 +186,17 @@
 
 (def g-grammar-1-atom (atom (g-grammar-1)))
 (defn g-grammar-1-a-fn [] (do @g-grammar-1-atom))
+(defn reload-g-grammar-1 [] (reset! g-grammar-1-atom (g-grammar-1) ))
 
 (def g-grammar g-grammar-1-a-fn)
+(def reload-g-grammar reload-g-grammar-1)
+
 ;(def g-grammar g-grammar-1)
 ;(def g-grammar grammar-martintest)
+
+(defn dump-to-path-rlg "dump to path and reload grammar" [path value] (do 
+                            (dump-to-path path value)
+                            (reload-g-grammar)) )
 
 
 (defn parsed-voc-map [parsetree] (read-string (apply str (rest (nth (first parsetree) 2 )))))
