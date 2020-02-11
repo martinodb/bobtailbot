@@ -246,7 +246,10 @@
 (defn negate "find booleans in input rormap (a record or map) and negate them" [rormap] 
 (postwalk #(if (or (= % true) (= % false)) (not %) % ) rormap)   )
 
+(defn conjugate-pres3 "Vinf->Vpres3" [vinf]
+  (:pres3 (first (filter #(= (:inf %) vinf) (get-verb-set)))))
 
+; (conjugate-pres3 t-verb-inf)
 
 (def g-transforms
   {:NUMBER #(Integer/parseInt %)
@@ -262,7 +265,7 @@
     :PRENEG-TRIP-FACT-IND2 (fn [t-subj t-verb t-obj]
                              `(->Triple "my-fact" false ~t-subj ~t-verb ~t-obj ))
     :EMBNEG-TRIP-FACT-IND2 (fn [t-subj t-verb-inf t-obj]
-                              (let [t-verb-pres3 (:pres3 (first (filter #(= (:inf %) t-verb-inf ) (get-verb-set))))]
+                              (let [t-verb-pres3 (conjugate-pres3 t-verb-inf) ]
                                 `(->Triple "my-fact" false ~t-subj ~t-verb-pres3 ~t-obj )))
     :R-TRIP-FACT-IND2 (fn [t-subj t-verb t-obj]
                       {:type Triple
@@ -297,7 +300,7 @@
                                              (list '= t-obj 'obj) ]
                                 :fact-binding :?#thing })
     :EMBNEG-Q-TRIP-FACT-IND2 (fn [t-subj t-verb-inf t-obj]
-                               (let [t-verb-pres3 (:pres3 (first (filter #(= (:inf %) t-verb-inf ) (get-verb-set))))]
+                               (let [t-verb-pres3 (conjugate-pres3 t-verb-inf)]
                                   { :type Triple
                                     :constraints [(list '= false 'affirm)
                                                  (list '= t-subj 'subj)
@@ -360,7 +363,7 @@
       (= intype :T-DOES-QUESTION)
         (let [t-subj (joinNNPstr (second actual-ptree))
               t-verb-inf (second (nth actual-ptree 2))
-              t-verb-pres3 (:pres3 (first (filter #(= (:inf %) t-verb-inf ) (get-verb-set)))) 
+              t-verb-pres3 (conjugate-pres3 t-verb-inf) 
               t-obj (joinNNPstr (nth actual-ptree 3))]
            (str t-subj " " t-verb-pres3 " " t-obj "?"))
       (= intype :T-WHO-QUESTION)
@@ -370,7 +373,7 @@
       (= intype :T-WHOM-QUESTION)
         (let [t-subj  (joinNNPstr (second actual-ptree))
               t-verb-inf (second (nth actual-ptree 2))
-              t-verb-pres3 (:pres3 (first (filter #(= (:inf %) t-verb-inf ) (get-verb-set))))]
+              t-verb-pres3 (conjugate-pres3 t-verb-inf)]
            (str "match " t-subj " " t-verb-pres3 " " "?x" ))
       :else "g-rephrase-from-tree failed" )))
 
