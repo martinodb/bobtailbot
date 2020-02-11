@@ -212,7 +212,7 @@
                 "=" `=})
 
 
-(defn NNPkw->str "transform keyword NNPs into strings" [kw] (-> kw name (string/replace #"_" " ")))
+;; UNUSED (defn NNPkw->str "transform keyword NNPs into strings" [kw] (-> kw name (string/replace #"_" " ")))
 
 (defn seq->str
   ([seq] (seq->str seq ""))
