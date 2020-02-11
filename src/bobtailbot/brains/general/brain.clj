@@ -534,28 +534,46 @@ Dynamic rules is something I wouldn't mind adding to Clara, although that comes 
 
 
 
-(defn g-respond-sync-query "respond to a simple query of the form 'match ?x ..' with a response of the form 'satisfiers: ..'"
+(defn g-respond-sync-query-rqr "(raw query result) respond to a simple query of the form 'match ?x ..' with a response of the form 'satisfiers: ..'"
 [qtext]
  (try
            (do 
              (let [ parsetree  ((g-grammar) qtext)
-                    new-rule-list (str (get-g-rule-list) qtext)
-                    new-session   (-> (mk-session (symbol this-ns) (g-load-user-rules new-rule-list))
-                                      ( #(apply insert %1 %2) (get-g-fact-set))
-                                      (fire-rules))
-                    anon-query  (first (insta/transform g-transforms parsetree))
-                    raw-query-result  (query new-session anon-query)
-                    raw-query-result-set (into #{} raw-query-result)
-                    ;raw-query-result-str (apply str raw-query-result)
-                    raw-query-result-set-str (apply str raw-query-result-set)]
-                    (str 
-                          "satisfiers: " (string/join "  " (get-ans-vars raw-query-result-set-str)) "    " 
-                          ;"raw query result (no duplicates):  " raw-query-result-set-str 
-                          )))
+                   new-rule-list (str (get-g-rule-list) qtext)
+                   new-session   (-> (mk-session (symbol this-ns) (g-load-user-rules new-rule-list))
+                                     ( #(apply insert %1 %2) (get-g-fact-set))
+                                     (fire-rules))
+                   anon-query  (first (insta/transform g-transforms parsetree))
+                   raw-query-result  (query new-session anon-query)]
+               raw-query-result
+               ))
             (catch Exception e (do (println (.getMessage e)) ans-invalid-query ))))
 
+(defn g-respond-sync-query-ransvars "(ans-vars result) respond to a simple query of the form 'match ?x ..' with a response of the form 'satisfiers: ..'"
+  [qtext]
+  (try
+    (do
+      (let [raw-query-result  (g-respond-sync-query-rqr qtext)
+            raw-query-result-set (into #{} raw-query-result)
+            raw-query-result-set-str (apply str raw-query-result-set)
+            ans-vars (get-ans-vars raw-query-result-set-str)
+            ]
+        ans-vars
+        ))
+    (catch Exception e (do (println (.getMessage e)) ans-invalid-query))))
+
+(defn g-respond-sync-query-rtxt "(text result) respond to a simple query of the form 'match ?x ..' with a response of the form 'satisfiers: ..'"
+  [qtext]
+  (try
+    (do
+      (let [ans-vars (g-respond-sync-query-ransvars qtext)]
+        (str   "satisfiers: " (string/join "  " ans-vars ) "    "
+                          ;"raw query result (no duplicates):  " raw-query-result-set-str 
+         )))
+    (catch Exception e (do (println (.getMessage e)) ans-invalid-query))))
 
 
+(def g-respond-sync-query g-respond-sync-query-rtxt)
 
 
 (defn g-respond-sync
@@ -728,7 +746,11 @@ Dynamic rules is something I wouldn't mind adding to Clara, although that comes 
 (def speakup g-speakup)
 (def respond g-respond)
 
-(defn get-ans-vars [raw-q-result] (re-seq #"\:\?[\S&&[^\#]]+\s+[\S&&[^\{\}]]+" raw-q-result))
+(defn get-ans-vars 
+  "Ex(but double quotes):
+  (':?x :Bob_Smith,' ':?y :Anna')"
+  [raw-query-result-set-str]
+  (re-seq #"\:\?[\S&&[^\#]]+\s+[\S&&[^\{\}]]+" raw-query-result-set-str))
 
 
 
