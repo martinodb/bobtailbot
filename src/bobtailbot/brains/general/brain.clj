@@ -373,7 +373,8 @@
 (def g-transforms-mkst  "treats :TRIP-FACT-IND2, :PRENEG-TRIP-FACT-IND2, :EMBNEG-TRIP-FACT-IND2, :NOT-FACTS, :PREAFF-FACTS normally, as a statement"
   (conj
    g-transforms-base
-   {:TRIP-FACT-IND2 (fn [t-subj t-verb t-obj]
+   {:ANON-FACT identity
+    :TRIP-FACT-IND2 (fn [t-subj t-verb t-obj]
                       `(->Triple "my-fact" true ~t-subj ~t-verb ~t-obj))
     :PRENEG-TRIP-FACT-IND2 (fn [t-subj t-verb t-obj]
                              `(->Triple "my-fact" false ~t-subj ~t-verb ~t-obj))
@@ -387,7 +388,11 @@
 (def g-transforms-ckst "treats :TRIP-FACT-IND2, :PRENEG-TRIP-FACT-IND2, :EMBNEG-TRIP-FACT-IND2, :NOT-FACTS, :PREAFF-FACTS  as a yn-question Q-TRIP-FACT-IND2, etc, to check statements"
   (conj
    g-transforms-base
-   {:TRIP-FACT-IND2 (fn [t-subj t-verb t-obj]
+   {:ANON-FACT (fn [& facts]
+                 {:name "anon-query"
+                  :lhs facts
+                  :params #{}})
+    :TRIP-FACT-IND2 (fn [t-subj t-verb t-obj]
                       {:type Triple
                        :constraints [(list '= true 'affirm)
                                      (list '= t-subj 'subj)
@@ -673,22 +678,23 @@ Dynamic rules is something I wouldn't mind adding to Clara, although that comes 
   (let  [parsetree  ((g-grammar) text)
          intype (first (first parsetree))]
     (cond
-      (or (= intype :TRIP-FACT-IND2) (= intype :PRENEG-TRIP-FACT-IND2) (= intype :EMBNEG-TRIP-FACT-IND2) (= intype :NOT-FACTS) (= intype :PREAFF-FACTS))
+      ;(or (= intype :TRIP-FACT-IND2) (= intype :PRENEG-TRIP-FACT-IND2) (= intype :EMBNEG-TRIP-FACT-IND2) (= intype :NOT-FACTS) (= intype :PREAFF-FACTS))
+      (= intype :ANON-FACT)
       (let [
             ckst-ptree-r (g-respond-sync-ckst-ptree parsetree)]
         (cond
           (= ckst-ptree-r ans-yes) (do ans-ikr)
           (= ckst-ptree-r ans-no) (do ans-imp)
           (= ckst-ptree-r ans-dunno) (do
-                                  (->> (reduce conj (get-g-fact-set) (map eval (g-load-user-facts text)))
-                                       (into #{})
-                                       (set-g-fact-set))
-                                  (let [new-session (-> @g-curr-session
-                                                        (#(apply insert %1 %2) (get-g-fact-set))
-                                                        (fire-rules))]
-                                    (dosync (ref-set g-curr-session new-session)))
+                                       (->> (reduce conj (get-g-fact-set) (map eval (g-load-user-facts text)))
+                                            (into #{})
+                                            (set-g-fact-set))
+                                       (let [new-session (-> @g-curr-session
+                                                             (#(apply insert %1 %2) (get-g-fact-set))
+                                                             (fire-rules))]
+                                         (dosync (ref-set g-curr-session new-session)))
                   ;(str "facts added: " (pr-str (g-load-user-facts text)))
-                                  (do ans-okgotit))
+                                       (do ans-okgotit))
           :else (ans-oops "g-respond-sync")))
 
       (= intype :AND-FACTS)
