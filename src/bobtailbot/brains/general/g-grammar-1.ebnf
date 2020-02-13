@@ -135,12 +135,8 @@ NEG-YNQUESTION-notest = NEG-YNQ-BODY-notest;
 <NEG-YNQ-BODY-notest> = <"is it ">? <"false that"> YNQLHS-notest <"?">+ <';'>* ;
 
 
-
-
-
-
-
-T-DOES-QUESTION = <"does"> T-SUBJECT VtraInf T-OBJECT <"?">+ ;
+D-TRIP-FACT-IND2 = T-SUBJECT VtraInf T-OBJECT ;
+T-DOES-QUESTION = <"does"> D-TRIP-FACT-IND2 <"?">+ ;
 
 T-WHO-QUESTION = <"who"> VtraPres3 T-NP <"?">+ ;
 T-WHOM-QUESTION = (<"who"> | <"whom">) <"does">  T-NP VtraInf <"?">+ ;

@@ -251,108 +251,169 @@
 
 ; (conjugate-pres3 t-verb-inf)
 
-(def g-transforms
+(def g-transforms-base "without :TRIP-FACT-IND2, :PRENEG-TRIP-FACT-IND2, :EMBNEG-TRIP-FACT-IND2, :NOT-FACTS, :PREAFF-FACTS "
   {:NUMBER #(Integer/parseInt %)
+   
    :TS-OPERATOR g-ts-operators
+   
    :ANON-RULE-notest (fn [fact & facts]
                        {:ns-name (symbol this-ns)
                         :name (str ns-prefix (gensym "my-anon-rule"))
                         :lhs facts
                         :rhs `(insert! ~fact)})
-                 
-    :TRIP-FACT-IND2 (fn [t-subj t-verb t-obj]
-                      `(->Triple "my-fact" true ~t-subj ~t-verb ~t-obj ) )
-    :PRENEG-TRIP-FACT-IND2 (fn [t-subj t-verb t-obj]
-                             `(->Triple "my-fact" false ~t-subj ~t-verb ~t-obj ))
-    :EMBNEG-TRIP-FACT-IND2 (fn [t-subj t-verb-inf t-obj]
-                              (let [t-verb-pres3 (conjugate-pres3 t-verb-inf) ]
-                                `(->Triple "my-fact" false ~t-subj ~t-verb-pres3 ~t-obj )))
-    :R-TRIP-FACT-IND2 (fn [t-subj t-verb t-obj]
-                      {:type Triple
-                       :constraints [(list '= true 'affirm)
-                                     (list '= t-subj 'subj)
-                                     (list '= t-verb 'verb)
-                                     (list '= t-obj 'obj)
-                                       ]
+
+   :PRENEG-TRIP-FACT-IND2 (fn [t-subj t-verb t-obj]
+                            `(->Triple "my-fact" false ~t-subj ~t-verb ~t-obj ))
+   
+   :EMBNEG-TRIP-FACT-IND2 (fn [t-subj t-verb-inf t-obj]
+                            (let [t-verb-pres3 (conjugate-pres3 t-verb-inf) ]
+                              `(->Triple "my-fact" false ~t-subj ~t-verb-pres3 ~t-obj )))
+   
+   :R-TRIP-FACT-IND2 (fn [t-subj t-verb t-obj]
+                       {:type Triple
+                        :constraints [(list '= true 'affirm)
+                                      (list '= t-subj 'subj)
+                                      (list '= t-verb 'verb)
+                                      (list '= t-obj 'obj)
+                                      ]
                         })
-    :NEG-R-TRIP-FACT-IND2 (fn [t-subj t-verb t-obj]
-                      {:type Triple
-                       :constraints [(list '= false 'affirm)
-                                     (list '= t-subj 'subj)
-                                     (list '= t-verb 'verb)
-                                     (list '= t-obj 'obj)
-                                       ]
+   
+   :NEG-R-TRIP-FACT-IND2 (fn [t-subj t-verb t-obj]
+                           {:type Triple
+                            :constraints [(list '= false 'affirm)
+                                          (list '= t-subj 'subj)
+                                          (list '= t-verb 'verb)
+                                          (list '= t-obj 'obj)
+                                          ]
+                            })
+   
+   :Q-TRIP-FACT-IND2 (fn [t-subj t-verb t-obj]
+                       {:type Triple
+                        :constraints [(list '= true 'affirm)
+                                      (list '= t-subj 'subj)
+                                      (list '= t-verb 'verb)
+                                      (list '= t-obj 'obj)
+                                      ]
+                        :fact-binding :?#thing
                         })
-    :Q-TRIP-FACT-IND2 (fn [t-subj t-verb t-obj]
-                      {:type Triple
-                       :constraints [(list '= true 'affirm)
-                                     (list '= t-subj 'subj)
-                                     (list '= t-verb 'verb)
-                                     (list '= t-obj 'obj)
-                                       ]
-                       :fact-binding :?#thing
-                        })
-    :PRENEG-Q-TRIP-FACT-IND2 (fn [t-subj t-verb t-obj]
+   
+   :PRENEG-Q-TRIP-FACT-IND2 (fn [t-subj t-verb t-obj]
                               {:type Triple
                                :constraints [(list '= false 'affirm)
                                              (list '= t-subj 'subj)
                                              (list '= t-verb 'verb)
                                              (list '= t-obj 'obj) ]
-                                :fact-binding :?#thing })
-    :EMBNEG-Q-TRIP-FACT-IND2 (fn [t-subj t-verb-inf t-obj]
-                               (let [t-verb-pres3 (conjugate-pres3 t-verb-inf)]
-                                  { :type Triple
-                                    :constraints [(list '= false 'affirm)
-                                                 (list '= t-subj 'subj)
-                                                 (list '= t-verb-pres3 'verb)
-                                                 (list '= t-obj 'obj) ]
-                                    :fact-binding :?#thing }))
-    
-    
+                               :fact-binding :?#thing })
+   
+   :EMBNEG-Q-TRIP-FACT-IND2 (fn [t-subj t-verb-inf t-obj]
+                              (let [t-verb-pres3 (conjugate-pres3 t-verb-inf)]
+                                { :type Triple
+                                 :constraints [(list '= false 'affirm)
+                                               (list '= t-subj 'subj)
+                                               (list '= t-verb-pres3 'verb)
+                                               (list '= t-obj 'obj) ]
+                                 :fact-binding :?#thing }))
+   
+   :D-TRIP-FACT-IND2 (fn [t-subj t-verb-inf t-obj]
+                       (let [t-verb-pres3 (conjugate-pres3 t-verb-inf)]
+                         {:type Triple
+                          :constraints [(list '= true 'affirm)
+                                        (list '= t-subj 'subj)
+                                        (list '= t-verb-pres3 'verb)
+                                        (list '= t-obj 'obj)]
+                          :fact-binding :?#thing}))
+   
     ;CAREFUL: this only works because the Triple record only has one boolean (affirm).
-    :Q-NOT-FACTS   negate ;(fn [map] (postwalk #(if (or (= % true) (= % false)) (not %) % ) map)) 
-    :R-NOT-FACTS  negate ; (fn [map] (postwalk #(if (or (= % true) (= % false)) (not %) % ) map)) 
-    :NOT-FACTS  negate ; (fn [map] (postwalk #(if (or (= % true) (= % false)) (not %) % ) map)) 
-    
-    :Q-PREAFF-FACTS identity
-    :R-PREAFF-FACTS identity
-    :PREAFF-FACTS identity
-    
-    
-    :AND-FACTS vector
-    :UNVAR symbol
-    
-    :NNP (fn [& NNP-tokens] (keyword (string/join "_" NNP-tokens)))
-    
-    :VtraPres3 identity
+   :Q-NOT-FACTS   negate ;(fn [map] (postwalk #(if (or (= % true) (= % false)) (not %) % ) map)) 
+   :R-NOT-FACTS  negate ; (fn [map] (postwalk #(if (or (= % true) (= % false)) (not %) % ) map)) 
+   ; :NOT-FACTS  negate ; (fn [map] (postwalk #(if (or (= % true) (= % false)) (not %) % ) map)) 
+   
+   :Q-PREAFF-FACTS identity
+   :R-PREAFF-FACTS identity
+   ; :PREAFF-FACTS identity
+   
+   
+   :AND-FACTS vector
+   :UNVAR symbol
+   
+   :NNP (fn [& NNP-tokens] (keyword (string/join "_" NNP-tokens)))
+   
+   :VtraPres3 identity
     ;:VtraPres3 keyword
-    
-    :VtraInf identity
-    
-    
-    :ANON-RULE identity
-    :QUERY identity
-    :YNQUESTION identity
-                 
-    :NQUERY  (fn [name] (fn [session-name] (query session-name (if (.contains name ns-prefix) name (str ns-prefix name)))))
-    :QUERY-notest   (fn [& facts]
+   
+   :VtraInf identity
+   
+   
+   :ANON-RULE identity
+   :QUERY identity
+   :YNQUESTION identity
+   
+   :NQUERY  (fn [name] (fn [session-name] (query session-name (if (.contains name ns-prefix) name (str ns-prefix name)))))
+   :QUERY-notest   (fn [& facts]
                      {:name "anon-query"
                       :lhs facts
                       :params #{}
-                       })
-    :YNQUESTION-notest   (fn [& facts]
-                     {:name "anon-query"
-                      :lhs facts
-                      :params #{}
-                       })
-    :NEG-YNQUESTION-notest   (fn [& facts]
-                     {:name "anon-query"
-                      :lhs (map negate facts)
-                      :params #{}
-                       })
-                 })
+                      })
+   :YNQUESTION-notest   (fn [& facts]
+                          {:name "anon-query"
+                           :lhs facts
+                           :params #{}
+                           })
+   :NEG-YNQUESTION-notest   (fn [& facts]
+                              {:name "anon-query"
+                               :lhs (map negate facts)
+                               :params #{}
+                               })
+   :T-DOES-QUESTION   (fn [ dfact]
+                        {:name "anon-query"
+                         :lhs [dfact]
+                         :params #{}})
+   })
 
+(def g-transforms-mkst  "treats :TRIP-FACT-IND2, :PRENEG-TRIP-FACT-IND2, :EMBNEG-TRIP-FACT-IND2, :NOT-FACTS, :PREAFF-FACTS normally, as a statement"
+  (conj
+   g-transforms-base
+   {:TRIP-FACT-IND2 (fn [t-subj t-verb t-obj]
+                      `(->Triple "my-fact" true ~t-subj ~t-verb ~t-obj))
+    :PRENEG-TRIP-FACT-IND2 (fn [t-subj t-verb t-obj]
+                             `(->Triple "my-fact" false ~t-subj ~t-verb ~t-obj))
+    :EMBNEG-TRIP-FACT-IND2 (fn [t-subj t-verb-inf t-obj]
+                             (let [t-verb-pres3 (conjugate-pres3 t-verb-inf)]
+                               `(->Triple "my-fact" false ~t-subj ~t-verb-pres3 ~t-obj)))
+    :NOT-FACTS  negate
+    :PREAFF-FACTS identity}
+   ))
 
+(def g-transforms-ckst "treats :TRIP-FACT-IND2, :PRENEG-TRIP-FACT-IND2, :EMBNEG-TRIP-FACT-IND2, :NOT-FACTS, :PREAFF-FACTS  as a yn-question Q-TRIP-FACT-IND2, etc, to check statements"
+  (conj
+   g-transforms-base
+   {:TRIP-FACT-IND2 (fn [t-subj t-verb t-obj]
+                      {:type Triple
+                       :constraints [(list '= true 'affirm)
+                                     (list '= t-subj 'subj)
+                                     (list '= t-verb 'verb)
+                                     (list '= t-obj 'obj)]
+                       :fact-binding :?#thing})
+    :PRENEG-TRIP-FACT-IND2 (fn [t-subj t-verb t-obj]
+                             {:type Triple
+                              :constraints [(list '= false 'affirm)
+                                            (list '= t-subj 'subj)
+                                            (list '= t-verb 'verb)
+                                            (list '= t-obj 'obj)]
+                              :fact-binding :?#thing})
+    :EMBNEG-TRIP-FACT-IND2 (fn [t-subj t-verb-inf t-obj]
+                             (let [t-verb-pres3 (conjugate-pres3 t-verb-inf)]
+                               {:type Triple
+                                :constraints [(list '= false 'affirm)
+                                              (list '= t-subj 'subj)
+                                              (list '= t-verb-pres3 'verb)
+                                              (list '= t-obj 'obj)]
+                                :fact-binding :?#thing}))
+    :NOT-FACTS  negate
+    :PREAFF-FACTS identity
+    }))
+
+(def g-transforms g-transforms-mkst)
 
 (defn joinNNPstr [NNP] (string/join " " (rest NNP)))
 
@@ -394,31 +455,32 @@
 (defn set-g-fact-set [g-fact-set]   (dump-to-path-records    fact-file-p   g-fact-set))
 
 
-
-
-
-
-
 (def g-default-rule-list   "Example Person One xxexamplefies ?x when ?x xxexamplefies Example Person One ;")
-
-
-;(def g-rule-list   (disk-ref   rule-file-p   g-default-rule-list    g-edn-readers))
 (defn get-g-rule-list []   (load-from-path-or-create    rule-file-p    g-default-rule-list    g-edn-readers))
-(defn set-g-rule-list [g-rule-list]   (dump-to-path    rule-file-p   g-rule-list))
 
+(defn get-g-rules-ptree []
+  ((g-grammar) (get-g-rule-list) ))
 
+(defn get-g-rules-transformed []
+  (insta/transform g-transforms (get-g-rules-ptree)))
+
+(def g-rules-tr-atom (atom (get-g-rules-transformed)))
+
+(defn reload-g-rules-tr [] (reset! g-rules-tr-atom (get-g-rules-transformed)) )
+
+(defn dump-to-path-rlr "dump to path and reload rules"
+  [path value]
+  (do (dump-to-path path value)
+      (reload-g-rules-tr)))
+
+(defn set-g-rule-list [g-rule-list]   (dump-to-path-rlr    rule-file-p   g-rule-list))
 (def last-utterance (atom {}))
-
-
 
 ;(defrule Joe-Smith-loves-back
   ;[Triple (= ?x subj)(= "loves" verb)(= "Joe Smith" obj)]
   ;=>
   ;(do (insert! (->Triple "my-Joe-fact" true "Joe Smith" "loves" ?x))
       ;(println "Joe is loved by, and loves back: " ?x)))
-
-
-
 
 (sc/defn ^:always-validate g-load-user-rules :- [clara.rules.schema/Production]
   "Converts a business rule string into Clara productions."
@@ -431,7 +493,6 @@
 
     (insta/transform g-transforms parse-tree)))
 
-
 (defn g-load-user-facts
   "Converts facts into Clara record entries."
   [facts]
@@ -441,14 +502,19 @@
     (when (insta/failure? parse-tree)
       (throw (ex-info (print-str parse-tree) {:failure parse-tree})))
 
-    (insta/transform g-transforms parse-tree)))
+    (insta/transform g-transforms-mkst parse-tree)))
 
 
 
 
-(def g-default-session (-> (mk-session (symbol this-ns) (g-load-user-rules (get-g-rule-list)))
-                    ( #(apply insert %1 %2) (get-g-fact-set))
-                    (fire-rules)))
+(def g-default-session 
+  (-> (mk-session 
+       (symbol this-ns) 
+       ;;(g-load-user-rules   (get-g-rule-list))
+       @g-rules-tr-atom
+       )
+      ( #(apply insert %1 %2) (get-g-fact-set))
+      (fire-rules)))
 
 (def g-curr-session (ref g-default-session))
 
@@ -480,61 +546,83 @@ Dynamic rules is something I wouldn't mind adding to Clara, although that comes 
 (def ans-imp "That's impossible.")    
 (def ans-dunno "Not that I know of.")       
 (def ans-okgotit "OK, got it.")      
-(def ans-ok-rule "OK, got it. That's a rule.")        
-(def ans-oops-rf "Oops, a bug in my respond function")      
+(def ans-ok-rule "OK, got it. That's a rule.")
+
+(defn ans-oops [fname] (str "Oops, a bug in the function: " fname )  )
+(def ans-oops-rf (ans-oops "respond"))
+
 (def ans-invalid-query "That's not a valid query.")      
 (def ans-sorrywhat "Sorry, I didn't get that.")
 (def ans-contradiction "There's a contradiction! The answer to that question is both yes and no.")
 
 
+(defn g-respond-sync-yes-dunno-ptreetr "respond to yes/no question, or does-question, with either 'yes' or 'dunno'. Question must be in ptreetr form (parsed and transformed)"
+  [ptreetr]
+  (try
+    (do
+      (let [
+            ;new-rule-list (str (get-g-rule-list) cqtext)
+            ;ptreetr (insta/transform g-transforms ptree)
+            anon-query (first ptreetr)
+            new-tr-rules (conj @g-rules-tr-atom anon-query)
+            new-session   (-> (mk-session
+                               (symbol this-ns)
+                               new-tr-rules
+                               )
+                              (#(apply insert %1 %2) (get-g-fact-set))
+                              (fire-rules))
+            raw-query-result  (query new-session anon-query)
+            raw-query-result-str (apply str raw-query-result)]
 
-(defn g-respond-sync-yes-dunno "respond to yes/no question with either 'yes' or 'dunno'. Question must be in simple form (eg: 'Carol likes Bob?'), not in 'does' form"
-[qtext]
-   (try
-      (do 
-         (let [ cqtext (-> qtext (remove-iitt) (replace-iift)) ; remove leading 'is it true that', replace leading 'is it false that' with 'it is false that'
-                parsetree  ((g-grammar) cqtext)
-                new-rule-list (str (get-g-rule-list) cqtext)
-                new-session   (-> (mk-session (symbol this-ns)  (g-load-user-rules new-rule-list))
-                                      ( #(apply insert %1 %2) (get-g-fact-set))
-                                      (fire-rules))
-                anon-query  (first (insta/transform g-transforms parsetree))
-                raw-query-result  (query new-session anon-query)
-                raw-query-result-str (apply str raw-query-result)
-                    ]
-                    
-                    (if (= raw-query-result-str "") 
-                       (do ans-dunno)
-                       (do ans-yes)) ))
-            (catch Exception e (do (println (.getMessage e)) ans-invalid-query ))))
-
-
-
-
-
-(defn g-respond-sync-ynquestion "answer yes/no question in simple form (eg: 'Carol likes Bob?'), not in 'does' form"
-[qtext]
-         (try
-           (do 
-             (let [ 
-                    negqtext (str "it's false that " qtext)
-                    query-ans (g-respond-sync-yes-dunno qtext )   
-                    negquery-ans (g-respond-sync-yes-dunno negqtext)
-                    
-                    
-                    ]
-                    (cond
-                      (and (= query-ans ans-dunno)  (= negquery-ans ans-dunno) ) (do  ans-dunno)
-                      (and (= query-ans ans-dunno)  (= negquery-ans ans-yes) ) (do  ans-no)
-                      (and (= query-ans ans-yes)  (= negquery-ans ans-dunno) ) (do  ans-yes)
-                      (and (= query-ans ans-yes)  (= negquery-ans ans-yes) ) (do  ans-contradiction)
-                       
-                       :else ans-oops-rf )
-                       
-                       ))
-            (catch Exception e (do (println (.getMessage e)) ans-invalid-query ))))
+        (if (= raw-query-result-str "")
+          (do ans-dunno)
+          (do ans-yes))))
+    (catch Exception e (do (println (.getMessage e)) ans-invalid-query))))
 
 
+(defn g-respond-sync-yndq-ptree "answer yes/no question, or does-question, in ptree form (parsed)"
+  [ptree]
+  (try
+    (do
+      (let [;negqtext (str "it's false that " qtext)
+            ptreetr (insta/transform g-transforms ptree)
+            neg-ptreetr (negate ptreetr)
+            query-ans (g-respond-sync-yes-dunno-ptreetr ptreetr)
+            negquery-ans (g-respond-sync-yes-dunno-ptreetr neg-ptreetr)]
+        (do 
+          (println "calling g-respond-sync-yndq-ptree ...  " "ptree: " ptree ", ptreetr: " ptreetr ", neg-ptreetr: " neg-ptreetr
+                   ", query-ans: " query-ans ", negquery-ans: " negquery-ans)
+          (cond
+            (and (= query-ans ans-dunno)  (= negquery-ans ans-dunno)) (do  ans-dunno)
+            (and (= query-ans ans-dunno)  (= negquery-ans ans-yes)) (do  ans-no)
+            (and (= query-ans ans-yes)  (= negquery-ans ans-dunno)) (do  ans-yes)
+            (and (= query-ans ans-yes)  (= negquery-ans ans-yes)) (do  ans-contradiction)
+
+            :else (ans-oops "g-respond-sync-yndq-ptree")))))
+    (catch Exception e (do (println (.getMessage e)) ans-invalid-query))))
+
+(defn g-respond-sync-ckst-ptree "check statement, in ptree form (parsed)"
+  [ptree]
+  (try
+    (do
+      (let [;negqtext (str "it's false that " qtext)
+            ptreetr (insta/transform g-transforms-ckst ptree)
+            neg-ptreetr (negate ptreetr)
+            query-ans (g-respond-sync-yes-dunno-ptreetr ptreetr)
+            negquery-ans (g-respond-sync-yes-dunno-ptreetr neg-ptreetr)]
+        (do (println "calling g-respond-sync-ckst-ptree ...  " "ptree: " ptree ", ptreetr: " ptreetr ", neg-ptreetr: " neg-ptreetr 
+                     ", query-ans: " query-ans ", negquery-ans: " negquery-ans)
+           (cond
+             (and (= query-ans ans-dunno)  (= negquery-ans ans-dunno)) (do  ans-dunno)
+             (and (= query-ans ans-dunno)  (= negquery-ans ans-yes)) (do  ans-no)
+             (and (= query-ans ans-yes)  (= negquery-ans ans-dunno)) (do  ans-yes)
+             (and (= query-ans ans-yes)  (= negquery-ans ans-yes)) (do  ans-contradiction)
+
+             :else (ans-oops "g-respond-sync-ckst-ptree")) ) 
+        
+        
+        ))
+    (catch Exception e (do (println (.getMessage e)) ans-invalid-query))))
 
 
 (defn g-respond-sync-query-rqr "(raw query result) respond to a simple query of the form 'match ?x ..' with a response of the form 'satisfiers: ..'"
@@ -581,71 +669,61 @@ Dynamic rules is something I wouldn't mind adding to Clara, although that comes 
 
 (defn g-respond-sync
 
-[text]
-(let  [ 
-        ;cleantext (remove-iitt text)
-        ;negtext (str "it's false that " cleantext)
-        ;yntext (str cleantext " ?") ; a cludge to quickly turn statement into a question.
-        
-        
-
-        
-        
-        parsetree  ((g-grammar) text)
-        intype (first (first parsetree))]
-   (cond 
-       (or (= intype :TRIP-FACT-IND2 ) (= intype :PRENEG-TRIP-FACT-IND2) (= intype :EMBNEG-TRIP-FACT-IND2) (= intype :NOT-FACTS ) (= intype :PREAFF-FACTS ))
-         (let [
-               yntext (str text " ?") ; quickly turn statement into a question.
-               yntextr (g-respond-sync-ynquestion yntext)]
-           (cond 
-             (= yntextr ans-yes) (do ans-ikr)
-             (= yntextr ans-no) (do ans-imp)
-             (= yntextr ans-dunno) (do
-                  (->> (reduce conj (get-g-fact-set) (map eval (g-load-user-facts text)))
-                       (into #{})
-                       (set-g-fact-set))
-                  (let [new-session (-> @g-curr-session 
-                                      (#(apply insert %1 %2) (get-g-fact-set))
-                                      (fire-rules))]
-                      (dosync (ref-set g-curr-session new-session)))
+  [text]
+  (let  [parsetree  ((g-grammar) text)
+         intype (first (first parsetree))]
+    (cond
+      (or (= intype :TRIP-FACT-IND2) (= intype :PRENEG-TRIP-FACT-IND2) (= intype :EMBNEG-TRIP-FACT-IND2) (= intype :NOT-FACTS) (= intype :PREAFF-FACTS))
+      (let [
+            ckst-ptree-r (g-respond-sync-ckst-ptree parsetree)]
+        (cond
+          (= ckst-ptree-r ans-yes) (do ans-ikr)
+          (= ckst-ptree-r ans-no) (do ans-imp)
+          (= ckst-ptree-r ans-dunno) (do
+                                  (->> (reduce conj (get-g-fact-set) (map eval (g-load-user-facts text)))
+                                       (into #{})
+                                       (set-g-fact-set))
+                                  (let [new-session (-> @g-curr-session
+                                                        (#(apply insert %1 %2) (get-g-fact-set))
+                                                        (fire-rules))]
+                                    (dosync (ref-set g-curr-session new-session)))
                   ;(str "facts added: " (pr-str (g-load-user-facts text)))
-                 (do ans-okgotit))
-             :else ans-oops-rf  ))
-          
-       (= intype :AND-FACTS)
-          (dosync
-            (->>  (reduce conj (get-g-fact-set) (map eval (first (g-load-user-facts text))))
-                (into #{})
-                (set-g-fact-set) )
-            (let [new-session
-                  (-> @g-curr-session 
+                                  (do ans-okgotit))
+          :else (ans-oops "g-respond-sync")))
+
+      (= intype :AND-FACTS)
+      (dosync
+       (->>  (reduce conj (get-g-fact-set) (map eval (first (g-load-user-facts text))))
+             (into #{})
+             (set-g-fact-set))
+       (let [new-session
+             (-> @g-curr-session
+                 (#(apply insert %1 %2) (get-g-fact-set))
+                 (fire-rules))]
+         (ref-set g-curr-session new-session))
+       (str "facts added: " (pr-str (first (g-load-user-facts text)))))
+
+      (= intype :QUERY)
+      (g-respond-sync-query text)
+      (or (= intype :YNQUESTION)  (= intype :NEG-YNQUESTION))
+      (g-respond-sync-yndq-ptree parsetree)
+
+      (= intype :T-DOES-QUESTION) (g-respond-sync-yndq-ptree parsetree)
+      (= intype :T-WHO-QUESTION) (get-who (g-respond-sync-query (g-rephrase-from-tree parsetree)))
+      (= intype :T-WHOM-QUESTION) (get-who (g-respond-sync-query (g-rephrase-from-tree parsetree)))
+
+      (= intype :ANON-RULE)
+      (do (->>  (str (get-g-rule-list) text ";")
+                (set-g-rule-list))
+          (let [new-session
+                (-> (mk-session (symbol this-ns)   (g-load-user-rules (get-g-rule-list)))
                     (#(apply insert %1 %2) (get-g-fact-set))
                     (fire-rules))]
-              (ref-set g-curr-session new-session))
-            (str "facts added: " (pr-str (first (g-load-user-facts text)))))
-       
-       (= intype :QUERY )
-         (g-respond-sync-query text)
-       (or (= intype :YNQUESTION )  (= intype :NEG-YNQUESTION ))
-           (g-respond-sync-ynquestion text)
-       
-       (= intype :T-DOES-QUESTION) (g-respond-sync-ynquestion (g-rephrase-from-tree parsetree))
-       (= intype :T-WHO-QUESTION) (get-who (g-respond-sync-query (g-rephrase-from-tree parsetree)))
-       (= intype :T-WHOM-QUESTION) (get-who (g-respond-sync-query (g-rephrase-from-tree parsetree)))
-       
-       (= intype :ANON-RULE)
-           (do (->>  (str (get-g-rule-list) text ";")
-                          (set-g-rule-list) )
-                   (let [new-session 
-                           (-> (mk-session (symbol this-ns)   (g-load-user-rules (get-g-rule-list)))
-                              ( #(apply insert %1 %2) (get-g-fact-set))
-                              (fire-rules))]
-                       (dosync (ref-set g-curr-session new-session)) )
-                   ans-ok-rule  )
-       
-      :else ans-sorrywhat
-       )))
+            (dosync (ref-set g-curr-session new-session)))
+          ans-ok-rule)
+
+      :else ans-sorrywhat)))
+
 
 
 
