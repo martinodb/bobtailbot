@@ -1,5 +1,11 @@
 (ns bobtailbot.adapters.repl
-  (:require [outpace.config :refer [defconfig]])
+  (:require
+   
+   [taoensso.timbre :as timbre   :refer [log  trace  debug  info  warn  error  fatal  report logf tracef debugf infof warnf errorf fatalf reportf  spy get-env]]
+   [bobtailbot.tools :as tools :refer [tim-ret tim-println] ]
+   
+   [outpace.config :refer [defconfig]]
+   )
   (:gen-class)
   )
 
@@ -27,17 +33,18 @@
 
 (defn launch-repl [greeting respond]
   (do
-    (if greeting (do (println greeting)
+    (if greeting (do (tim-println greeting)
                      (flush)))
     (print ">> ")
     (flush))
   (let [input (read-line)]
     (if-not (= input "quit")
      (do
-       (println (try (respond input)
-                     (catch Exception e (do (str "Sorry: " e " - " (.getMessage e)))  )))
+       
+       (try (tim-println (respond input)) 
+            (catch Exception e (tim-println (str "Sorry: " e " - " (.getMessage e)))))
        (recur nil respond))
-     (do (println "Bye!")
+     (do (tim-println "Bye!")
          ;(System/exit 0)
          ))))
 

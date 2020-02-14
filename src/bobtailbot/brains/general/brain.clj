@@ -3,28 +3,31 @@
 
 (ns bobtailbot.brains.general.brain
   "General chatbot"
-  (:require [instaparse.core :as insta]
-            [clara.rules.accumulators :as acc]
-            [clara.rules :refer :all]
-            
+  (:require 
+   [taoensso.timbre :as timbre   :refer [log  trace  debug  info  warn  error  fatal  report logf tracef debugf infof warnf errorf fatalf reportf  spy get-env]]
+   
+   [instaparse.core :as insta]
+   [clara.rules.accumulators :as acc]
+   [clara.rules :refer :all]
+   
             ;; just for development
-            [clara.tools.inspect :as cti :refer [inspect]]
+   [clara.tools.inspect :as cti :refer [inspect]]
             ;; /just for development
-            
-            
-            [clojure.string :as string]
-            [clojure.core.async :as async :refer [go-loop <! <!! >! >!!  close! chan pub sub go]]
-            
-            [clojure.walk :as walk :refer [postwalk]]
-            
-            [schema.core :as sc]
-            
-            
-            [bobtailbot.tools :as tools :refer [dump-to-path dump-to-path-records load-from-path-or-create ]]
-            
-            [clojure.set :as set]
-            
-            [clojure.edn :as edn]))
+   
+   
+   [clojure.string :as string]
+   [clojure.core.async :as async :refer [go-loop <! <!! >! >!!  close! chan pub sub go]]
+   
+   [clojure.walk :as walk :refer [postwalk]]
+   
+   [schema.core :as sc]
+   
+   
+   [bobtailbot.tools :as tools :refer [tim-ret dump-to-path dump-to-path-records load-from-path-or-create ]]
+   
+   [clojure.set :as set]
+   
+   [clojure.edn :as edn]))
 
 
 
@@ -485,7 +488,7 @@
   ;[Triple (= ?x subj)(= "loves" verb)(= "Joe Smith" obj)]
   ;=>
   ;(do (insert! (->Triple "my-Joe-fact" true "Joe Smith" "loves" ?x))
-      ;(println "Joe is loved by, and loves back: " ?x)))
+      ;(timbre/info "Joe is loved by, and loves back: " ?x)))
 
 (sc/defn ^:always-validate g-load-user-rules :- [clara.rules.schema/Production]
   "Converts a business rule string into Clara productions."
@@ -582,7 +585,7 @@ Dynamic rules is something I wouldn't mind adding to Clara, although that comes 
         (if (= raw-query-result-str "")
           (do ans-dunno)
           (do ans-yes))))
-    (catch Exception e (do (println (.getMessage e)) ans-invalid-query))))
+    (catch Exception e (do (timbre/info (.getMessage e)) ans-invalid-query))))
 
 
 (defn g-respond-sync-yndq-ptree "answer yes/no question, or does-question, in ptree form (parsed)"
@@ -595,7 +598,7 @@ Dynamic rules is something I wouldn't mind adding to Clara, although that comes 
             query-ans (g-respond-sync-yes-dunno-ptreetr ptreetr)
             negquery-ans (g-respond-sync-yes-dunno-ptreetr neg-ptreetr)]
         (do 
-          (println "calling g-respond-sync-yndq-ptree ...  " "ptree: " ptree ", ptreetr: " ptreetr ", neg-ptreetr: " neg-ptreetr
+          (timbre/info "calling g-respond-sync-yndq-ptree ...  " "ptree: " ptree ", ptreetr: " ptreetr ", neg-ptreetr: " neg-ptreetr
                    ", query-ans: " query-ans ", negquery-ans: " negquery-ans)
           (cond
             (and (= query-ans ans-dunno)  (= negquery-ans ans-dunno)) (do  ans-dunno)
@@ -604,7 +607,7 @@ Dynamic rules is something I wouldn't mind adding to Clara, although that comes 
             (and (= query-ans ans-yes)  (= negquery-ans ans-yes)) (do  ans-contradiction)
 
             :else (ans-oops "g-respond-sync-yndq-ptree")))))
-    (catch Exception e (do (println (.getMessage e)) ans-invalid-query))))
+    (catch Exception e (do (timbre/info (.getMessage e)) ans-invalid-query))))
 
 (defn g-respond-sync-ckst-ptree "check statement, in ptree form (parsed)"
   [ptree]
@@ -615,7 +618,7 @@ Dynamic rules is something I wouldn't mind adding to Clara, although that comes 
             neg-ptreetr (negate ptreetr)
             query-ans (g-respond-sync-yes-dunno-ptreetr ptreetr)
             negquery-ans (g-respond-sync-yes-dunno-ptreetr neg-ptreetr)]
-        (do (println "calling g-respond-sync-ckst-ptree ...  " "ptree: " ptree ", ptreetr: " ptreetr ", neg-ptreetr: " neg-ptreetr 
+        (do (timbre/info "calling g-respond-sync-ckst-ptree ...  " "ptree: " ptree ", ptreetr: " ptreetr ", neg-ptreetr: " neg-ptreetr 
                      ", query-ans: " query-ans ", negquery-ans: " negquery-ans)
            (cond
              (and (= query-ans ans-dunno)  (= negquery-ans ans-dunno)) (do  ans-dunno)
@@ -627,7 +630,7 @@ Dynamic rules is something I wouldn't mind adding to Clara, although that comes 
         
         
         ))
-    (catch Exception e (do (println (.getMessage e)) ans-invalid-query))))
+    (catch Exception e (do (timbre/info (.getMessage e)) ans-invalid-query))))
 
 
 (defn g-respond-sync-query-rqr "(raw query result) respond to a simple query of the form 'match ?x ..' with a response of the form 'satisfiers: ..'"
@@ -643,7 +646,7 @@ Dynamic rules is something I wouldn't mind adding to Clara, although that comes 
                    raw-query-result  (query new-session anon-query)]
                raw-query-result
                ))
-            (catch Exception e (do (println (.getMessage e)) ans-invalid-query ))))
+            (catch Exception e (do (timbre/info (.getMessage e)) ans-invalid-query ))))
 
 (defn g-respond-sync-query-ransvars "(ans-vars result) respond to a simple query of the form 'match ?x ..' with a response of the form 'satisfiers: ..'"
   [qtext]
@@ -656,7 +659,7 @@ Dynamic rules is something I wouldn't mind adding to Clara, although that comes 
             ]
         ans-vars
         ))
-    (catch Exception e (do (println (.getMessage e)) ans-invalid-query))))
+    (catch Exception e (do (timbre/info (.getMessage e)) ans-invalid-query))))
 
 (defn g-respond-sync-query-rtxt "(text result) respond to a simple query of the form 'match ?x ..' with a response of the form 'satisfiers: ..'"
   [qtext]
@@ -666,7 +669,7 @@ Dynamic rules is something I wouldn't mind adding to Clara, although that comes 
         (str   "satisfiers: " (string/join "  " ans-vars ) "    "
                           ;"raw query result (no duplicates):  " raw-query-result-set-str 
          )))
-    (catch Exception e (do (println (.getMessage e)) ans-invalid-query))))
+    (catch Exception e (do (timbre/info (.getMessage e)) ans-invalid-query))))
 
 
 (def g-respond-sync-query g-respond-sync-query-rtxt)
@@ -778,7 +781,7 @@ Dynamic rules is something I wouldn't mind adding to Clara, although that comes 
 (defn g-respond-sync-top [text]
 (let [ukw (unk-words text)
           ]
- (println "text: " text)
+ (timbre/info "text: " text)
  (cond
     (= text "Forget all facts") (do   (set-g-fact-set g-default-fact-set   )
                                           (let [new-session (-> @g-curr-session 
@@ -786,7 +789,7 @@ Dynamic rules is something I wouldn't mind adding to Clara, although that comes 
                                                              (fire-rules))]
                                              (dosync (ref-set g-curr-session new-session)) )
                                           (do "OK, all facts forgotten."))
-   (= text "Forget all rules") (do (println "forgetting all rules..")
+   (= text "Forget all rules") (do (timbre/info "forgetting all rules..")
                                    (set-g-rule-list g-default-rule-list )
                                    (let [new-session (-> (mk-session (symbol this-ns) (g-load-user-rules (get-g-rule-list)))
                                                          ( #(apply insert %1 %2) (get-g-fact-set))

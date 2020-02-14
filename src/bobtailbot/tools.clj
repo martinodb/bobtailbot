@@ -1,10 +1,27 @@
 (ns bobtailbot.tools
-(:require [clojure.edn :as edn]
-          [clojure.string :as string :refer [trim]]
-          [clojure.java.io :as io]
-          [me.raynes.fs :as fs]
-          [clojure.pprint :as pp :refer [pprint]]
-))
+(:require 
+ 
+ [taoensso.timbre :as timbre   :refer [log  trace  debug  info  warn  error  fatal  report logf tracef debugf infof warnf errorf fatalf reportf  spy get-env]]
+ ;[taoensso.timbre.appenders.core :as appenders]
+ 
+ [clojure.edn :as edn]
+ [clojure.string :as string :refer [trim]]
+ [clojure.java.io :as io]
+ [me.raynes.fs :as fs]
+ [clojure.pprint :as pp :refer [pprint]]
+ ))
+
+
+
+(defn tim-ret "timbre/info text and then return it"
+  [text]
+  (do (timbre/info text) text))
+
+(defn tim-println "timbre/info text items and then print them"
+  [& texts]
+  (do (timbre/info texts) (apply println texts)))
+
+
 
 ;; CREDIT:
 ;; https://spootnik.org/entries/2016/12/17/building-an-atomic-database-with-clojure/
@@ -86,7 +103,7 @@
                     {:readers edn-readers}
                     (slurp path))]
           (if string string ""))
-    (catch Exception e (println (.getMessage e)))))
+    (catch Exception e (timbre/info (.getMessage e)))))
 
 (defn load-from-path-or-create
   ([path edn-readers] 
@@ -94,7 +111,7 @@
   ([path init edn-readers]
    (try
      (if (.exists (io/as-file path)) (load-from-path path edn-readers) (do (dump-to-path path init) (load-from-path-or-create path init edn-readers)))
-     (catch Exception e (println (.getMessage e)))) ) )
+     (catch Exception e (timbre/info (.getMessage e)))) ) )
 
 (defn persist-fn
   "Yields an atom watch-fn that dumps new states to a path"
@@ -214,7 +231,7 @@
 (defn println-clj-filenames
   "print recursively the names of .clj files in a given dir"
   ([] (println-clj-filenames "src"))
-  ([dir](map #(println (.getPath %)) (walk dir #".*\.clj"))) 
+  ([dir](map #(timbre/info (.getPath %)) (walk dir #".*\.clj"))) 
 
   )
 
@@ -243,13 +260,13 @@
 
 (defn embed-backend
 "Creates a copy of a whole external repo of some FOSS third-party backend inside this repo, renaming namespaces accordingly. Used for CSNePS"
- ([] (do (println "TODO: the embed tool is not working yet!")
+ ([] (do (timbre/info "TODO: the embed tool is not working yet!")
        (embed-backend default-orig default-dest)))
  ([orig dest] (do
-                  (println "TODO: the embed tool is not working yet!!")
+                  (timbre/info "TODO: the embed tool is not working yet!!")
                   (println-clj-filenames orig)
                   
-                  (println "copying dirs..")
+                  (timbre/info "copying dirs..")
                    ;;(fs/copy-dir-into orig (str dest "/CSNePS")) ; copies the *contents* of orig into dest.
                     (fs/copy-dir orig dest) ; copies orig into dest.
                   ;;In both cases, if orig is aleady there, I think it overwrites it.
@@ -274,7 +291,7 @@
 
 ;;; FUNCTIONS WITH REGEXES
 
-;; (map #(println (.getPath %)) (walk "src" #".*\.clj"))
+;; (map #(timbre/info (.getPath %)) (walk "src" #".*\.clj"))
 
 
 

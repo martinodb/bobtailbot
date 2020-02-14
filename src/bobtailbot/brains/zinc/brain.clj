@@ -1,21 +1,21 @@
 (ns bobtailbot.brains.zinc.brain
   "CSNePS as backend"
-  (:require [clojure.string :as string]
-            [clojure.core.async :as async 
-               :refer [go-loop <! <!! >! >!!  close! chan pub sub]]
-            
-            
-            
-            
-            
-            ;[csneps.core.snuser :as s]
-            [zinc.core.snuser :as s :refer [adopt-rule adopt-rules allTerms  ask askif askifnot askwh assert assert! assertAll clearkb defineCaseframe defineSlot defineTerm defineType describe-terms exit find-term goaltrace  krnovice list-focused-inference-tasks list-variables list-terms listkb load  nogoaltrace quit unassert] ]
-            [zinc.MOD-logging :as Mlogg :refer [wdm wtim wlog wdm2 wtim2 wlog2]] ;; added by martinodb.
-            
-            
+  (:require
+   [taoensso.timbre :as timbre   :refer []]
+   [bobtailbot.tools :as tools :refer [tim-ret]]
+   
+   [clojure.string :as string]
+   [clojure.core.async :as async :refer [go-loop <! <!! >! >!!  close! chan pub sub]]
+
+   ;[csneps.core.snuser :as s]
+   
+   [zinc.core.snuser :as s :refer [adopt-rule adopt-rules allTerms  ask askif askifnot askwh assert assert! assertAll clearkb defineCaseframe defineSlot defineTerm defineType describe-terms exit find-term goaltrace  krnovice list-focused-inference-tasks list-variables list-terms listkb load  nogoaltrace quit unassert] ]
+   [zinc.MOD-logging :as Mlogg :refer [wdm wtim wlog wdm2 wtim2 wlog2]] ;; added by martinodb.
+   
+   
             ;[instaparse.core :as insta]
             ;[schema.core :as sc]
-            )
+   )
      
      
      (:require [zinc.MOD-logging :as Mlogg :refer [wdm wtim wlog wdm2 wtim2 wlog2]] ;; added by martinodb.
@@ -185,7 +185,7 @@
   
   (= (:hear @mode) true) (hear-normal text)
   (= (:hear @mode) false) nil
-  :else (do (println "problem with hear-top"))
+  :else (do (timbre/info "problem with hear-top"))
    ))
 
 

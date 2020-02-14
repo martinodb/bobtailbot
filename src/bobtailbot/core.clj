@@ -51,10 +51,10 @@
 ;;;;;;; Dynamically load brains and adapters
 (def brain-dirs (vec (list-dir "src/bobtailbot/brains")) )
 (def adapter-files (vec (list-dir "src/bobtailbot/adapters")) )
-(println (str "brain-dirs: " brain-dirs "\n" "adapter-files: " adapter-files))
+(timbre/info (str "brain-dirs: " brain-dirs "\n" "adapter-files: " adapter-files))
 (def brain-names (vec (map #(-> (.getName %) (pr-str) (read-string) ) brain-dirs) )) ; using ".getName" directly gives me a syntax error for some reason. I have to use pr-str bc otherwise it's lazy seq.
 (def adapter-names (vec (map #(-> (.getName %) (pr-str) (read-string) (string/replace  (re-pattern "\\.clj") ""  ) ) adapter-files)    )  ) ; using ".getName" directly gives me a syntax error for some reason.
-(println (str "brain-names: " brain-names  "\n" "adapter-names: " adapter-names ))
+(timbre/info (str "brain-names: " brain-names  "\n" "adapter-names: " adapter-names ))
 (def req-brains-string (str "(require '["(string/join "] '[" (map brainns-str brain-names)) "])"))
 (def req-adapters-string (str "(require '["(string/join "] '[" (map adapterns-str adapter-names)) "])"))
 ;;;;;;;;;;
@@ -70,24 +70,24 @@
 ;;;;;;; logging
 (def log-fname "bobtailbot-history.log")
 
-(defn hush-log "send log messages to file and not to stdout"
-    [] (timbre/merge-config!
+(def hush-log "send log messages to file and not to stdout"
+  (future (timbre/merge-config!
            {:appenders {
-              :spit (appenders/spit-appender {:fname log-fname})
-              :println {:enabled? false}}}))
+                        :spit (appenders/spit-appender {:fname log-fname})
+                        :println {:enabled? false}}})))
 
 
-(defn say-n-log "send log messages to file and also to stdout"
-    [] (timbre/merge-config!
+(def say-n-log "send log messages to file and also to stdout"
+  (future (timbre/merge-config!
            {:appenders {
-              :spit (appenders/spit-appender {:fname log-fname})
+                        :spit (appenders/spit-appender {:fname log-fname})
               ;:println {:enabled? true}
-              
-              }}))
+                        
+                        }})))
 
 
 
-(defn clean-log "wipe the log file clean" [] (spit log-fname "") )
+;;; (defn clean-log "wipe the log file clean" [] (spit log-fname "") ) ;;; I don't want to delete the log. Fix later. Make it optional, use future so that it doesn't happen when def.
 
 (defn setup-tlog "Set up Timbre logging for clojure.tools.logging"
    [] (use-timbre) )
@@ -155,7 +155,7 @@
           speakup (speakup-b brain)
           respond (respond-b brain)
          ]
-      (do   ;;; DEBUGGING (println "opts-conn: " {:nick nick :host host :port port :group-or-chan group-or-chan :greeting greeting :hear hear :speakup speakup :respond respond}  "\n" "(respond 'hello'): " (respond "hello"))
+      (do   ;;; DEBUGGING (timbre/info "opts-conn: " {:nick nick :host host :port port :group-or-chan group-or-chan :greeting greeting :hear hear :speakup speakup :respond respond}  "\n" "(respond 'hello'): " (respond "hello"))
         ((load-string (str
         "(fn [{:keys [nick host port group-or-chan greeting hear speakup respond] :as opts-conn}] " 
          "(" (adapterns-str adapter) "/connect "  "opts-conn"  ")" ")"  )) 
@@ -268,16 +268,16 @@
 
 
 (defn dev-exit [status msg]
-  (println msg)
+  (timbre/info msg)
   ;(System/exit status)
-  (println "Would have exited")
+  (timbre/info "Would have exited")
   
   )
 
 
 
 (defn exit [status msg]
-  (println msg)
+  (timbre/info msg)
   (System/exit status)
   
   )
@@ -300,25 +300,26 @@
  
                             ] 
           
-          (do (clean-log) ; delete previous log entries. This is useful for testing.
-              (setup-tlog) ; use Timbre for clojure.tools.logging
-              
+          (do ;; (clean-log) ;;(NO! Make it optional) delete previous log entries. This is useful for testing.
+            (setup-tlog) ; use Timbre for clojure.tools.logging
+            (timbre/info ";;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; NEW SESSION ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;")
+            
               ;;pick one
-              ;(hush-log) ; log to file, not to stdout.
-              (say-n-log) ; log to file and also to stdout.
+                @hush-log ; log to file, not to stdout.
+              ; @say-n-log ; log to file and also to stdout.
               ;;;;
-              
-              
-              ;; DEBUGGING (println "value-map: " value-map) ;; for debugging
-              ;; DEBUGGING (println "brain : " brain)
-              ;; DEBUGGING (println "adapter: " adapter)
-              ;; DEBUGGING (println "opts-ab: " opts-ab)
-              (if exit-message  (dev-exit (if ok? 0 1) exit-message) (do))
-              (case action
-                "start"  (connect-ab opts-ab )
-                "stop"   "stop: unimplemented arg. Use 'quit' instead"
-                "status" "status: unimplemented arg."
-                 (str "No matching for action: " action)  ) )   )  )
+
+
+              ;; DEBUGGING (timbre/info "value-map: " value-map) ;; for debugging
+              ;; DEBUGGING (timbre/info "brain : " brain)
+              ;; DEBUGGING (timbre/info "adapter: " adapter)
+              ;; DEBUGGING (timbre/info "opts-ab: " opts-ab)
+            (if exit-message  (dev-exit (if ok? 0 1) exit-message) (do))
+            (case action
+              "start"  (connect-ab opts-ab )
+              "stop"   "stop: unimplemented arg. Use 'quit' instead"
+              "status" "status: unimplemented arg."
+              (str "No matching for action: " action)  ) )   )  )
                  
 
 

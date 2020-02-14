@@ -2,11 +2,15 @@
 
 (ns bobtailbot.adapters.irc
   (:gen-class)
-  (:require [outpace.config :refer [defconfig]]
-            [clojure.string :as string]
-            [clojure.tools.cli :as cli]
-            [clojure.core.async :as async]
-            [com.gearswithingears.async-sockets :refer :all]))
+  (:require 
+   [taoensso.timbre :as timbre   :refer []]
+   [bobtailbot.tools :as tools :refer [tim-ret]]
+   
+   [outpace.config :refer [defconfig]]
+   [clojure.string :as string]
+   [clojure.tools.cli :as cli]
+   [clojure.core.async :as async]
+   [com.gearswithingears.async-sockets :refer :all]))
 
 
 
@@ -42,7 +46,7 @@
    (write socket message false))
   ([socket message print?]
    (when print?
-     (println message))
+     (timbre/info message))
    (async/>!! (:out socket) (str message "\r"))))
 
 
@@ -51,22 +55,22 @@
    (write-privmsg socket privmsg irc-channel false))
   ([socket privmsg irc-channel print?]
    (when print?
-     (println privmsg))
+     (timbre/info privmsg))
    (async/>!! (:out socket) (str "PRIVMSG "  irc-channel " :" privmsg "\r"))))
 
 
 
 (defn login-as-guest [socket nick]
-  (println (str "Logging in as guest " nick))
+  (timbre/info (str "Logging in as guest " nick))
   (write socket (str "NICK " nick))
   (write socket (str "USER " nick " 0 * :" nick))
-  (println "done logging in")
+  (timbre/info "done logging in")
   )
 
 (defn input-listener [socket]
   (loop []
     (let [input (read-line)]
-      (println input)
+      (timbre/info input)
       
       (recur))))
 
@@ -76,7 +80,7 @@
 
 (defn handle-line [socket line irc-channel hear-fn]
  (let [e-line (string/replace line (re-pattern "\\\"")  #(str "\\" %)  )] ; escape user double-quotes
-  (try (do ;(println "line: " line "\n" "e-line: " e-line) ; debugging.
+  (try (do ;(timbre/info "line: " line "\n" "e-line: " e-line) ; debugging.
            (cond
              (re-find #"^ERROR :Closing Link:" e-line)
                (close-socket-client socket)
@@ -93,11 +97,11 @@
                       (cond 
                         (re-find #"^quit" msg-content) (swap! connected (constantly false))
                          :else (do
-                                  ;(println "msg-user: " msg-user "\n" "msg-content: " msg-content) ; debugging
+                                  ;(timbre/info "msg-user: " msg-user "\n" "msg-content: " msg-content) ; debugging
                                  (hear-fn msg-content)
                                  )))))
         (catch Exception e
-           (do (println "stacktrace: " (println e))
+           (do (timbre/info "stacktrace: " (timbre/info e))
                (hear-fn 
                  (str "&caught exception: " (or (.getMessage e) "(no message)")
                     )  )   )   ) ) ) )
@@ -120,21 +124,21 @@
 
 
 (defn connect [{:keys [nick host port group-or-chan greeting hear speakup ]}]; respond will be ignored.
-  (println "Connecting...")
+  (timbre/info "Connecting...")
   (swap! curr-host (constantly host))
   (try
     (let [socket (socket-client port host)
           irc-channel (str "#" group-or-chan)
            ]
-      (println (str "Connected to " host ":" port))
+      (timbre/info (str "Connected to " host ":" port))
        
       
        (message-listener socket irc-channel hear)
        (Thread/sleep 1000)
        (login-as-guest socket nick)
-       (println (str "connected? :" @connected))
+       (timbre/info (str "connected? :" @connected))
        (while (= @connected false) (Thread/sleep 100))
-       (println (str "connected? :" @connected))
+       (timbre/info (str "connected? :" @connected))
        (Thread/sleep 500)
        (write socket (str "JOIN " irc-channel) true)
        (Thread/sleep 1000)
@@ -142,10 +146,10 @@
        (Thread/sleep 500)
        (speaker-up socket irc-channel speakup)
        (while (= @connected true) (Thread/sleep 100))
-       (println "disconnecting now")
+       (timbre/info "disconnecting now")
        (write socket "QUIT")
        )
     (catch Exception e
-      (println (str "Failed to connect to " host ":" port "\n" (str e))))))
+      (timbre/info (str "Failed to connect to " host ":" port "\n" (str e))))))
 
 
