@@ -136,9 +136,11 @@ NEG-YNQUESTION-notest = NEG-YNQ-BODY-notest;
 
 
 D-TRIP-FACT-IND2 = T-SUBJECT VtraInf T-OBJECT ;
+WHO-TRIP-FACT-IND2 = VtraPres3 T-NP ;
+
 T-DOES-QUESTION = <"does"> D-TRIP-FACT-IND2 <"?">+ ;
 
-T-WHO-QUESTION = <"who"> VtraPres3 T-NP <"?">+ ;
+T-WHO-QUESTION = <"who"> WHO-TRIP-FACT-IND2 <"?">+ ;
 T-WHOM-QUESTION = (<"who"> | <"whom">) <"does">  T-NP VtraInf <"?">+ ;
 
 

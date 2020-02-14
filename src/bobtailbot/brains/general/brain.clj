@@ -325,8 +325,15 @@
                                         (list '= t-verb-pres3 'verb)
                                         (list '= t-obj 'obj)]
                           :fact-binding :?#thing}))
+   :WHO-TRIP-FACT-IND2 (fn [t-verb t-obj]
+                         {:type Triple
+                          :constraints [(list '= true 'affirm)
+                                        (list '= '?x 'subj)
+                                        (list '= t-verb 'verb)
+                                        (list '= t-obj 'obj)]
+                          :fact-binding :?#thing})
    
-    ;CAREFUL: this only works because the Triple record only has one boolean (affirm).
+   ;CAREFUL: this only works because the Triple record only has one boolean (affirm).
    :Q-NOT-FACTS   negate ;(fn [map] (postwalk #(if (or (= % true) (= % false)) (not %) % ) map)) 
    :R-NOT-FACTS  negate ; (fn [map] (postwalk #(if (or (= % true) (= % false)) (not %) % ) map)) 
    ; :NOT-FACTS  negate ; (fn [map] (postwalk #(if (or (= % true) (= % false)) (not %) % ) map)) 
@@ -371,6 +378,10 @@
                         {:name "anon-query"
                          :lhs [dfact]
                          :params #{}})
+   :T-WHO-QUESTION   (fn [wfact]
+                       {:name "anon-query"
+                        :lhs [wfact]
+                        :params #{}})
    })
 
 (def g-transforms-mkst  "treats :TRIP-FACT-IND2, :PRENEG-TRIP-FACT-IND2, :EMBNEG-TRIP-FACT-IND2, :NOT-FACTS, :PREAFF-FACTS normally, as a statement"
@@ -425,26 +436,26 @@
 
 (defn joinNNPstr [NNP] (string/join " " (rest NNP)))
 
-(defn g-rephrase-from-tree [parsetree]
- (let [actual-ptree (first parsetree)
-       intype (first actual-ptree)]
-    (cond
-      (= intype :T-DOES-QUESTION)
-        (let [t-subj (joinNNPstr (second actual-ptree))
-              t-verb-inf (second (nth actual-ptree 2))
-              t-verb-pres3 (conjugate-pres3 t-verb-inf) 
-              t-obj (joinNNPstr (nth actual-ptree 3))]
-           (str t-subj " " t-verb-pres3 " " t-obj "?"))
-      (= intype :T-WHO-QUESTION)
-        (let [t-verb  (second (second actual-ptree))
-              t-obj (joinNNPstr (nth actual-ptree 2))]
-           (str "match ?x " t-verb " " t-obj ))
-      (= intype :T-WHOM-QUESTION)
-        (let [t-subj  (joinNNPstr (second actual-ptree))
-              t-verb-inf (second (nth actual-ptree 2))
-              t-verb-pres3 (conjugate-pres3 t-verb-inf)]
-           (str "match " t-subj " " t-verb-pres3 " " "?x" ))
-      :else "g-rephrase-from-tree failed" )))
+; (defn g-rephrase-from-tree [parsetree]
+;  (let [actual-ptree (first parsetree)
+;        intype (first actual-ptree)]
+;     (cond
+;       (= intype :T-DOES-QUESTION)
+;         (let [t-subj (joinNNPstr (second actual-ptree))
+;               t-verb-inf (second (nth actual-ptree 2))
+;               t-verb-pres3 (conjugate-pres3 t-verb-inf) 
+;               t-obj (joinNNPstr (nth actual-ptree 3))]
+;            (str t-subj " " t-verb-pres3 " " t-obj "?"))
+;       (= intype :T-WHO-QUESTION)
+;         (let [t-verb  (second (second actual-ptree))
+;               t-obj (joinNNPstr (nth actual-ptree 2))]
+;            (str "match ?x " t-verb " " t-obj ))
+;       (= intype :T-WHOM-QUESTION)
+;         (let [t-subj  (joinNNPstr (second actual-ptree))
+;               t-verb-inf (second (nth actual-ptree 2))
+;               t-verb-pres3 (conjugate-pres3 t-verb-inf)]
+;            (str "match " t-subj " " t-verb-pres3 " " "?x" ))
+;       :else "g-rephrase-from-tree failed" )))
 
 
 
@@ -632,6 +643,42 @@ Dynamic rules is something I wouldn't mind adding to Clara, although that comes 
         ))
     (catch Exception e (do (timbre/info (.getMessage e)) ans-invalid-query))))
 
+(defn g-respond-sync-who-ptree "answer WHO-question, in ptree form (parsed)"
+  [ptree]
+  (try
+    (let [log-start (timbre/info "logging g-respond-sync-who-ptree")
+          ptreetr (insta/transform g-transforms ptree)
+         
+          anon-query (first ptreetr)
+          log-anon-query (timbre/info "anon-query: " anon-query ",\n")
+          
+          new-tr-rules (conj @g-rules-tr-atom anon-query)
+          log-new-tr-rules (timbre/info "new-tr-rules: " new-tr-rules ",\n")
+          
+          new-session   (-> (mk-session
+                             (symbol this-ns)
+                             new-tr-rules)
+                            (#(apply insert %1 %2) (get-g-fact-set))
+                            (fire-rules))
+          
+          raw-query-result  (query new-session anon-query)
+          log-raw-query-result (timbre/info "raw-query-result: " raw-query-result ",\n")
+          
+          raw-query-result-set (into #{} raw-query-result)
+          raw-query-result-set-str (apply str raw-query-result-set)
+          
+          ans-vars (get-ans-vars raw-query-result-set-str)
+          log-ans-vars (timbre/info "ans-vars: " ans-vars ",\n")
+          
+          who (get-who (first ans-vars) )
+          log-who (timbre/info "who: " who ",\n")
+          ]
+      who)
+    (catch Exception e (do (timbre/info
+                            "g-respond-sync-who-ptree failed. Error message:"
+                            (.getMessage e)
+                            ", ptree: " ptree )
+                           ans-invalid-query))))
 
 (defn g-respond-sync-query-rqr "(raw query result) respond to a simple query of the form 'match ?x ..' with a response of the form 'satisfiers: ..'"
 [qtext]
@@ -718,8 +765,8 @@ Dynamic rules is something I wouldn't mind adding to Clara, although that comes 
       (g-respond-sync-yndq-ptree parsetree)
 
       (= intype :T-DOES-QUESTION) (g-respond-sync-yndq-ptree parsetree)
-      (= intype :T-WHO-QUESTION) (get-who (g-respond-sync-query (g-rephrase-from-tree parsetree)))
-      (= intype :T-WHOM-QUESTION) (get-who (g-respond-sync-query (g-rephrase-from-tree parsetree)))
+      (= intype :T-WHO-QUESTION) (g-respond-sync-who-ptree parsetree)
+      ;(= intype :T-WHOM-QUESTION) (g-respond-sync-whom-ptree parsetree)
 
       (= intype :ANON-RULE)
       (do (->>  (str (get-g-rule-list) text ";")
@@ -731,7 +778,10 @@ Dynamic rules is something I wouldn't mind adding to Clara, although that comes 
             (dosync (ref-set g-curr-session new-session)))
           ans-ok-rule)
 
-      :else ans-sorrywhat)))
+      :else (do
+              (timbre/info
+               "ERROR in g-respond-sync.. parsetree: " parsetree ", intype: " intype)
+              ans-sorrywhat) )))
 
 
 
