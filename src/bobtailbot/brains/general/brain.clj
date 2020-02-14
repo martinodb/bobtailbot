@@ -434,30 +434,6 @@
 
 (def g-transforms g-transforms-mkst)
 
-(defn joinNNPstr [NNP] (string/join " " (rest NNP)))
-
-; (defn g-rephrase-from-tree [parsetree]
-;  (let [actual-ptree (first parsetree)
-;        intype (first actual-ptree)]
-;     (cond
-;       (= intype :T-DOES-QUESTION)
-;         (let [t-subj (joinNNPstr (second actual-ptree))
-;               t-verb-inf (second (nth actual-ptree 2))
-;               t-verb-pres3 (conjugate-pres3 t-verb-inf) 
-;               t-obj (joinNNPstr (nth actual-ptree 3))]
-;            (str t-subj " " t-verb-pres3 " " t-obj "?"))
-;       (= intype :T-WHO-QUESTION)
-;         (let [t-verb  (second (second actual-ptree))
-;               t-obj (joinNNPstr (nth actual-ptree 2))]
-;            (str "match ?x " t-verb " " t-obj ))
-;       (= intype :T-WHOM-QUESTION)
-;         (let [t-subj  (joinNNPstr (second actual-ptree))
-;               t-verb-inf (second (nth actual-ptree 2))
-;               t-verb-pres3 (conjugate-pres3 t-verb-inf)]
-;            (str "match " t-subj " " t-verb-pres3 " " "?x" ))
-;       :else "g-rephrase-from-tree failed" )))
-
-
 
 (def fact-file-p (str data-dir-prefix "store/g_fact_set.edn"))
 (def rule-file-p (str data-dir-prefix "store/g_rule_list.edn"))
