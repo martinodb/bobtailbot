@@ -19,6 +19,8 @@ VOC-MAP = "{" <whitespace>*  (VMkey <whitespace>+ VMval (<whitespace> | <",">)*)
 
 NEG = (<"it's"> | <"it is">) (<"false"> | (<"not"> (<"the case">)?)) <"that">  ;
 PREAFF = (<"it's"> | <"it is">) (<"true"> | <"the case">) <"that">  ;
+Q-PREAFF = <"is it"> (<"true"> | <"the case">) <"that">  ;
+Q-NEG = <"is it"> (<"false"> | (<"not"> (<"the case">)?)) <"that">  ;
 
 
 NQUERY = <"query"> NAME ;
@@ -110,29 +112,20 @@ Q-AND-FACTS = Q-FACT (<"and"> (Q-FACT | <"("> Q-FACTS <")">))+  ;
 Q-OR-FACTS = Q-FACT (<"or"> (Q-FACT | <"("> Q-FACTS <")">))+  ;
 
 Q-NOT-FACTS = <NEG> Q-FACTS;
-Q-PREAFF-FACTS = <PREAFF> Q-FACTS;
+Q-PREAFF-FACTS = <PREAFF>+ Q-FACTS;
 
 
 
 
 
 YNQUESTION = (YNQUESTION-wtest | YNQUESTION-notest);
-YNQUESTION-wtest = YNQ-BODY-wtest;
-YNQUESTION-notest = YNQ-BODY-notest;
-
-<YNQ-BODY-wtest> = (<"is it ">? <"true that">)? YNQLHS-wtest <"?">+ <';'>* ;
-<YNQ-BODY-notest> = (<"is it ">? <"true that">)? YNQLHS-notest <"?">+ <';'>* ;
-
-<YNQLHS-wtest> = QLHS-wtest ;
-<YNQLHS-notest> = QLHS-notest ;
+YNQUESTION-wtest =  <Q-PREAFF>? QLHS-wtest <"?">+ <';'>* ;
+YNQUESTION-notest =  <Q-PREAFF>? QLHS-notest <"?">+ <';'>* ;
 
 
 NEG-YNQUESTION = (NEG-YNQUESTION-wtest | NEG-YNQUESTION-notest);
-NEG-YNQUESTION-wtest = NEG-YNQ-BODY-wtest;
-NEG-YNQUESTION-notest = NEG-YNQ-BODY-notest;
-
-<NEG-YNQ-BODY-wtest> = <"is it ">? <"false that"> YNQLHS-wtest <"?">+ <';'>* ;
-<NEG-YNQ-BODY-notest> = <"is it ">? <"false that"> YNQLHS-notest <"?">+ <';'>* ;
+NEG-YNQUESTION-wtest = <Q-NEG> QLHS-wtest <"?">+ <';'>*;
+NEG-YNQUESTION-notest = <Q-NEG> QLHS-notest <"?">+ <';'>* ;
 
 
 D-TRIP-FACT-IND2 = T-SUBJECT VtraInf T-OBJECT ;

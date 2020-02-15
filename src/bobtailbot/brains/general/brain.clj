@@ -365,6 +365,7 @@
    :ANON-RULE identity
    :QUERY identity
    :YNQUESTION identity
+   :NEG-YNQUESTION identity
    
    :NQUERY  (fn [name] (fn [session-name] (query session-name (if (.contains name ns-prefix) name (str ns-prefix name)))))
    :QUERY-notest   (fn [& facts]
@@ -567,14 +568,16 @@ Dynamic rules is something I wouldn't mind adding to Clara, although that comes 
 (def ans-contradiction "There's a contradiction! The answer to that question is both yes and no.")
 
 
-(defn g-respond-sync-yes-dunno-ptreetr "respond to yes/no question, or does-question, with either 'yes' or 'dunno'. Question must be in ptreetr form (parsed and transformed)"
+(defn g-respond-sync-yes-dunno-ptreetr "respond to yes/no question, negated yes/no question, or does-question, with either 'yes' or 'dunno'. Question must be in ptreetr form (parsed and transformed)"
   [ptreetr]
   (try
     (do
-      (let [
+      (let [log-start (timbre/info "g-respond-sync-yes-dunno-ptreetr")
             ;new-rule-list (str (get-g-rule-list) cqtext)
             ;ptreetr (insta/transform g-transforms ptree)
             anon-query (first ptreetr)
+            log-anon-query (timbre/info "anon-query: " anon-query ",\n")
+            
             new-tr-rules (conj @g-rules-tr-atom anon-query)
             new-session   (-> (mk-session
                                (symbol this-ns)
@@ -591,7 +594,7 @@ Dynamic rules is something I wouldn't mind adding to Clara, although that comes 
     (catch Exception e (do (timbre/info (.getMessage e)) ans-invalid-query))))
 
 
-(defn g-respond-sync-yndq-ptree "answer yes/no question, or does-question, in ptree form (parsed)"
+(defn g-respond-sync-yndq-ptree "answer yes/no question, negated yes/no question, or does-question, in ptree form (parsed)"
   [ptree]
   (try
     (do
@@ -778,12 +781,12 @@ Dynamic rules is something I wouldn't mind adding to Clara, although that comes 
          (ref-set g-curr-session new-session))
        (str "facts added: " (pr-str (first (g-load-user-facts text)))))
 
-      (= intype :QUERY)
-      (g-respond-sync-query text)
-      (or (= intype :YNQUESTION)  (= intype :NEG-YNQUESTION))
-      (g-respond-sync-yndq-ptree parsetree)
-
+      (= intype :QUERY)  (g-respond-sync-query text)
+      
+      (= intype :YNQUESTION)      (g-respond-sync-yndq-ptree parsetree)
+      (= intype :NEG-YNQUESTION)  (g-respond-sync-yndq-ptree parsetree)
       (= intype :T-DOES-QUESTION) (g-respond-sync-yndq-ptree parsetree)
+      
       (= intype :T-WHO-QUESTION) (g-respond-sync-who-ptree parsetree)
       (= intype :T-WHOM-QUESTION) (g-respond-sync-whom-ptree parsetree)
 
