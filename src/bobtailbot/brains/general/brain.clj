@@ -810,13 +810,7 @@ Dynamic rules is something I wouldn't mind adding to Clara, although that comes 
 
 
 
- ;new-rule-list (str (get-g-rule-list) text)
-                    ;new-session   (-> (mk-session (symbol this-ns)  (g-load-user-rules new-rule-list))
-                                      ;( #(apply insert %1 %2) (get-g-fact-set))
-                                        ;(fire-rules))
-                    ;anon-query  (first (insta/transform g-transforms parsetree))
-                    ;raw-query-result  (query new-session anon-query)
-                    ;raw-query-result-str (apply str raw-query-result)   
+
 
 
 
