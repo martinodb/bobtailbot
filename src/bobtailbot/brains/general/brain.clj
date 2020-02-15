@@ -539,6 +539,10 @@ Dynamic rules is something I wouldn't mind adding to Clara, although that comes 
 
 ;;silly reason.
 (declare get-ans-vars)
+(declare get-ans-vars-rtxt)
+(declare get-ans-vars-rvec)
+
+
 (declare remove-iitt)
 (declare replace-iift)
 (declare get-who)
@@ -658,7 +662,7 @@ Dynamic rules is something I wouldn't mind adding to Clara, although that comes 
           ans-vars (get-ans-vars raw-query-result-set-str)
           log-ans-vars (timbre/info "ans-vars: " ans-vars ",\n")
           
-          who (get-who (first ans-vars) )
+          who (get-who ans-vars )
           log-who (timbre/info "who: " who ",\n")
           ]
       who)
@@ -719,28 +723,19 @@ Dynamic rules is something I wouldn't mind adding to Clara, although that comes 
         ))
     (catch Exception e (do (timbre/info (.getMessage e)) ans-invalid-query ))))
 
-(defn g-respond-sync-query-ransvars "(ans-vars result) respond to a simple query of the form 'match ?x ..' with a response of the form 'satisfiers: ..'"
+(defn g-respond-sync-query-rtxt "(text result) respond to a simple query of the form 'match ?x ..' with a response of the form 'satisfiers: ..'"
   [qtext]
   (try
     (do
       (let [raw-query-result  (g-respond-sync-query-rqr qtext)
             raw-query-result-set (into #{} raw-query-result)
             raw-query-result-set-str (apply str raw-query-result-set)
-            ans-vars (get-ans-vars raw-query-result-set-str)
+            ans-vars-txt (get-ans-vars-rtxt raw-query-result-set-str)
             ]
-        ans-vars
+        ans-vars-txt
         ))
     (catch Exception e (do (timbre/info (.getMessage e)) ans-invalid-query))))
 
-(defn g-respond-sync-query-rtxt "(text result) respond to a simple query of the form 'match ?x ..' with a response of the form 'satisfiers: ..'"
-  [qtext]
-  (try
-    (do
-      (let [ans-vars (g-respond-sync-query-ransvars qtext)]
-        (str   "satisfiers: " (string/join "  " ans-vars ) "    "
-                          ;"raw query result (no duplicates):  " raw-query-result-set-str 
-         )))
-    (catch Exception e (do (timbre/info (.getMessage e)) ans-invalid-query))))
 
 
 (def g-respond-sync-query g-respond-sync-query-rtxt)
@@ -904,13 +899,20 @@ Dynamic rules is something I wouldn't mind adding to Clara, although that comes 
 (def speakup g-speakup)
 (def respond g-respond)
 
-(defn get-ans-vars 
-  "Ex(but double quotes):
+(defn get-ans-vars-rvec 
+  "(returns a vector of strings) Ex(but double quotes):
   (':?x :Bob_Smith,' ':?y :Anna')"
   [raw-query-result-set-str]
   (re-seq #"\:\?[\S&&[^\#]]+\s+[\S&&[^\{\}]]+" raw-query-result-set-str))
 
+(defn get-ans-vars-rtxt
+  "(returns a string) Ex(but double quotes):
+  ('satisfiers: :?x :Bob_Smith, :?y :Anna')"
+  [raw-query-result-set-str]
+  (let [ans-vars-vec (get-ans-vars-rvec raw-query-result-set-str)]
+    (str   "satisfiers: " (string/join "  " ans-vars-vec) "    ")))
 
+(def get-ans-vars get-ans-vars-rtxt)
 
 ;;; #"\:\?x\s+\:(\S+)"  ---> (re-pattern "\\:\\?x\\s+\\:(\\S+)")
 ;;; #"\"([a-z\']+)\"|\'([a-z]+)\'"  --> (re-pattern "\\\"([a-z\\']+)\\\"|\\'([a-z]+)\\'")  ;;;; we also need spaces! --> (re-pattern "\\\"([a-z\\'\\s]+)\\\"|\\'([a-z\\s]+)\\'")
