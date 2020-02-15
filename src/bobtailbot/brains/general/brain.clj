@@ -400,7 +400,8 @@
 (def g-transforms-mkst  "treats :TRIP-FACT-IND2, :PRENEG-TRIP-FACT-IND2, :EMBNEG-TRIP-FACT-IND2, :NOT-FACTS, :PREAFF-FACTS normally, as a statement"
   (conj
    g-transforms-base
-   {:ANON-FACT identity
+   {:FACTS identity
+    :ANON-FACT identity
     :TRIP-FACT-IND2 (fn [t-subj t-verb t-obj]
                       `(->Triple "my-fact" true ~t-subj ~t-verb ~t-obj))
     :PRENEG-TRIP-FACT-IND2 (fn [t-subj t-verb t-obj]
@@ -415,7 +416,8 @@
 (def g-transforms-ckst "treats :TRIP-FACT-IND2, :PRENEG-TRIP-FACT-IND2, :EMBNEG-TRIP-FACT-IND2, :NOT-FACTS, :PREAFF-FACTS  as a yn-question Q-TRIP-FACT-IND2, etc, to check statements"
   (conj
    g-transforms-base
-   {:ANON-FACT (fn [& facts]
+   {:FACTS identity
+    :ANON-FACT (fn [& facts]
                  {:name "anon-query"
                   :lhs facts
                   :params #{}})
@@ -751,7 +753,7 @@ Dynamic rules is something I wouldn't mind adding to Clara, although that comes 
          intype (first (first parsetree))]
     (cond
       ;(or (= intype :TRIP-FACT-IND2) (= intype :PRENEG-TRIP-FACT-IND2) (= intype :EMBNEG-TRIP-FACT-IND2) (= intype :NOT-FACTS) (= intype :PREAFF-FACTS))
-      (= intype :ANON-FACT)
+      (= intype :FACTS)
       (let [
             ckst-ptree-r (g-respond-sync-ckst-ptree parsetree)]
         (cond
@@ -930,4 +932,4 @@ Dynamic rules is something I wouldn't mind adding to Clara, although that comes 
 
 (defn get-who [x-str] (->> x-str (re-seq (re-pattern "\\:\\?x\\s+\\:(\\S+)") ) (map second) (map #(clojure.string/replace % "_" " ")) (seq->str)  ))
 
-(defn gram-voc [] (set/union #{"it"}  (into #{} (map #(if (second %) (second %) (nth % 2)) (re-seq (re-pattern "\\\"([a-z']+)\\\"|'([a-z]+)'")  (raw-g-grammar-1-w-annex)))))   )
+(defn gram-voc [] (set/union #{"it" "case"}  (into #{} (map #(if (second %) (second %) (nth % 2)) (re-seq (re-pattern "\\\"([a-z']+)\\\"|'([a-z]+)'")  (raw-g-grammar-1-w-annex)))))   )

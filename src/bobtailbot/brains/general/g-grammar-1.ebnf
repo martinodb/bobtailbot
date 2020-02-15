@@ -1,6 +1,20 @@
 (* EBNF grammar for instaparse *)
-<SENTENCE> =   (ADD-VOCAB | RULES-QUERIES | NQUERY | FACTS) <";">* ;
 
+(* Careful with the angle brackets. On the left, the node type is omitted from the ptree. On the right, the pattern is omitted.
+If you prefer not to omit the node type, instead of using the angle brackets on the left you can simply equate the node type to identity in the transforms map.
+For instance, for the node type "FACTS", instead of doing:
+<FACTS> = (FACT | AND-FACTS | ...)  ;
+here, do:
+FACTS = (FACT | AND-FACTS | ...)  ; 
+here, and then in the maps g-transforms-mkst and g-transforms-ckst in brain.clj, do:
+:FACTS identity
+
+*)
+
+<SENTENCE> =   (ADD-VOCAB | PROD-LIST | NQUERY | FACTS) <";">* ;
+<PROD-LIST> = PROD (<';'>+ PROD)* ;
+<PROD> = (RULE | QUERY | QUESTION) <';'>* ;
+<QUESTION> = ( YNQUESTION | NEG-YNQUESTION | T-DOES-QUESTION | T-WHO-QUESTION | T-WHOM-QUESTION);
 
 
 
@@ -25,7 +39,6 @@ Q-NEG = <"is it"> (<"false"> | (<"not"> (<"the case">)?)) <"that">  ;
 
 NQUERY = <"query"> NAME ;
 
-<RULES-QUERIES> = (RULE | QUERY | YNQUESTION | NEG-YNQUESTION | T-DOES-QUESTION | T-WHO-QUESTION | T-WHOM-QUESTION)+ ;
 
 <RULE> = (NAMED-RULE | ANON-RULE);
 NAMED-RULE = (NAMED-RULE-wtest | NAMED-RULE-notest);
@@ -35,8 +48,8 @@ ANON-RULE = (ANON-RULE-wtest | ANON-RULE-notest);
 ANON-RULE-wtest = RULE-BODY-wtest;
 ANON-RULE-notest = RULE-BODY-notest;
 
-<RULE-BODY-wtest> = FACT <"when"> LHS-wtest <';'>*  ;
-<RULE-BODY-notest> = FACT <"when"> LHS-notest <';'>*  ;
+<RULE-BODY-wtest> = FACT <"when"> LHS-wtest  ;
+<RULE-BODY-notest> = FACT <"when"> LHS-notest  ;
 
 <LHS-wtest> = <"test"> TEST <','>* <"facts"> R-FACTS  ;
 <LHS-notest> = R-FACTS ;
@@ -146,7 +159,7 @@ PREAFF-FACTS = <PREAFF> FACTS;
 
 
 
-<FACTS> = (FACT | AND-FACTS | OR-FACTS | NOT-FACTS | PREAFF-FACTS)  ;
+FACTS = (FACT | AND-FACTS | OR-FACTS | NOT-FACTS | PREAFF-FACTS)  ;
 
 <FACT> = (ANON-FACT | NAMED-FACT) ;
 ANON-FACT = FACT-BODY ;
