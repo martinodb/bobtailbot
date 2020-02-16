@@ -29,9 +29,9 @@ So, to get started quickly (for Ubuntu and similar):
   1. Clone this repo: `git clone https://github.com/martinodb/bobtailbot`
   2. `cd ./bobtailbot`
   3. Launch it with one of these commands:
-    * `lein run`
-    * `lein repl` and then `(-main)`.
-    * `lein repl` and then `(dev-main  "-a irc" "-b general")`
+     * `lein run`
+     * `lein repl` and then `(-main)`.
+     * `lein repl` and then `(dev-main  "-a irc" "-b general")`
   
   The last method (using `dev-main`) is very useful for development. It's just like `main` but when it's done it returns to the lein repl instead of closing the program. You can talk to the bot directly in the repl instead of irc, without changing the configuration file. Just change the command to:
   
