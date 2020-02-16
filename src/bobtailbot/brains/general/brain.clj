@@ -342,9 +342,9 @@
                              :fact-binding :?#thing}))
    
    ;CAREFUL: this only works because the Triple record only has one boolean (affirm).
-   :Q-NOT-FACTS   negate ;(fn [map] (postwalk #(if (or (= % true) (= % false)) (not %) % ) map)) 
-   :R-NOT-FACTS  negate ; (fn [map] (postwalk #(if (or (= % true) (= % false)) (not %) % ) map)) 
-   ; :NOT-FACTS  negate ; (fn [map] (postwalk #(if (or (= % true) (= % false)) (not %) % ) map)) 
+   :Q-NOT-FACTS   negate 
+   :R-NOT-FACTS  negate
+   ; :NOT-FACTS  negate
    
    :Q-PREAFF-FACTS identity
    :R-PREAFF-FACTS identity
@@ -545,12 +545,8 @@ Dynamic rules is something I wouldn't mind adding to Clara, although that comes 
 (declare get-ans-vars-rtxt)
 (declare get-ans-vars-rvec)
 
-
-(declare remove-iitt)
-(declare replace-iift)
 (declare get-who)
 
-;(def negating (atom false))
 
 
 
@@ -575,8 +571,7 @@ Dynamic rules is something I wouldn't mind adding to Clara, although that comes 
   (try
     (do
       (let [log-start (timbre/info "g-respond-sync-yes-dunno-ptreetr")
-            ;new-rule-list (str (get-g-rule-list) cqtext)
-            ;ptreetr (insta/transform g-transforms ptree)
+
             anon-query (first ptreetr)
             log-anon-query (timbre/info "anon-query: " anon-query ",\n")
             
@@ -600,8 +595,7 @@ Dynamic rules is something I wouldn't mind adding to Clara, although that comes 
   [ptree]
   (try
     (do
-      (let [;negqtext (str "it's false that " qtext)
-            ptreetr (insta/transform g-transforms ptree)
+      (let [ptreetr (insta/transform g-transforms ptree)
             neg-ptreetr (negate ptreetr)
             query-ans (g-respond-sync-yes-dunno-ptreetr ptreetr)
             negquery-ans (g-respond-sync-yes-dunno-ptreetr neg-ptreetr)]
@@ -621,8 +615,7 @@ Dynamic rules is something I wouldn't mind adding to Clara, although that comes 
   [ptree]
   (try
     (do
-      (let [;negqtext (str "it's false that " qtext)
-            ptreetr (insta/transform g-transforms-ckst ptree)
+      (let [ptreetr (insta/transform g-transforms-ckst ptree)
             neg-ptreetr (negate ptreetr)
             query-ans (g-respond-sync-yes-dunno-ptreetr ptreetr)
             negquery-ans (g-respond-sync-yes-dunno-ptreetr neg-ptreetr)]
@@ -752,7 +745,6 @@ Dynamic rules is something I wouldn't mind adding to Clara, although that comes 
   (let  [parsetree  ((g-grammar) text)
          intype (first (first parsetree))]
     (cond
-      ;(or (= intype :TRIP-FACT-IND2) (= intype :PRENEG-TRIP-FACT-IND2) (= intype :EMBNEG-TRIP-FACT-IND2) (= intype :NOT-FACTS) (= intype :PREAFF-FACTS))
       (= intype :FACTS)
       (let [
             ckst-ptree-r (g-respond-sync-ckst-ptree parsetree)]
@@ -767,8 +759,7 @@ Dynamic rules is something I wouldn't mind adding to Clara, although that comes 
                                                              (#(apply insert %1 %2) (get-g-fact-set))
                                                              (fire-rules))]
                                          (dosync (ref-set g-curr-session new-session)))
-                  ;(str "facts added: " (pr-str (g-load-user-facts text)))
-                                       (do ans-okgotit))
+                                       ans-okgotit)
           :else (ans-oops "g-respond-sync")))
 
       (= intype :AND-FACTS)
@@ -897,7 +888,6 @@ Dynamic rules is something I wouldn't mind adding to Clara, although that comes 
 
 
 
-; (#(try (load-string %) (catch Exception e (str "caught exception: " (.getMessage e))) ) )
 
 
 (def hear g-hear)
@@ -923,11 +913,6 @@ Dynamic rules is something I wouldn't mind adding to Clara, although that comes 
 ;;; #"\"([a-z\']+)\"|\'([a-z]+)\'"  --> (re-pattern "\\\"([a-z\\']+)\\\"|\\'([a-z]+)\\'")  ;;;; we also need spaces! --> (re-pattern "\\\"([a-z\\'\\s]+)\\\"|\\'([a-z\\s]+)\\'")
 
 
-
-
-
-(defn remove-iitt [text] (string/replace text (re-pattern "is it true that") ""  ))
-(defn replace-iift [text] (string/replace text (re-pattern "is it false that") "it's false that"  )) ; turn it into a simple yes-no question, like "it's false that Carol likes Bob?"
 
 
 (defn get-who [x-str] (->> x-str (re-seq (re-pattern "\\:\\?x\\s+\\:(\\S+)") ) (map second) (map #(clojure.string/replace % "_" " ")) (seq->str)  ))
