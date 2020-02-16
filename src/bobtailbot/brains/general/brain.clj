@@ -704,7 +704,7 @@ Dynamic rules is something I wouldn't mind adding to Clara, although that comes 
           ans-vars (get-ans-vars raw-query-result-set-str)
           log-ans-vars (timbre/info "ans-vars: " ans-vars ",\n")
 
-          whom (get-who (first ans-vars))
+          whom (get-who ans-vars)
           log-whom (timbre/info "who: " whom ",\n")]
       whom)
     (catch Exception e (do (timbre/info
