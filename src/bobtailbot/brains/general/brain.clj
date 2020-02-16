@@ -325,6 +325,16 @@
                                         (list '= t-verb-pres3 'verb)
                                         (list '= t-obj 'obj)]
                           :fact-binding :?#thing}))
+   
+   :NEG-D-TRIP-FACT-IND2 (fn [t-subj t-verb-inf t-obj]
+                           (let [t-verb-pres3 (conjugate-pres3 t-verb-inf)]
+                             {:type Triple
+                              :constraints [(list '= false 'affirm)
+                                            (list '= t-subj 'subj)
+                                            (list '= t-verb-pres3 'verb)
+                                            (list '= t-obj 'obj)]
+                              :fact-binding :?#thing}))
+   
    :WHO-TRIP-FACT-IND2 (fn [t-verb t-obj]
                          {:type Triple
                           :constraints [(list '= true 'affirm)
@@ -332,6 +342,7 @@
                                         (list '= t-verb 'verb)
                                         (list '= t-obj 'obj)]
                           :fact-binding :?#thing})
+   
    :WHOM-TRIP-FACT-IND2 (fn [t-subj t-verb-inf]
                           (let [t-verb-pres3 (conjugate-pres3 t-verb-inf)]
                             {:type Triple
@@ -367,6 +378,9 @@
    :YNQUESTION identity
    :NEG-YNQUESTION identity
    
+   ;:NEG-T-DOES-QUESTION identity
+   
+   
    :NQUERY  (fn [name] (fn [session-name] (query session-name (if (.contains name ns-prefix) name (str ns-prefix name)))))
    :QUERY-notest   (fn [& facts]
                      {:name "anon-query"
@@ -387,6 +401,10 @@
                         {:name "anon-query"
                          :lhs [dfact]
                          :params #{}})
+   :NEG-T-DOES-QUESTION (fn [dfact]
+                          {:name "anon-query"
+                           :lhs [dfact]
+                           :params #{}})
    :T-WHO-QUESTION   (fn [wfact]
                        {:name "anon-query"
                         :lhs [wfact]
@@ -566,7 +584,7 @@ Dynamic rules is something I wouldn't mind adding to Clara, although that comes 
 (def ans-contradiction "There's a contradiction! The answer to that question is both yes and no.")
 
 
-(defn g-respond-sync-yes-dunno-ptreetr "respond to yes/no question, negated yes/no question, or does-question, with either 'yes' or 'dunno'. Question must be in ptreetr form (parsed and transformed)"
+(defn g-respond-sync-yes-dunno-ptreetr "respond to yes/no question, negated yes/no question, does-question or negated does-question, with either 'yes' or 'dunno'. Question must be in ptreetr form (parsed and transformed)"
   [ptreetr]
   (try
     (do
@@ -591,7 +609,7 @@ Dynamic rules is something I wouldn't mind adding to Clara, although that comes 
     (catch Exception e (do (timbre/info (.getMessage e)) ans-invalid-query))))
 
 
-(defn g-respond-sync-yndq-ptree "answer yes/no question, negated yes/no question, or does-question, in ptree form (parsed)"
+(defn g-respond-sync-yndq-ptree "answer yes/no question, negated yes/no question, does-question or negated does-question, in ptree form (parsed)"
   [ptree]
   (try
     (do
@@ -779,6 +797,7 @@ Dynamic rules is something I wouldn't mind adding to Clara, although that comes 
       (= intype :YNQUESTION)      (g-respond-sync-yndq-ptree parsetree)
       (= intype :NEG-YNQUESTION)  (g-respond-sync-yndq-ptree parsetree)
       (= intype :T-DOES-QUESTION) (g-respond-sync-yndq-ptree parsetree)
+      (= intype :NEG-T-DOES-QUESTION) (g-respond-sync-yndq-ptree parsetree)
       
       (= intype :T-WHO-QUESTION) (g-respond-sync-who-ptree parsetree)
       (= intype :T-WHOM-QUESTION) (g-respond-sync-whom-ptree parsetree)

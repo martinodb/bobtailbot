@@ -14,7 +14,7 @@ here, and then in the maps g-transforms-mkst and g-transforms-ckst in brain.clj,
 <SENTENCE> =   (ADD-VOCAB | PROD-LIST | NQUERY | FACTS) <";">* ;
 <PROD-LIST> = PROD (<';'>+ PROD)* ;
 <PROD> = (RULE | QUERY | QUESTION) <';'>* ;
-<QUESTION> = ( YNQUESTION | NEG-YNQUESTION | T-DOES-QUESTION | T-WHO-QUESTION | T-WHOM-QUESTION);
+<QUESTION> = ( YNQUESTION | NEG-YNQUESTION | T-DOES-QUESTION | NEG-T-DOES-QUESTION |T-WHO-QUESTION | T-WHOM-QUESTION);
 
 
 
@@ -142,10 +142,15 @@ NEG-YNQUESTION-notest = <Q-NEG> QLHS-notest <"?">+ <';'>* ;
 
 
 D-TRIP-FACT-IND2 = T-SUBJECT VtraInf T-OBJECT ;
+NEG-D-TRIP-FACT-IND2 = T-SUBJECT VtraInf T-OBJECT ;
+
+
 WHO-TRIP-FACT-IND2 = VtraPres3 T-NP ;
 WHOM-TRIP-FACT-IND2 = T-NP VtraInf ;
 
 T-DOES-QUESTION = <"does"> D-TRIP-FACT-IND2 <"?">+ ;
+NEG-T-DOES-QUESTION = (<"doesn't">|<"does not">) NEG-D-TRIP-FACT-IND2 <"?">+ ;
+
 
 T-WHO-QUESTION = <"who"> WHO-TRIP-FACT-IND2 <"?">+ ;
 T-WHOM-QUESTION = (<"who"> | <"whom">) <"does"> WHOM-TRIP-FACT-IND2 <"?">+ ;
