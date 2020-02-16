@@ -73,7 +73,7 @@ Every brain must have a `brain.clj` file, so that the full namespace is `bobtail
 Brain data are stored by convention in the directory `./data/bobtailbot/brains/<brain-name>/store`. In the example brains there's a snippet that detects the namespace and gives you the string `data-dir-prefix` to prepend to your storage file names. Just copy-paste it and leave it unmodified, or use one of those brains as a template.
 
 
-To write a new adapter, look at the [available adapters](https://github.com/martinodb/bobtailbot/tree/master/src/bobtailbot/adapters) , pick one, save it with a new name, etc (same thing as with brains). Every adapter must have a function `(connect [nick host port group-or-chan greeting hear-fn speakup-fn respond-fn])`.
+To write a new adapter, look at the [available adapters](https://github.com/martinodb/bobtailbot/tree/master/src/bobtailbot/adapters) , pick one, save it with a new name, etc (same thing as with brains). Every adapter must have a function `(connect [{:keys [nick host port group-or-chan greeting hear speakup ]}])`.
 You'll get the idea of how it works by looking at [bobtailbot.core](https://github.com/martinodb/bobtailbot/blob/master/src/bobtailbot/core.clj).
 
 And that's it!
