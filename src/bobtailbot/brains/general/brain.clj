@@ -256,6 +256,13 @@
 
 (def g-transforms-base "without :TRIP-FACT-IND2, :PRENEG-TRIP-FACT-IND2, :EMBNEG-TRIP-FACT-IND2, :NOT-FACTS, :PREAFF-FACTS "
   {:NUMBER #(Integer/parseInt %)
+
+   :UNVAR symbol
+   :NNP (fn [& NNP-tokens] (keyword (string/join "_" NNP-tokens)))
+
+   :VtraPres3 identity
+   
+   :VtraInf identity
    
    :TS-OPERATOR g-ts-operators
    
@@ -264,13 +271,6 @@
                         :name (str ns-prefix (gensym "my-anon-rule"))
                         :lhs facts
                         :rhs `(insert! ~fact)})
-
-   :PRENEG-TRIP-FACT-IND2 (fn [t-subj t-verb t-obj]
-                            `(->Triple "my-fact" false ~t-subj ~t-verb ~t-obj ))
-   
-   :EMBNEG-TRIP-FACT-IND2 (fn [t-subj t-verb-inf t-obj]
-                            (let [t-verb-pres3 (conjugate-pres3 t-verb-inf) ]
-                              `(->Triple "my-fact" false ~t-subj ~t-verb-pres3 ~t-obj )))
    
    :R-TRIP-FACT-IND2 (fn [t-subj t-verb t-obj]
                        {:type Triple
@@ -363,14 +363,7 @@
    
    
    :AND-FACTS vector
-   :UNVAR symbol
-   
-   :NNP (fn [& NNP-tokens] (keyword (string/join "_" NNP-tokens)))
-   
-   :VtraPres3 identity
-    ;:VtraPres3 keyword
-   
-   :VtraInf identity
+
    
    
    :ANON-RULE identity
@@ -378,7 +371,7 @@
    :YNQUESTION identity
    :NEG-YNQUESTION identity
    
-   ;:NEG-T-DOES-QUESTION identity
+
    
    
    :NQUERY  (fn [name] (fn [session-name] (query session-name (if (.contains name ns-prefix) name (str ns-prefix name)))))
@@ -415,7 +408,7 @@
                        :params #{}})
    })
 
-(def g-transforms-mkst  "treats :TRIP-FACT-IND2, :PRENEG-TRIP-FACT-IND2, :EMBNEG-TRIP-FACT-IND2, :NOT-FACTS, :PREAFF-FACTS normally, as a statement"
+(def g-transforms-mkst  "treats :FACTS normally, as a statement"
   (conj
    g-transforms-base
    {:FACTS identity
@@ -431,7 +424,7 @@
     :PREAFF-FACTS identity}
    ))
 
-(def g-transforms-ckst "treats :TRIP-FACT-IND2, :PRENEG-TRIP-FACT-IND2, :EMBNEG-TRIP-FACT-IND2, :NOT-FACTS, :PREAFF-FACTS  as a yn-question Q-TRIP-FACT-IND2, etc, to check statements"
+(def g-transforms-ckst "treats :FACTS as a yn-question, to check statements"
   (conj
    g-transforms-base
    {:FACTS identity
@@ -654,14 +647,11 @@ Dynamic rules is something I wouldn't mind adding to Clara, although that comes 
 (defn g-respond-sync-who-ptree "answer WHO-question, in ptree form (parsed)"
   [ptree]
   (try
-    (let [log-start (timbre/info "logging g-respond-sync-who-ptree")
-          ptreetr (insta/transform g-transforms ptree)
-         
-          anon-query (first ptreetr)
-          log-anon-query (timbre/info "anon-query: " anon-query ",\n")
+    (let [ptreetr (timbre/spy (insta/transform g-transforms ptree))
           
-          new-tr-rules (conj @g-rules-tr-atom anon-query)
-          log-new-tr-rules (timbre/info "new-tr-rules: " new-tr-rules ",\n")
+          anon-query (timbre/spy (first ptreetr))
+          
+          new-tr-rules (timbre/spy (conj @g-rules-tr-atom anon-query))
           
           new-session   (-> (mk-session
                              (symbol this-ns)
@@ -669,17 +659,15 @@ Dynamic rules is something I wouldn't mind adding to Clara, although that comes 
                             (#(apply insert %1 %2) (get-g-fact-set))
                             (fire-rules))
           
-          raw-query-result  (query new-session anon-query)
-          log-raw-query-result (timbre/info "raw-query-result: " raw-query-result ",\n")
+          raw-query-result  (timbre/spy (query new-session anon-query))
           
-          raw-query-result-set (into #{} raw-query-result)
-          raw-query-result-set-str (apply str raw-query-result-set)
+          raw-query-result-set (timbre/spy (into #{} raw-query-result))
           
-          ans-vars (get-ans-vars raw-query-result-set-str)
-          log-ans-vars (timbre/info "ans-vars: " ans-vars ",\n")
+          raw-query-result-set-str (timbre/spy (apply str raw-query-result-set))
           
-          who (get-who ans-vars )
-          log-who (timbre/info "who: " who ",\n")
+          ans-vars (timbre/spy (get-ans-vars raw-query-result-set-str))
+          
+          who (timbre/spy (get-who ans-vars ))
           ]
       who)
     (catch Exception e (do (timbre/info
@@ -688,35 +676,34 @@ Dynamic rules is something I wouldn't mind adding to Clara, although that comes 
                             ", ptree: " ptree )
                            ans-invalid-query))))
 
+;; using (timbre/spy) for debugging
+
 (defn g-respond-sync-whom-ptree "answer WHOM-question, in ptree form (parsed)"
   [ptree]
   (try
-    (let [log-start (timbre/info "logging g-respond-sync-whom-ptree")
-          ptreetr (insta/transform g-transforms ptree)
+    (let [ptreetr (timbre/spy (insta/transform g-transforms ptree))
 
-          anon-query (first ptreetr)
-          log-anon-query (timbre/info "anon-query: " anon-query ",\n")
+          anon-query (timbre/spy  (first ptreetr))
 
-          new-tr-rules (conj @g-rules-tr-atom anon-query)
-          log-new-tr-rules (timbre/info "new-tr-rules: " new-tr-rules ",\n")
-
+          
+          new-tr-rules (timbre/spy (conj @g-rules-tr-atom anon-query))
+          
           new-session   (-> (mk-session
                              (symbol this-ns)
                              new-tr-rules)
                             (#(apply insert %1 %2) (get-g-fact-set))
                             (fire-rules))
 
-          raw-query-result  (query new-session anon-query)
-          log-raw-query-result (timbre/info "raw-query-result: " raw-query-result ",\n")
-
-          raw-query-result-set (into #{} raw-query-result)
+          raw-query-result  (timbre/spy (query new-session anon-query))
+          
+          raw-query-result-set (timbre/spy (into #{} raw-query-result))
+          
           raw-query-result-set-str (apply str raw-query-result-set)
-
-          ans-vars (get-ans-vars raw-query-result-set-str)
-          log-ans-vars (timbre/info "ans-vars: " ans-vars ",\n")
-
-          whom (get-who ans-vars)
-          log-whom (timbre/info "who: " whom ",\n")]
+          
+          ans-vars (timbre/spy (get-ans-vars raw-query-result-set-str))
+          
+          whom (timbre/spy (get-who ans-vars))
+          ]
       whom)
     (catch Exception e (do (timbre/info
                             "g-respond-sync-whom-ptree failed. Error message:"
@@ -724,11 +711,11 @@ Dynamic rules is something I wouldn't mind adding to Clara, although that comes 
                             ", ptree: " ptree)
                            ans-invalid-query))))
 
-(defn g-respond-sync-query-rqr "(raw query result) respond to a simple query of the form 'match ?x ..' with a response of the form 'satisfiers: ..'"
+(defn g-respond-sync-query-rqr "(raw query result) respond to a simple query of the form 'match ?x ..' "
   [qtext]
   (try
     (do 
-      (let [ parsetree  ((g-grammar) qtext)
+      (let [parsetree  ((g-grammar) qtext)
             new-rule-list (str (get-g-rule-list) qtext)
             new-session   (-> (mk-session (symbol this-ns) (g-load-user-rules new-rule-list))
                               ( #(apply insert %1 %2) (get-g-fact-set))
