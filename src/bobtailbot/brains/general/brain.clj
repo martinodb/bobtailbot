@@ -553,8 +553,12 @@ Dynamic rules is something I wouldn't mind adding to Clara, although that comes 
 
 ;;silly reason.
 (declare get-ans-vars)
+
 (declare get-ans-vars-rtxt)
 (declare get-ans-vars-rvec)
+
+
+
 
 (declare get-who)
 
@@ -576,25 +580,21 @@ Dynamic rules is something I wouldn't mind adding to Clara, although that comes 
 (def ans-sorrywhat "Sorry, I didn't get that.")
 (def ans-contradiction "There's a contradiction! The answer to that question is both yes and no.")
 
-
+;; using (timbre/spy) for debugging
 (defn g-respond-sync-yes-dunno-ptreetr "respond to yes/no question, negated yes/no question, does-question or negated does-question, with either 'yes' or 'dunno'. Question must be in ptreetr form (parsed and transformed)"
   [ptreetr]
   (try
     (do
-      (let [log-start (timbre/info "g-respond-sync-yes-dunno-ptreetr")
-
-            anon-query (first ptreetr)
-            log-anon-query (timbre/info "anon-query: " anon-query ",\n")
-            
-            new-tr-rules (conj @g-rules-tr-atom anon-query)
+      (let [anon-query (timbre/spy (first ptreetr))
+            new-tr-rules (timbre/spy (conj @g-rules-tr-atom anon-query))
             new-session   (-> (mk-session
                                (symbol this-ns)
                                new-tr-rules
                                )
                               (#(apply insert %1 %2) (get-g-fact-set))
                               (fire-rules))
-            raw-query-result  (query new-session anon-query)
-            raw-query-result-str (apply str raw-query-result)]
+            raw-query-result  (timbre/spy (query new-session anon-query))
+            raw-query-result-str (timbre/spy (apply str raw-query-result))]
 
         (if (= raw-query-result-str "")
           (do ans-dunno)
@@ -676,7 +676,7 @@ Dynamic rules is something I wouldn't mind adding to Clara, although that comes 
                             ", ptree: " ptree )
                            ans-invalid-query))))
 
-;; using (timbre/spy) for debugging
+
 
 (defn g-respond-sync-whom-ptree "answer WHOM-question, in ptree form (parsed)"
   [ptree]
@@ -711,29 +711,35 @@ Dynamic rules is something I wouldn't mind adding to Clara, although that comes 
                             ", ptree: " ptree)
                            ans-invalid-query))))
 
-(defn g-respond-sync-query-rqr "(raw query result) respond to a simple query of the form 'match ?x ..' "
-  [qtext]
-  (try
-    (do 
-      (let [parsetree  ((g-grammar) qtext)
-            new-rule-list (str (get-g-rule-list) qtext)
-            new-session   (-> (mk-session (symbol this-ns) (g-load-user-rules new-rule-list))
-                              ( #(apply insert %1 %2) (get-g-fact-set))
-                              (fire-rules))
-            anon-query  (first (insta/transform g-transforms parsetree))
-            raw-query-result  (query new-session anon-query)]
-        raw-query-result
-        ))
-    (catch Exception e (do (timbre/info (.getMessage e)) ans-invalid-query ))))
+; (defn g-respond-sync-query-rqr "(raw query result) respond to a simple query of the form 'match ?x ..' "
+;   [qtext]
+;   (try
+;     (do 
+;       (let [parsetree  ((g-grammar) qtext)
+;             new-rule-list (str (get-g-rule-list) qtext)
+;             new-session   (-> (mk-session (symbol this-ns) (g-load-user-rules new-rule-list))
+;                               ( #(apply insert %1 %2) (get-g-fact-set))
+;                               (fire-rules))
+;             anon-query  (first (insta/transform g-transforms parsetree))
+;             raw-query-result  (query new-session anon-query)]
+;         raw-query-result
+;         ))
+;     (catch Exception e (do (timbre/info (.getMessage e)) ans-invalid-query ))))
 
 (defn g-respond-sync-query-rtxt "(text result) respond to a simple query of the form 'match ?x ..' with a response of the form 'satisfiers: ..'"
   [qtext]
   (try
     (do
-      (let [raw-query-result  (g-respond-sync-query-rqr qtext)
-            raw-query-result-set (into #{} raw-query-result)
-            raw-query-result-set-str (apply str raw-query-result-set)
-            ans-vars-txt (get-ans-vars-rtxt raw-query-result-set-str)
+      (let [parsetree  (timbre/spy ((g-grammar) qtext))
+            new-rule-list (timbre/spy (str (get-g-rule-list) qtext))
+            new-session   (-> (mk-session (symbol this-ns) (g-load-user-rules new-rule-list))
+                              (#(apply insert %1 %2) (get-g-fact-set))
+                              (fire-rules))
+            anon-query  (timbre/spy (first (insta/transform g-transforms parsetree)))
+            raw-query-result  (query new-session anon-query)
+            raw-query-result-set (timbre/spy (into #{} raw-query-result))
+            
+            ans-vars-txt (timbre/spy (get-ans-vars raw-query-result-set))
             ]
         ans-vars-txt
         ))
@@ -900,18 +906,24 @@ Dynamic rules is something I wouldn't mind adding to Clara, although that comes 
 (def speakup g-speakup)
 (def respond g-respond)
 
-(defn get-ans-vars-rvec 
-  "(returns a vector of strings) Ex(but double quotes):
-  (':?x :Bob_Smith,' ':?y :Anna')"
-  [raw-query-result-set-str]
-  (re-seq #"\:\?[\S&&[^\#]]+\s+[\S&&[^\{\}]]+" raw-query-result-set-str))
+
+
+
+
+(defn get-ans-vars-rvec
+  "(returns a vector of maps) Ex(but double quotes):
+  [{:?x :Bob_Smith, :?y :Anna}]"
+  [raw-query-result-set]
+  (timbre/spy (map #(dissoc % :?#thing) raw-query-result-set)))
 
 (defn get-ans-vars-rtxt
   "(returns a string) Ex(but double quotes):
   ('satisfiers: :?x :Bob_Smith, :?y :Anna')"
-  [raw-query-result-set-str]
-  (let [ans-vars-vec (get-ans-vars-rvec raw-query-result-set-str)]
-    (str   "satisfiers: " (string/join "  " ans-vars-vec) "    ")))
+  [raw-query-result-set]
+  (let [ans-vars-vec (get-ans-vars-rvec raw-query-result-set)]
+    (str   "satisfiers: " (pr-str ans-vars-vec))))
+
+
 
 (def get-ans-vars get-ans-vars-rtxt)
 
