@@ -67,7 +67,7 @@ If you are using `lein repl`, then after editing `config.edn` or any other file,
 # _Development_
 
 To write a new brain, you can start by looking at the [available brains](https://github.com/martinodb/bobtailbot/tree/master/src/bobtailbot/brains) , pick one, save it with a new name, then rename its namespaces accordingly.
-Then you have to [add its namespace](https://github.com/martinodb/bobtailbot/blob/master/src/bobtailbot/core.clj) as a requirement in `bobtailbot.core`.
+Then you have to [add its namespace](https://github.com/martinodb/bobtailbot/blob/master/src/bobtailbot/core.clj) as a requirement in `bobtailbot.core` (this step is currently not necessary because brains are loaded dynamically, but it doesn't hurt, so you can do it if you run into issues).
 
 Every brain must have a `brain.clj` file, so that the full namespace is `bobtailbot.brains.<brain-name>.brain`. It must also have the functions `respond`, `hear` and `speakup`. The first one is used for syncronous, strictly interactive UIs such as a repl, while the other two are used for asyncronous UI such as IRC, where the bot must be able to hear without saying anything, and OTOH it may speak up at any moment, for instance when it detects some kind of event outside of the chat environment.
 Brain data are stored by convention in the directory `./data/bobtailbot/brains/<brain-name>/store`. In the example brains there's a snippet that detects the namespace and gives you the string `data-dir-prefix` to prepend to your storage file names. Just copy-paste it and leave it unmodified, or use one of those brains as a template.
