@@ -661,12 +661,10 @@ Dynamic rules is something I wouldn't mind adding to Clara, although that comes 
   (try
     
     (let [ptreetr (insta/transform g-transforms-mkst ptree)
-          anon-fact (timbre/spy (eval (first ptreetr)) )
-          new-fact-set (timbre/spy (conj @g-fact-set-atom anon-fact))
-
-            ;neg-ptreetr (negate ptreetr)
-            ;query-ans (g-respond-sync-yes-dunno-ptreetr ptreetr)
-            ;negquery-ans (g-respond-sync-yes-dunno-ptreetr neg-ptreetr)
+          ev-ptreetr (timbre/spy (map eval ptreetr))
+          ;anon-fact (timbre/spy (first ev-ptreetr) )
+          ;new-fact-set (timbre/spy (conj @g-fact-set-atom anon-fact))
+          new-fact-set (timbre/spy (reduce conj @g-fact-set-atom ev-ptreetr))
           ]
       (timbre/spy (set-g-fact-set new-fact-set))
       
@@ -680,19 +678,7 @@ Dynamic rules is something I wouldn't mind adding to Clara, although that comes 
     (catch Exception e (do (timbre/info (.getMessage e)) ans-invalid-fact))))
 
 
-;;;;;;;;;;;;;;;;;;;;;;;;
 
-; -          (= ckst-ptree-r ans-dunno) (do
-;                                         -                                       (->> (reduce conj (get-g-fact-set) (map eval (g-load-user-facts text)))
-;                                                                                      -                                            (into #{})
-;                                                                                      -                                            (set-g-fact-set))
-;                                         -                                       (let [new-session (-> @g-curr-session
-;                                                                                                       -                                                             (#(apply insert %1 %2) (get-g-fact-set))
-;                                                                                                       -                                                             (fire-rules))]
-;                                                                                   -                                         (dosync (ref-set g-curr-session new-session)))
-;                                         -                                       ans-okgotit)
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 
 
