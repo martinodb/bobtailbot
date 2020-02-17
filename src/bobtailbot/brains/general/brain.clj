@@ -215,17 +215,15 @@
                 "=" `=})
 
 
-;; UNUSED (defn NNPkw->str "transform keyword NNPs into strings" [kw] (-> kw name (string/replace #"_" " ")))
+(defn NNPkw2str "transform keyword NNPs into strings" [kw] (-> kw name (string/replace #"_" " ")))
 
-(defn seq->str
-  ([seq] (seq->str seq ""))
+(defn seq2str "Ex: (but double quotes) ['Anna' 'Carol'] => 'Anna and Carol' "
+  ([seq] (seq2str seq ""))
   ([seq header] (case (count seq)
-                      0 ""
-                      1 (str (first seq) ".")
-                      2 (str header (first seq) " and " (second seq) ".")
-                      (recur (rest seq) (str (first seq) ", ")))))
-
-
+                  0 ""
+                  1 (str (first seq) ".")
+                  2 (str header (first seq) " and " (second seq) ".")
+                  (recur (rest seq) (str (first seq) ", ")))))
 
 (declare gram-voc)
 (defn rem-tp "remove trailing punctuation" [text] (string/replace text #"[\?|\!]+\s*\z" "" ))
@@ -252,7 +250,6 @@
 (defn conjugate-pres3 "Vinf->Vpres3" [vinf]
   (:pres3 (first (filter #(= (:inf %) vinf) (get-verb-set)))))
 
-; (conjugate-pres3 t-verb-inf)
 
 (def g-transforms-base "without :TRIP-FACT-IND2, :PRENEG-TRIP-FACT-IND2, :EMBNEG-TRIP-FACT-IND2, :NOT-FACTS, :PREAFF-FACTS "
   {:NUMBER #(Integer/parseInt %)
@@ -648,26 +645,17 @@ Dynamic rules is something I wouldn't mind adding to Clara, although that comes 
   [ptree]
   (try
     (let [ptreetr (timbre/spy (insta/transform g-transforms ptree))
-          
           anon-query (timbre/spy (first ptreetr))
-          
           new-tr-rules (timbre/spy (conj @g-rules-tr-atom anon-query))
-          
           new-session   (-> (mk-session
                              (symbol this-ns)
                              new-tr-rules)
                             (#(apply insert %1 %2) (get-g-fact-set))
                             (fire-rules))
-          
           raw-query-result  (timbre/spy (query new-session anon-query))
-          
           raw-query-result-set (timbre/spy (into #{} raw-query-result))
+          who (timbre/spy (get-who raw-query-result-set))
           
-          raw-query-result-set-str (timbre/spy (apply str raw-query-result-set))
-          
-          ans-vars (timbre/spy (get-ans-vars raw-query-result-set-str))
-          
-          who (timbre/spy (get-who ans-vars ))
           ]
       who)
     (catch Exception e (do (timbre/info
@@ -682,27 +670,17 @@ Dynamic rules is something I wouldn't mind adding to Clara, although that comes 
   [ptree]
   (try
     (let [ptreetr (timbre/spy (insta/transform g-transforms ptree))
-
           anon-query (timbre/spy  (first ptreetr))
-
-          
           new-tr-rules (timbre/spy (conj @g-rules-tr-atom anon-query))
-          
           new-session   (-> (mk-session
                              (symbol this-ns)
                              new-tr-rules)
                             (#(apply insert %1 %2) (get-g-fact-set))
                             (fire-rules))
-
           raw-query-result  (timbre/spy (query new-session anon-query))
-          
           raw-query-result-set (timbre/spy (into #{} raw-query-result))
+          whom  (timbre/spy (get-who  raw-query-result-set))
           
-          raw-query-result-set-str (apply str raw-query-result-set)
-          
-          ans-vars (timbre/spy (get-ans-vars raw-query-result-set-str))
-          
-          whom (timbre/spy (get-who ans-vars))
           ]
       whom)
     (catch Exception e (do (timbre/info
@@ -711,20 +689,6 @@ Dynamic rules is something I wouldn't mind adding to Clara, although that comes 
                             ", ptree: " ptree)
                            ans-invalid-query))))
 
-; (defn g-respond-sync-query-rqr "(raw query result) respond to a simple query of the form 'match ?x ..' "
-;   [qtext]
-;   (try
-;     (do 
-;       (let [parsetree  ((g-grammar) qtext)
-;             new-rule-list (str (get-g-rule-list) qtext)
-;             new-session   (-> (mk-session (symbol this-ns) (g-load-user-rules new-rule-list))
-;                               ( #(apply insert %1 %2) (get-g-fact-set))
-;                               (fire-rules))
-;             anon-query  (first (insta/transform g-transforms parsetree))
-;             raw-query-result  (query new-session anon-query)]
-;         raw-query-result
-;         ))
-;     (catch Exception e (do (timbre/info (.getMessage e)) ans-invalid-query ))))
 
 (defn g-respond-sync-query-rtxt "(text result) respond to a simple query of the form 'match ?x ..' with a response of the form 'satisfiers: ..'"
   [qtext]
@@ -916,7 +880,7 @@ Dynamic rules is something I wouldn't mind adding to Clara, although that comes 
   [raw-query-result-set]
   (timbre/spy (map #(dissoc % :?#thing) raw-query-result-set)))
 
-(defn get-ans-vars-rtxt
+(defn get-ans-vars
   "(returns a string) Ex(but double quotes):
   ('satisfiers: :?x :Bob_Smith, :?y :Anna')"
   [raw-query-result-set]
@@ -925,14 +889,22 @@ Dynamic rules is something I wouldn't mind adding to Clara, although that comes 
 
 
 
-(def get-ans-vars get-ans-vars-rtxt)
-
 ;;; #"\:\?x\s+\:(\S+)"  ---> (re-pattern "\\:\\?x\\s+\\:(\\S+)")
 ;;; #"\"([a-z\']+)\"|\'([a-z]+)\'"  --> (re-pattern "\\\"([a-z\\']+)\\\"|\\'([a-z]+)\\'")  ;;;; we also need spaces! --> (re-pattern "\\\"([a-z\\'\\s]+)\\\"|\\'([a-z\\s]+)\\'")
+;(defn get-who [x-str] (->> x-str (re-seq (re-pattern "\\:\\?x\\s+\\:(\\S+)") ) (map second) (map #(clojure.string/replace % "_" " ")) (seq->str)  ))
 
 
-
-
-(defn get-who [x-str] (->> x-str (re-seq (re-pattern "\\:\\?x\\s+\\:(\\S+)") ) (map second) (map #(clojure.string/replace % "_" " ")) (seq->str)  ))
+(defn get-who
+  "Called by functions that answer who-questions.
+  Takes a map set and returns the value of the key :?x"
+  [raw-query-result-set]
+  (let [who-kw-vec (timbre/spy (map :?x raw-query-result-set))
+        who-str-vec (timbre/spy (map NNPkw2str who-kw-vec))
+        who-str  (timbre/spy (seq2str who-str-vec))
+        ]
+    who-str
+    )
+  
+  )
 
 (defn gram-voc [] (set/union #{"it" "case"}  (into #{} (map #(if (second %) (second %) (nth % 2)) (re-seq (re-pattern "\\\"([a-z']+)\\\"|'([a-z]+)'")  (raw-g-grammar-1-w-annex)))))   )
