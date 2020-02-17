@@ -251,7 +251,7 @@
   (:pres3 (first (filter #(= (:inf %) vinf) (get-verb-set)))))
 
 
-(def g-transforms-base "without :TRIP-FACT-IND2, :PRENEG-TRIP-FACT-IND2, :EMBNEG-TRIP-FACT-IND2, :NOT-FACTS, :PREAFF-FACTS "
+(def g-transforms-base "without :FACTS "
   {:NUMBER #(Integer/parseInt %)
 
    :UNVAR symbol
@@ -470,7 +470,24 @@
 
 
 (defn get-g-fact-set []   (load-from-path-or-create    fact-file-p    g-default-fact-set    g-edn-readers))
-(defn set-g-fact-set [g-fact-set]   (dump-to-path-records    fact-file-p   g-fact-set))
+;(defn set-g-fact-set [g-fact-set]   (dump-to-path-records    fact-file-p   g-fact-set))
+
+
+
+
+(def g-fact-set-atom (atom (get-g-fact-set)))
+
+(defn reload-g-fact-set [] (reset! g-fact-set-atom (get-g-fact-set)))
+
+(defn dump-to-path-rlf "dump to path and reload facts"
+  [path value]
+  (do (dump-to-path-records path value)
+      (reload-g-fact-set)))
+
+(defn set-g-fact-set [g-fact-set]   (dump-to-path-rlf  fact-file-p  g-fact-set ))
+
+
+
 
 
 (def g-default-rule-list   "Example Person One xxexamplefies ?x when ?x xxexamplefies Example Person One ;")
@@ -478,20 +495,17 @@
 
 (defn get-g-rules-ptree []
   ((g-grammar) (get-g-rule-list) ))
-
 (defn get-g-rules-transformed []
   (insta/transform g-transforms (get-g-rules-ptree)))
-
 (def g-rules-tr-atom (atom (get-g-rules-transformed)))
-
 (defn reload-g-rules-tr [] (reset! g-rules-tr-atom (get-g-rules-transformed)) )
-
 (defn dump-to-path-rlr "dump to path and reload rules"
   [path value]
   (do (dump-to-path path value)
       (reload-g-rules-tr)))
-
 (defn set-g-rule-list [g-rule-list]   (dump-to-path-rlr    rule-file-p   g-rule-list))
+
+
 (def last-utterance (atom {}))
 
 ;(defrule Joe-Smith-loves-back
@@ -573,7 +587,8 @@ Dynamic rules is something I wouldn't mind adding to Clara, although that comes 
 (defn ans-oops [fname] (str "Oops, a bug in the function: " fname )  )
 (def ans-oops-rf (ans-oops "respond"))
 
-(def ans-invalid-query "That's not a valid query.")      
+(def ans-invalid-query "That's not a valid query.")
+(def ans-invalid-fact "That's not a valid fact.")   
 (def ans-sorrywhat "Sorry, I didn't get that.")
 (def ans-contradiction "There's a contradiction! The answer to that question is both yes and no.")
 
@@ -641,6 +656,50 @@ Dynamic rules is something I wouldn't mind adding to Clara, although that comes 
         ))
     (catch Exception e (do (timbre/info (.getMessage e)) ans-invalid-query))))
 
+(defn g-respond-sync-mkst-ptree "make a statement, in ptree form (parsed)"
+  [ptree]
+  (try
+    
+    (let [ptreetr (insta/transform g-transforms-mkst ptree)
+          anon-fact (timbre/spy (eval (first ptreetr)) )
+          new-fact-set (timbre/spy (conj @g-fact-set-atom anon-fact))
+
+            ;neg-ptreetr (negate ptreetr)
+            ;query-ans (g-respond-sync-yes-dunno-ptreetr ptreetr)
+            ;negquery-ans (g-respond-sync-yes-dunno-ptreetr neg-ptreetr)
+          ]
+      (timbre/spy (set-g-fact-set new-fact-set))
+      
+      )
+      (let [new-session  (timbre/spy (-> @g-curr-session
+                                         (#(apply insert %1 %2) @g-fact-set-atom)
+                                         (fire-rules))) ]
+        (timbre/spy  (dosync (ref-set g-curr-session new-session) ans-okgotit)
+                      )
+        )        
+    (catch Exception e (do (timbre/info (.getMessage e)) ans-invalid-fact))))
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;
+
+; -          (= ckst-ptree-r ans-dunno) (do
+;                                         -                                       (->> (reduce conj (get-g-fact-set) (map eval (g-load-user-facts text)))
+;                                                                                      -                                            (into #{})
+;                                                                                      -                                            (set-g-fact-set))
+;                                         -                                       (let [new-session (-> @g-curr-session
+;                                                                                                       -                                                             (#(apply insert %1 %2) (get-g-fact-set))
+;                                                                                                       -                                                             (fire-rules))]
+;                                                                                   -                                         (dosync (ref-set g-curr-session new-session)))
+;                                         -                                       ans-okgotit)
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+
+
+
+
+
+
 (defn g-respond-sync-who-ptree "answer WHO-question, in ptree form (parsed)"
   [ptree]
   (try
@@ -690,28 +749,45 @@ Dynamic rules is something I wouldn't mind adding to Clara, although that comes 
                            ans-invalid-query))))
 
 
-(defn g-respond-sync-query-rtxt "(text result) respond to a simple query of the form 'match ?x ..' with a response of the form 'satisfiers: ..'"
-  [qtext]
+; (defn g-respond-sync-query "respond to a simple query of the form 'match ?x ..' with a response of the form 'satisfiers: ..'"
+;   [qtext]
+;   (try
+;     (do
+;       (let [parsetree  (timbre/spy ((g-grammar) qtext))
+;             new-rule-list (timbre/spy (str (get-g-rule-list) qtext))
+;             new-session   (-> (mk-session (symbol this-ns) (g-load-user-rules new-rule-list))
+;                               (#(apply insert %1 %2) (get-g-fact-set))
+;                               (fire-rules))
+;             anon-query  (timbre/spy (first (insta/transform g-transforms parsetree)))
+;             raw-query-result  (query new-session anon-query)
+;             raw-query-result-set (timbre/spy (into #{} raw-query-result))
+            
+;             ans-vars-txt (timbre/spy (get-ans-vars raw-query-result-set))
+;             ]
+;         ans-vars-txt
+;         ))
+;     (catch Exception e (do (timbre/info (.getMessage e)) ans-invalid-query))))
+
+(defn g-respond-sync-query-ptree "respond to a simple query of the form 'match ?x ..' with a response of the form 'satisfiers: ..'"
+  [ptree]
   (try
     (do
-      (let [parsetree  (timbre/spy ((g-grammar) qtext))
-            new-rule-list (timbre/spy (str (get-g-rule-list) qtext))
-            new-session   (-> (mk-session (symbol this-ns) (g-load-user-rules new-rule-list))
+      (let [;parsetree  (timbre/spy ((g-grammar) qtext))
+            ptreetr (timbre/spy (insta/transform g-transforms ptree))
+            anon-query (timbre/spy  (first ptreetr))
+            new-tr-rules (timbre/spy (conj @g-rules-tr-atom anon-query))
+            new-session   (-> (mk-session (symbol this-ns) new-tr-rules)
                               (#(apply insert %1 %2) (get-g-fact-set))
                               (fire-rules))
-            anon-query  (timbre/spy (first (insta/transform g-transforms parsetree)))
             raw-query-result  (query new-session anon-query)
             raw-query-result-set (timbre/spy (into #{} raw-query-result))
-            
-            ans-vars-txt (timbre/spy (get-ans-vars raw-query-result-set))
-            ]
-        ans-vars-txt
-        ))
+
+            ans-vars-txt (timbre/spy (get-ans-vars raw-query-result-set))]
+        ans-vars-txt))
     (catch Exception e (do (timbre/info (.getMessage e)) ans-invalid-query))))
 
 
-
-(def g-respond-sync-query g-respond-sync-query-rtxt)
+;(def g-respond-sync-query g-respond-sync-query-rtxt)
 
 
 (defn g-respond-sync
@@ -721,35 +797,28 @@ Dynamic rules is something I wouldn't mind adding to Clara, although that comes 
          intype (first (first parsetree))]
     (cond
       (= intype :FACTS)
-      (let [
-            ckst-ptree-r (g-respond-sync-ckst-ptree parsetree)]
+      (let [ckst-ptree-r (g-respond-sync-ckst-ptree parsetree)
+            ]
         (cond
           (= ckst-ptree-r ans-yes) (do ans-ikr)
           (= ckst-ptree-r ans-no) (do ans-imp)
-          (= ckst-ptree-r ans-dunno) (do
-                                       (->> (reduce conj (get-g-fact-set) (map eval (g-load-user-facts text)))
-                                            (into #{})
-                                            (set-g-fact-set))
-                                       (let [new-session (-> @g-curr-session
-                                                             (#(apply insert %1 %2) (get-g-fact-set))
-                                                             (fire-rules))]
-                                         (dosync (ref-set g-curr-session new-session)))
-                                       ans-okgotit)
+          (= ckst-ptree-r ans-dunno) (g-respond-sync-mkst-ptree  parsetree)
           :else (ans-oops "g-respond-sync")))
 
-      (= intype :AND-FACTS)
-      (dosync
-       (->>  (reduce conj (get-g-fact-set) (map eval (first (g-load-user-facts text))))
-             (into #{})
-             (set-g-fact-set))
-       (let [new-session
-             (-> @g-curr-session
-                 (#(apply insert %1 %2) (get-g-fact-set))
-                 (fire-rules))]
-         (ref-set g-curr-session new-session))
-       (str "facts added: " (pr-str (first (g-load-user-facts text)))))
+      ; (= intype :AND-FACTS)
+      ; (dosync
+      ;  (->>  (reduce conj (get-g-fact-set) (map eval (first (g-load-user-facts text))))
+      ;        (into #{})
+      ;        (set-g-fact-set))
+      ;  (let [new-session
+      ;        (-> @g-curr-session
+      ;            (#(apply insert %1 %2) (get-g-fact-set))
+      ;            (fire-rules))]
+      ;    (ref-set g-curr-session new-session))
+      ;  (str "facts added: " (pr-str (first (g-load-user-facts text)))))
 
-      (= intype :QUERY)  (g-respond-sync-query text)
+      ;(= intype :QUERY)  (g-respond-sync-query text)
+      (= intype :QUERY)  (g-respond-sync-query-ptree parsetree)
       
       (= intype :YNQUESTION)      (g-respond-sync-yndq-ptree parsetree)
       (= intype :NEG-YNQUESTION)  (g-respond-sync-yndq-ptree parsetree)
@@ -763,7 +832,7 @@ Dynamic rules is something I wouldn't mind adding to Clara, although that comes 
       (do (->>  (str (get-g-rule-list) text ";")
                 (set-g-rule-list))
           (let [new-session
-                (-> (mk-session (symbol this-ns)   (g-load-user-rules (get-g-rule-list)))
+                (-> (mk-session (symbol this-ns) @g-rules-tr-atom  )
                     (#(apply insert %1 %2) (get-g-fact-set))
                     (fire-rules))]
             (dosync (ref-set g-curr-session new-session)))
