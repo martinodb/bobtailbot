@@ -7,22 +7,16 @@
   ;:aot [bobtailbot.core]
   
   :dependencies [
-
-                 ;[org.clojure/clojure "1.10.0"]
                  [org.clojure/clojure "1.10.1"]
 
-                 ;[org.clojure/tools.cli "0.4.1"]
                  [org.clojure/tools.cli "1.0.194"]
 
-                 ;[com.outpace/config "0.13.1"]
                  [com.outpace/config "0.13.2"]
                  
-                 ;[com.cerner/clara-rules "0.19.0"]
                  [com.cerner/clara-rules "0.20.0"]
                  
                  [instaparse "1.4.10"]
                  
-                 ;[org.clojure/core.async "0.4.490"]
                  [org.clojure/core.async "1.0.567"]
                  
                  [com.gearswithingears/async-sockets "0.1.0"]
@@ -36,7 +30,6 @@
                  [org.clojars.martinodb/zinc "1.0.0-SNAPSHOT"] ; clojars version
                  
                  [com.taoensso/timbre "4.10.0"] ; logging.
-                 ;[org.clojure/tools.logging "0.4.1"]
                  
                  
                  ]
