@@ -8,18 +8,22 @@
   
   :dependencies [
 
-                 [org.clojure/clojure "1.10.0"]
+                 ;[org.clojure/clojure "1.10.0"]
+                 [org.clojure/clojure "1.10.1"]
 
-                 [org.clojure/tools.cli "0.4.1"]
+                 ;[org.clojure/tools.cli "0.4.1"]
+                 [org.clojure/tools.cli "1.0.194"]
 
-                 [com.outpace/config "0.13.1"]
+                 ;[com.outpace/config "0.13.1"]
+                 [com.outpace/config "0.13.2"]
                  
                  ;[com.cerner/clara-rules "0.19.0"]
                  [com.cerner/clara-rules "0.20.0"]
                  
                  [instaparse "1.4.10"]
                  
-                 [org.clojure/core.async "0.4.490"]
+                 ;[org.clojure/core.async "0.4.490"]
+                 [org.clojure/core.async "1.0.567"]
                  
                  [com.gearswithingears/async-sockets "0.1.0"]
                  
@@ -39,8 +43,9 @@
                  
   :profiles
   {:dev {:source-paths ["dev" "src" "test"]
-         :dependencies [ [org.clojure/tools.namespace "0.2.10"] 
-                                  ]
+         :dependencies [ ;[org.clojure/tools.namespace "0.2.10"]
+                        [org.clojure/tools.namespace "1.0.0"]
+                        ]
          :plugins [  [lein-ancient "0.6.15"]  ]    }
    :uberjar {:aot :all} 
    }
