@@ -815,14 +815,14 @@ Dynamic rules is something I wouldn't mind adding to Clara, although that comes 
       (= intype :T-WHOM-QUESTION) (g-respond-sync-whom-ptree parsetree)
 
       (= intype :ANON-RULE)
-      (do (->>  (str (get-g-rule-list) text ";")
-                (set-g-rule-list))
-          (let [new-session
-                (-> (mk-session (symbol this-ns) @g-rules-tr-atom  )
-                    (#(apply insert %1 %2) (get-g-fact-set))
-                    (fire-rules))]
-            (dosync (ref-set g-curr-session new-session)))
-          ans-ok-rule)
+      (timbre/spy (do (->>  (str (get-g-rule-list) text ";")
+                            (set-g-rule-list))
+                      (let [new-session
+                            (-> (mk-session (symbol this-ns) @g-rules-tr-atom)
+                                (#(apply insert %1 %2) (get-g-fact-set))
+                                (fire-rules))]
+                        (dosync (ref-set g-curr-session new-session)))
+                      ans-ok-rule)) 
 
       :else (do
               (timbre/info

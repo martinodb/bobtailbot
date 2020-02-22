@@ -14,7 +14,9 @@
 
                  [com.outpace/config "0.13.1"]
                  
-                 [com.cerner/clara-rules "0.19.0"]
+                 ;[com.cerner/clara-rules "0.19.0"]
+                 [com.cerner/clara-rules "0.20.0"]
+                 
                  [instaparse "1.4.10"]
                  
                  [org.clojure/core.async "0.4.490"]
