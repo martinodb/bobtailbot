@@ -909,13 +909,13 @@ Dynamic rules is something I wouldn't mind adding to Clara, although that comes 
           ]
  (timbre/info "text: " text)
  (cond
-    (= text "Forget all facts") (do   (set-g-fact-set g-default-fact-set   )
+    (= text "forget all facts") (do   (set-g-fact-set g-default-fact-set   )
                                           (let [new-session (-> @g-curr-session 
                                                              (#(apply insert %1 %2) (get-g-fact-set))
                                                              (fire-rules))]
                                              (dosync (ref-set g-curr-session new-session)) )
                                           (do "OK, all facts forgotten."))
-   (= text "Forget all rules") (do (timbre/info "forgetting all rules..")
+   (= text "forget all rules") (do (timbre/info "forgetting all rules..")
                                    (set-g-rule-list g-default-rule-list )
                                    (let [new-session (-> (mk-session (symbol this-ns) @g-rules-tr-atom )
                                                          ( #(apply insert %1 %2) (get-g-fact-set))
