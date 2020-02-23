@@ -244,8 +244,26 @@
 
 
 
-(defn negate "find booleans in input rormap (a record or map) and negate them" [rormap] 
-(postwalk #(if (or (= % true) (= % false)) (not %) % ) rormap)   )
+; (defn negate1 "find booleans in input rormap (a record or map) and negate them" [rormap] 
+; (postwalk #(if (or (= % true) (= % false)) (not %) % ) rormap)   )
+
+(defn negate2-fact-one "find :affirm in input rormap (a record or map) and negate them" [rormap]
+  (timbre/spy ( #(if (record? %) (update-in  % [:affirm] not) %)  rormap)))
+
+(defn negate2-prod-lhs-one "find affirm conditions in input rormap (the lhs of a production) and negate them" [rormap]
+  (timbre/spy ( #(cond (= % '(= true affirm)) '(= false affirm)
+                               (= % '(= false affirm)) '(= true affirm)
+                               (= % '(= affirm true)) '(= affirm false)
+                               (= % '(= affirm false)) '(= affirm true)
+                               :else  %)  rormap)))
+
+(defn negate2 "find :affirm in input rormap (a record or map) and negate them" [rormap]
+  (timbre/spy (postwalk #(if (record? %) (negate2-fact-one %) (negate2-prod-lhs-one %) ) rormap  )))
+
+(def negate negate2)
+
+
+
 
 (defn conjugate-pres3 "Vinf->Vpres3" [vinf]
   (:pres3 (first (filter #(= (:inf %) vinf) (get-verb-set)))))
@@ -513,6 +531,24 @@
   ;=>
   ;(do (insert! (->Triple "my-Joe-fact" true "Joe Smith" "loves" ?x))
       ;(timbre/info "Joe is loved by, and loves back: " ?x)))
+
+
+
+; https://groups.google.com/forum/?hl=en#!topic/clara-rules/3R6fEXn9ETA
+;
+; (defrule symmetry
+;   [?eq <- (acc/distinct) [Eq (= obj1 ?obj1) (= obj2 ?obj2)]]
+;   =>
+;   (insert! (->Eq ?obj2 ?obj1)))
+;
+; (defrule symmetry-likes
+;   [?thing <- (acc/distinct) :from [Triple (= true affirm)  (= ?y subj) (= "likes" verb) (= ?x obj)]]
+;   =>
+;   (insert! (->Triple "my symmetric fact" true ?x "likes" ?y)))
+;
+;bobtailbot.brains.general.brain=> symmetry-likes
+; {:ns-name bobtailbot.brains.general.brain, :lhs [{:accumulator (clara.rules.accumulators/distinct), :from {:type bobtailbot.brains.general.brain.Triple, :constraints [(= true affirm) (= ?y subj) (= "likes" verb) (= ?x obj)]}, :result-binding :?thing}], :rhs (do (insert! (->Triple "my symmetric fact" true ?x "likes" ?y))), :name "bobtailbot.brains.general.brain/symmetry-likes"}
+
 
 (sc/defn ^:always-validate g-load-user-rules :- [clara.rules.schema/Production]
   "Converts a business rule string into Clara productions."
