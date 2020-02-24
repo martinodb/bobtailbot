@@ -81,8 +81,8 @@ EMBNEG-T-VCOP-IC = (<"am not">|<"isn't">|<"is not">|<"aren't">|<"are not">)(<"a"
 
 
 <EMBNEG-T-VERB> = (EMBNEG-T-Vconj | EMBNEG-T-Vvar);
-<EMBNEG-T-Vconj> = (<"doesn't"> | <"does not"> ) VtraInf ;
-<EMBNEG-T-Vvar> = (<"doesn't do">|<"does not do"> ) VAR <"to">;
+<EMBNEG-T-Vconj> = DOESNT VtraInf ;
+<EMBNEG-T-Vvar> = DOESNT <"do">  VAR <"to">;
 
 <T-Vconj> = VtraPres3 ;
 <T-Vvar> = (VAR | <"does"> VAR <"to">) ;
@@ -219,7 +219,7 @@ T-DOES-QUESTION = <"does"> D-TRIP-FACT-IND2 <"?">+ ;
 D-TRIP-FACT-IND2 = T-SUBJECT VtraInf T-OBJECT ;
 
 (*NEG-T-DOES-QUESTION*)
-NEG-T-DOES-QUESTION = (<"doesn't">|<"does not">) NEG-D-TRIP-FACT-IND2 <"?">+ ;
+NEG-T-DOES-QUESTION = DOESNT NEG-D-TRIP-FACT-IND2 <"?">+ ;
 NEG-D-TRIP-FACT-IND2 = T-SUBJECT VtraInf T-OBJECT ;
 
 (*T-WHO-QUESTION*)
@@ -323,14 +323,17 @@ NegVtraConj = (NegVtraPres) ;
 
 
 
-NegVintPres3 = (<"doesn't"> | <"does not">) VintInf ;
-NegVtraPres3 = (<"doesn't"> | <"does not">) VtraInf ;
 
-NegVintPresNon3 = (<"don't"> | <"do not">) VintInf ;
-NegVtraPresNon3 = (<"don't"> | <"do not">) VtraInf ;
+<NegVintPres3> = DOESNT VintInf ;
+<NegVtraPres3> = DOESNT VtraInf ;
 
-DOESNT = (<"doesn't"> | <"does not">);
-DONT = (<"don't"> | <"do not">) ;
+
+<NegVintPresNon3> = DONT VintInf ;
+<NegVtraPresNon3> = DONT VtraInf ;
+
+
+<DOESNT> = (<"doesn't"> | <"does not">);
+<DONT> = (<"don't"> | <"do not">) ;
 
 
 
