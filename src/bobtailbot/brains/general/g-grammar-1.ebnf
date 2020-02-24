@@ -81,7 +81,7 @@ EMBNEG-T-VCOP-IC = (<"am not">|<"isn't">|<"is not">|<"aren't">|<"are not">)(<"a"
 
 
 <EMBNEG-T-VERB> = (EMBNEG-T-Vconj | EMBNEG-T-Vvar);
-<EMBNEG-T-Vconj> = DOESNT VtraInf ;
+<EMBNEG-T-Vconj> = NegVtraPres3 ;
 <EMBNEG-T-Vvar> = DOESNT <"do">  VAR <"to">;
 
 <T-Vconj> = VtraPres3 ;
