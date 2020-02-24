@@ -628,6 +628,8 @@ Dynamic rules is something I wouldn't mind adding to Clara, although that comes 
 (def ans-sorrywhat "Sorry, I didn't get that.")
 (def ans-contradiction "There's a contradiction! The answer to that question is both yes and no.")
 
+(def ans-nobody "Nobody.")
+
 ;; using (timbre/spy) for debugging
 (defn g-respond-sync-yes-dunno-ptreetr "respond to yes/no question, negated yes/no question, does-question or negated does-question, with either 'yes' or 'dunno'. Question must be in ptreetr form (parsed and transformed)"
   [ptreetr]
@@ -735,7 +737,7 @@ Dynamic rules is something I wouldn't mind adding to Clara, although that comes 
                             (fire-rules))
           raw-query-result  (timbre/spy (query new-session anon-query))
           raw-query-result-set (timbre/spy (into #{} raw-query-result))
-          who (timbre/spy (get-who raw-query-result-set))
+          who (timbre/spy (get-who raw-query-result-set) )
           
           ]
       who)
@@ -993,7 +995,7 @@ Dynamic rules is something I wouldn't mind adding to Clara, although that comes 
         who-str-vec (timbre/spy (map NNPkw2str who-kw-vec))
         who-str  (timbre/spy (seq2str who-str-vec))
         ]
-    who-str
+    (if-let [who (not-empty who-str)] who ans-nobody)
     )
   
   )
