@@ -179,10 +179,6 @@
 (defn raw-g-grammar-1 [] (slurp (str dir-prefix "g-grammar-1.ebnf")) )
 (defn raw-g-grammar-1-w-annex [] (str (raw-g-grammar-1) (g-grammar-1-annex)))
 
-
-;(def grammar-martintest
-  ;(insta/parser  (slurp (str dir-prefix "grammar-martintest.ebnf")) :auto-whitespace :standard ))
-
 (defn g-grammar-1 []
   (insta/parser (raw-g-grammar-1-w-annex)  :auto-whitespace :standard ))
 
@@ -201,9 +197,6 @@
 
 
 (defn parsed-voc-map [parsetree] (read-string (apply str (rest (nth (first parsetree) 2 )))))
-;bobtailbot.brains.general.brain=> (apply str (rest (nth (first (g-grammar-1 "add verb {:my taylor  :is  rich };")) 2 )))
-;"{:my taylor  :is  rich }"
-
 
 
 
@@ -244,8 +237,6 @@
 
 
 
-; (defn negate1 "find booleans in input rormap (a record or map) and negate them" [rormap] 
-; (postwalk #(if (or (= % true) (= % false)) (not %) % ) rormap)   )
 
 (defn negate2-fact-one "find :affirm in input rormap (a record or map) and negate them" [rormap]
   (timbre/spy ( #(if (record? %) (update-in  % [:affirm] not) %)  rormap)))
@@ -269,6 +260,13 @@
   (:pres3 (first (filter #(= (:inf %) vinf) (get-verb-set)))))
 
 
+; (def g-transforms-WHATEVER  "WHATEVER"
+;   (conj
+;    g-transforms-base
+;    {
+
+;     }))
+
 (def g-transforms-base "Common elements"
   {:NUMBER #(Integer/parseInt %)
 
@@ -280,15 +278,11 @@
    :VtraInf identity
    
    :TS-OPERATOR g-ts-operators
-   
-   
+
 
    ; :NOT-FACTS  negate
    ; :PREAFF-FACTS identity
    ;:AND-FACTS vector
-
-
-
 
    })
 
@@ -344,7 +338,6 @@
     :PREAFF-FACTS identity
     }))
 
-
 (def g-transforms-RULE  "Rules"
   (conj
    g-transforms-mkst
@@ -372,9 +365,6 @@
 
     }))
 
-
-
-
 (def g-transforms-NQUERY  "Named queries"
   (conj
    g-transforms-base
@@ -386,10 +376,6 @@
                              name
                              (str ns-prefix name)))))
     }))
-
-
-
-
 
 (def g-transforms-QUERY  "Queries"
   (conj
@@ -427,7 +413,6 @@
                          :params #{}})
     }))
 
-
 (def g-transforms-YNQUESTION  "YES/NO questions"
   (conj
    g-transforms-QUERY
@@ -452,13 +437,6 @@
                                    :params #{}})
 
     }))
-
-; (def g-transforms-WHATEVER  "WHATEVER"
-;   (conj
-;    g-transforms-base
-;    {
-
-;     }))
 
 (def g-transforms-T-DOES-QUESTION  "T-Does questions"
   (conj
@@ -495,7 +473,6 @@
                             :params #{}})
     }))
 
-
 (def g-transforms-YNDQ "y/n q, neg y/n q, does-q, neg does-q"
   (conj g-transforms-YNQUESTION
         g-transforms-NEG-YNQUESTION
@@ -503,7 +480,6 @@
         g-transforms-NEG-T-DOES-QUESTION
         )
   )
-
 
 (def g-transforms-T-WHO-QUESTION  "T-WHO questions"
   (conj
@@ -540,24 +516,9 @@
                         :params #{}})
     }))
 
-
-
-
-
-
-
-
-
-
-
-
-
-;(def g-transforms g-transforms-mkst)
-
-
 (def fact-file-p (str data-dir-prefix "store/g_fact_set.edn"))
-(def rule-file-p (str data-dir-prefix "store/g_rule_list.edn"))
 
+(def rule-file-p (str data-dir-prefix "store/g_rule_list.edn"))
 
 (def g-default-fact-set
   (set [
@@ -567,10 +528,6 @@
 
 
 (defn get-g-fact-set []   (load-from-path-or-create    fact-file-p    g-default-fact-set    g-edn-readers))
-;(defn set-g-fact-set [g-fact-set]   (dump-to-path-records    fact-file-p   g-fact-set))
-
-
-
 
 (def g-fact-set-atom (atom (get-g-fact-set)))
 
@@ -584,22 +541,25 @@
 (defn set-g-fact-set [g-fact-set]   (dump-to-path-rlf  fact-file-p  g-fact-set ))
 
 
-
-
-
 (def g-default-rule-list   "Example Person One xxexamplefies ?x when ?x xxexamplefies Example Person One ;")
+
 (defn get-g-rule-list []   (load-from-path-or-create    rule-file-p    g-default-rule-list    g-edn-readers))
 
 (defn get-g-rules-ptree []
   ((g-grammar) (get-g-rule-list) ))
+
 (defn get-g-rules-transformed []
   (insta/transform g-transforms-RULE (get-g-rules-ptree)))
+
 (def g-rules-tr-atom (atom (get-g-rules-transformed)))
+
 (defn reload-g-rules-tr [] (reset! g-rules-tr-atom (get-g-rules-transformed)) )
+
 (defn dump-to-path-rlr "dump to path and reload rules"
   [path value]
   (do (dump-to-path path value)
       (reload-g-rules-tr)))
+
 (defn set-g-rule-list [g-rule-list]   (dump-to-path-rlr    rule-file-p   g-rule-list))
 
 
@@ -610,7 +570,6 @@
   ;=>
   ;(do (insert! (->Triple "my-Joe-fact" true "Joe Smith" "loves" ?x))
       ;(timbre/info "Joe is loved by, and loves back: " ?x)))
-
 
 
 ; https://groups.google.com/forum/?hl=en#!topic/clara-rules/3R6fEXn9ETA
@@ -629,9 +588,6 @@
 ; {:ns-name bobtailbot.brains.general.brain, :lhs [{:accumulator (clara.rules.accumulators/distinct), :from {:type bobtailbot.brains.general.brain.Triple, :constraints [(= true affirm) (= ?y subj) (= "likes" verb) (= ?x obj)]}, :result-binding :?thing}], :rhs (do (insert! (->Triple "my symmetric fact" true ?x "likes" ?y))), :name "bobtailbot.brains.general.brain/symmetry-likes"}
 
 
-
-
-
 (def g-default-session 
   (-> (mk-session 
        (symbol this-ns) 
@@ -643,10 +599,6 @@
 
 (def g-curr-session (ref g-default-session))
 
-
-
-
-
 ;;https://groups.google.com/d/msg/clara-rules/CFvJQGwelo0/NYBMmV9hFAAJ
 #_("Will's answer is correct. You'll find the related API documentation here: http://www.clara-rules.org/apidocs/0.12.0/clojure/clara.rules.html#var-retract
 We don't have any immediate plans to dynamically add or remove rules from a session, although I could see this happening in the future. I know of at least one use case that handles this by keeping a list of facts they have inserted, and re-building a new session dynamically and inserted those facts into a new session, while the previous gets garbage collected. 
@@ -657,17 +609,8 @@ Dynamic rules is something I wouldn't mind adding to Clara, although that comes 
 
 ;;silly reason.
 (declare get-ans-vars)
-
-(declare get-ans-vars-rtxt)
 (declare get-ans-vars-rvec)
-
-
-
-
 (declare get-who)
-
-
-
 
 (def ans-yes "Yes, that's right.")
 (def ans-ikr "I know, right.")       
@@ -757,8 +700,6 @@ Dynamic rules is something I wouldn't mind adding to Clara, although that comes 
     
     (let [ptreetr (insta/transform g-transforms-mkst ptree)
           ev-ptreetr (timbre/spy (map eval ptreetr))
-          ;anon-fact (timbre/spy (first ev-ptreetr) )
-          ;new-fact-set (timbre/spy (conj @g-fact-set-atom anon-fact))
           new-fact-set (timbre/spy (reduce conj @g-fact-set-atom ev-ptreetr))
           ]
       (timbre/spy (set-g-fact-set new-fact-set))
@@ -771,15 +712,6 @@ Dynamic rules is something I wouldn't mind adding to Clara, although that comes 
                       )
         )        
     (catch Exception e (do (timbre/info (.getMessage e)) ans-invalid-fact))))
-
-
-
-
-
-
-
-
-
 
 (defn g-respond-sync-who-ptree "answer WHO-question, in ptree form (parsed)"
   [ptree]
@@ -804,8 +736,6 @@ Dynamic rules is something I wouldn't mind adding to Clara, although that comes 
                             ", ptree: " ptree )
                            ans-invalid-query))))
 
-
-
 (defn g-respond-sync-whom-ptree "answer WHOM-question, in ptree form (parsed)"
   [ptree]
   (try
@@ -829,8 +759,6 @@ Dynamic rules is something I wouldn't mind adding to Clara, although that comes 
                             ", ptree: " ptree)
                            ans-invalid-query))))
 
-
-
 (defn g-respond-sync-query-ptree "respond to a simple query of the form 'match ?x ..' with a response of the form 'satisfiers: ..'"
   [ptree]
   (try
@@ -849,10 +777,6 @@ Dynamic rules is something I wouldn't mind adding to Clara, although that comes 
         ans-vars-txt))
     (catch Exception e (do (timbre/info (.getMessage e)) ans-invalid-query))))
 
-
-;(def g-respond-sync-query g-respond-sync-query-rtxt)
-
-
 (defn g-respond-sync
 
   [text]
@@ -867,20 +791,6 @@ Dynamic rules is something I wouldn't mind adding to Clara, although that comes 
           (= ckst-ptree-r ans-no) (do ans-imp)
           (= ckst-ptree-r ans-dunno) (g-respond-sync-mkst-ptree  parsetree)
           :else (ans-oops "g-respond-sync")))
-
-      ; (= intype :AND-FACTS)
-      ; (dosync
-      ;  (->>  (reduce conj (get-g-fact-set) (map eval (first (g-load-user-facts text))))
-      ;        (into #{})
-      ;        (set-g-fact-set))
-      ;  (let [new-session
-      ;        (-> @g-curr-session
-      ;            (#(apply insert %1 %2) (get-g-fact-set))
-      ;            (fire-rules))]
-      ;    (ref-set g-curr-session new-session))
-      ;  (str "facts added: " (pr-str (first (g-load-user-facts text)))))
-
-      ;(= intype :QUERY)  (g-respond-sync-query text)
       (= intype :QUERY)  (g-respond-sync-query-ptree parsetree)
       
       (= intype :YNQUESTION)      (g-respond-sync-yndq-ptree parsetree)
@@ -905,13 +815,6 @@ Dynamic rules is something I wouldn't mind adding to Clara, although that comes 
               (timbre/info
                "ERROR in g-respond-sync.. parsetree: " parsetree ", intype: " intype)
               ans-sorrywhat) )))
-
-
-
-
-
-
-
 
 
 (defn add-voc "add vocabulary"
@@ -942,9 +845,6 @@ Dynamic rules is something I wouldn't mind adding to Clara, although that comes 
            ))
 
 
-
-
-
 (defn g-respond-sync-top [text]
 (let [ukw (unk-words text)
           ]
@@ -972,15 +872,11 @@ Dynamic rules is something I wouldn't mind adding to Clara, although that comes 
    )
 ))
 
-
 ;;; example, typing this on irc:  {:add-voc-type :verb , :content {:inf \"admire\", :past \"admired\", :pp \"admired\", :er \"admirer\", :ing \"admiring\", :pres3 \"admires\"} }
 ;;; Becomes this in verb_set.edn: {:inf "admire", :past "admired", :pp "admired", :er "admirer", :ing "admiring", :pres3 "admires"}
 ;;; Note: if you eliminate a verb from vocab but it remains in a rule, instaparse gives an error and the bot breaks. I have to fix that.
 
 ;;; Only use "hear" and "speakup" for multi-user interfaces like irc. The bot may report events asyncronously, not just respond to questions.
-
-
-
 (defn g-speakup [speakup-chan] (add-watch last-utterance :utt-ready
                                           (fn [k r old-state new-state]
                                                 (>!! speakup-chan (:text new-state) ))))
@@ -995,16 +891,9 @@ Dynamic rules is something I wouldn't mind adding to Clara, although that comes 
                            {:type :response , :text (g-respond text)} )))
 
 
-
-
-
 (def hear g-hear)
 (def speakup g-speakup)
 (def respond g-respond)
-
-
-
-
 
 (defn get-ans-vars-rvec
   "(returns a vector of maps) Ex(but double quotes):
@@ -1018,13 +907,6 @@ Dynamic rules is something I wouldn't mind adding to Clara, although that comes 
   [raw-query-result-set]
   (let [ans-vars-vec (get-ans-vars-rvec raw-query-result-set)]
     (str   "satisfiers: " (pr-str ans-vars-vec))))
-
-
-
-;;; #"\:\?x\s+\:(\S+)"  ---> (re-pattern "\\:\\?x\\s+\\:(\\S+)")
-;;; #"\"([a-z\']+)\"|\'([a-z]+)\'"  --> (re-pattern "\\\"([a-z\\']+)\\\"|\\'([a-z]+)\\'")  ;;;; we also need spaces! --> (re-pattern "\\\"([a-z\\'\\s]+)\\\"|\\'([a-z\\s]+)\\'")
-;(defn get-who [x-str] (->> x-str (re-seq (re-pattern "\\:\\?x\\s+\\:(\\S+)") ) (map second) (map #(clojure.string/replace % "_" " ")) (seq->str)  ))
-
 
 (defn get-who
   "Called by functions that answer who-questions.
@@ -1040,3 +922,5 @@ Dynamic rules is something I wouldn't mind adding to Clara, although that comes 
   )
 
 (defn gram-voc [] (set/union #{"it" "case"}  (into #{} (map #(if (second %) (second %) (nth % 2)) (re-seq (re-pattern "\\\"([a-z']+)\\\"|'([a-z]+)'")  (raw-g-grammar-1-w-annex)))))   )
+;;; #"\:\?x\s+\:(\S+)"  ---> (re-pattern "\\:\\?x\\s+\\:(\\S+)")
+;;; #"\"([a-z\']+)\"|\'([a-z]+)\'"  --> (re-pattern "\\\"([a-z\\']+)\\\"|\\'([a-z]+)\\'")  ;;;; we also need spaces! --> (re-pattern "\\\"([a-z\\'\\s]+)\\\"|\\'([a-z\\s]+)\\'")
