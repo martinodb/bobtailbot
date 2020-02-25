@@ -830,24 +830,6 @@ Dynamic rules is something I wouldn't mind adding to Clara, although that comes 
                            ans-invalid-query))))
 
 
-; (defn g-respond-sync-query "respond to a simple query of the form 'match ?x ..' with a response of the form 'satisfiers: ..'"
-;   [qtext]
-;   (try
-;     (do
-;       (let [parsetree  (timbre/spy ((g-grammar) qtext))
-;             new-rule-list (timbre/spy (str (get-g-rule-list) qtext))
-;             new-session   (-> (mk-session (symbol this-ns) (g-load-user-rules new-rule-list))
-;                               (#(apply insert %1 %2) (get-g-fact-set))
-;                               (fire-rules))
-;             anon-query  (timbre/spy (first (insta/transform g-transforms parsetree)))
-;             raw-query-result  (query new-session anon-query)
-;             raw-query-result-set (timbre/spy (into #{} raw-query-result))
-            
-;             ans-vars-txt (timbre/spy (get-ans-vars raw-query-result-set))
-;             ]
-;         ans-vars-txt
-;         ))
-;     (catch Exception e (do (timbre/info (.getMessage e)) ans-invalid-query))))
 
 (defn g-respond-sync-query-ptree "respond to a simple query of the form 'match ?x ..' with a response of the form 'satisfiers: ..'"
   [ptree]
