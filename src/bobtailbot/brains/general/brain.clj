@@ -629,28 +629,6 @@
 ; {:ns-name bobtailbot.brains.general.brain, :lhs [{:accumulator (clara.rules.accumulators/distinct), :from {:type bobtailbot.brains.general.brain.Triple, :constraints [(= true affirm) (= ?y subj) (= "likes" verb) (= ?x obj)]}, :result-binding :?thing}], :rhs (do (insert! (->Triple "my symmetric fact" true ?x "likes" ?y))), :name "bobtailbot.brains.general.brain/symmetry-likes"}
 
 
-; (sc/defn ^:always-validate g-load-user-rules :- [clara.rules.schema/Production]
-;   "Converts a business rule string into Clara productions."
-;   [business-rules :- sc/Str]
-
-;   (let [parse-tree ((g-grammar) business-rules)]
-
-;     (when (insta/failure? parse-tree)
-;       (throw (ex-info (print-str parse-tree) {:failure parse-tree})))
-
-;     (insta/transform g-transforms parse-tree)))
-
-; (defn g-load-user-facts
-;   "Converts facts into Clara record entries."
-;   [facts]
-
-;   (let [parse-tree ((g-grammar) facts)]
-
-;     (when (insta/failure? parse-tree)
-;       (throw (ex-info (print-str parse-tree) {:failure parse-tree})))
-
-;     (insta/transform g-transforms-mkst parse-tree)))
-
 
 
 
