@@ -269,7 +269,7 @@
   (:pres3 (first (filter #(= (:inf %) vinf) (get-verb-set)))))
 
 
-(def g-transforms-base "without :FACTS "
+(def g-transforms-base "Common elements"
   {:NUMBER #(Integer/parseInt %)
 
    :UNVAR symbol
@@ -281,146 +281,15 @@
    
    :TS-OPERATOR g-ts-operators
    
-   :ANON-RULE-notest (fn [fact & facts]
-                       {:ns-name (symbol this-ns)
-                        :name (str ns-prefix (gensym "my-anon-rule"))
-                        :lhs facts
-                        :rhs `(insert! ~fact)})
    
-   :R-TRIP-FACT-IND2 (fn [t-subj t-verb t-obj]
-                       {:type Triple
-                        :constraints [(list '= true 'affirm)
-                                      (list '= t-subj 'subj)
-                                      (list '= t-verb 'verb)
-                                      (list '= t-obj 'obj)
-                                      ]
-                        })
-   
-   :NEG-R-TRIP-FACT-IND2 (fn [t-subj t-verb t-obj]
-                           {:type Triple
-                            :constraints [(list '= false 'affirm)
-                                          (list '= t-subj 'subj)
-                                          (list '= t-verb 'verb)
-                                          (list '= t-obj 'obj)
-                                          ]
-                            })
-   
-   :Q-TRIP-FACT-IND2 (fn [t-subj t-verb t-obj]
-                       {:type Triple
-                        :constraints [(list '= true 'affirm)
-                                      (list '= t-subj 'subj)
-                                      (list '= t-verb 'verb)
-                                      (list '= t-obj 'obj)
-                                      ]
-                        :fact-binding :?#thing
-                        })
-   
-   :PRENEG-Q-TRIP-FACT-IND2 (fn [t-subj t-verb t-obj]
-                              {:type Triple
-                               :constraints [(list '= false 'affirm)
-                                             (list '= t-subj 'subj)
-                                             (list '= t-verb 'verb)
-                                             (list '= t-obj 'obj) ]
-                               :fact-binding :?#thing })
-   
-   :EMBNEG-Q-TRIP-FACT-IND2 (fn [t-subj t-verb-inf t-obj]
-                              (let [t-verb-pres3 (conjugate-pres3 t-verb-inf)]
-                                { :type Triple
-                                 :constraints [(list '= false 'affirm)
-                                               (list '= t-subj 'subj)
-                                               (list '= t-verb-pres3 'verb)
-                                               (list '= t-obj 'obj) ]
-                                 :fact-binding :?#thing }))
-   
-   :D-TRIP-FACT-IND2 (fn [t-subj t-verb-inf t-obj]
-                       (let [t-verb-pres3 (conjugate-pres3 t-verb-inf)]
-                         {:type Triple
-                          :constraints [(list '= true 'affirm)
-                                        (list '= t-subj 'subj)
-                                        (list '= t-verb-pres3 'verb)
-                                        (list '= t-obj 'obj)]
-                          :fact-binding :?#thing}))
-   
-   :NEG-D-TRIP-FACT-IND2 (fn [t-subj t-verb-inf t-obj]
-                           (let [t-verb-pres3 (conjugate-pres3 t-verb-inf)]
-                             {:type Triple
-                              :constraints [(list '= false 'affirm)
-                                            (list '= t-subj 'subj)
-                                            (list '= t-verb-pres3 'verb)
-                                            (list '= t-obj 'obj)]
-                              :fact-binding :?#thing}))
-   
-   :WHO-TRIP-FACT-IND2 (fn [t-verb t-obj]
-                         {:type Triple
-                          :constraints [(list '= true 'affirm)
-                                        (list '= '?x 'subj)
-                                        (list '= t-verb 'verb)
-                                        (list '= t-obj 'obj)]
-                          :fact-binding :?#thing})
-   
-   :WHOM-TRIP-FACT-IND2 (fn [t-subj t-verb-inf]
-                          (let [t-verb-pres3 (conjugate-pres3 t-verb-inf)]
-                            {:type Triple
-                             :constraints [(list '= true 'affirm)
-                                           (list '= t-subj 'subj)
-                                           (list '= t-verb-pres3 'verb)
-                                           (list '= '?x 'obj)]
-                             :fact-binding :?#thing}))
-   
-   ;CAREFUL: this only works because the Triple record only has one boolean (affirm).
-   :Q-NOT-FACTS   negate 
-   :R-NOT-FACTS  negate
+
    ; :NOT-FACTS  negate
-   
-   :Q-PREAFF-FACTS identity
-   :R-PREAFF-FACTS identity
    ; :PREAFF-FACTS identity
-   
-   
-   :AND-FACTS vector
+   ;:AND-FACTS vector
 
-   
-   
-   :ANON-RULE identity
-   :QUERY identity
-   :YNQUESTION identity
-   :NEG-YNQUESTION identity
-   
 
-   
-   
-   :NQUERY  (fn [name] (fn [session-name] (query session-name (if (.contains name ns-prefix) name (str ns-prefix name)))))
-   :QUERY-notest   (fn [& facts]
-                     {:name "anon-query"
-                      :lhs facts
-                      :params #{}
-                      })
-   :YNQUESTION-notest   (fn [& facts]
-                          {:name "anon-query"
-                           :lhs facts
-                           :params #{}
-                           })
-   :NEG-YNQUESTION-notest   (fn [& facts]
-                              {:name "anon-query"
-                               :lhs (map negate facts)
-                               :params #{}
-                               })
-   :T-DOES-QUESTION   (fn [ dfact]
-                        {:name "anon-query"
-                         :lhs [dfact]
-                         :params #{}})
-   :NEG-T-DOES-QUESTION (fn [dfact]
-                          {:name "anon-query"
-                           :lhs [dfact]
-                           :params #{}})
-   :T-WHO-QUESTION   (fn [wfact]
-                       {:name "anon-query"
-                        :lhs [wfact]
-                        :params #{}})
-   :T-WHOM-QUESTION (fn [wfact]
-                      {:name "anon-query"
-                       :lhs [wfact]
-                       :params #{}})
+
+
    })
 
 (def g-transforms-mkst  "treats :FACTS normally, as a statement"
@@ -436,6 +305,7 @@
                              (let [t-verb-pres3 (conjugate-pres3 t-verb-inf)]
                                `(->Triple "my-fact" false ~t-subj ~t-verb-pres3 ~t-obj)))
     :NOT-FACTS  negate
+    :AND-FACTS vector
     :PREAFF-FACTS identity}
    ))
 
@@ -470,10 +340,219 @@
                                               (list '= t-obj 'obj)]
                                 :fact-binding :?#thing}))
     :NOT-FACTS  negate
+    :AND-FACTS vector
     :PREAFF-FACTS identity
     }))
 
-(def g-transforms g-transforms-mkst)
+
+(def g-transforms-RULE  "Rules"
+  (conj
+   g-transforms-mkst
+   {
+    :ANON-RULE-notest (fn [fact & facts]
+                        {:ns-name (symbol this-ns)
+                         :name (str ns-prefix (gensym "my-anon-rule"))
+                         :lhs facts
+                         :rhs `(insert! ~fact)})
+    :R-TRIP-FACT-IND2 (fn [t-subj t-verb t-obj]
+                        {:type Triple
+                         :constraints [(list '= true 'affirm)
+                                       (list '= t-subj 'subj)
+                                       (list '= t-verb 'verb)
+                                       (list '= t-obj 'obj)]})
+    :NEG-R-TRIP-FACT-IND2 (fn [t-subj t-verb t-obj]
+                            {:type Triple
+                             :constraints [(list '= false 'affirm)
+                                           (list '= t-subj 'subj)
+                                           (list '= t-verb 'verb)
+                                           (list '= t-obj 'obj)]})
+    :ANON-RULE identity
+    :R-NOT-FACTS  negate
+    :R-PREAFF-FACTS identity
+
+    }))
+
+
+
+
+(def g-transforms-NQUERY  "Named queries"
+  (conj
+   g-transforms-base
+   {
+       :NQUERY  (fn [name]
+                  (fn [session-name]
+                    (query session-name
+                           (if (.contains name ns-prefix)
+                             name
+                             (str ns-prefix name)))))
+    }))
+
+
+
+
+
+(def g-transforms-QUERY  "Queries"
+  (conj
+   g-transforms-base
+   {:Q-TRIP-FACT-IND2 (fn [t-subj t-verb t-obj]
+                        {:type Triple
+                         :constraints [(list '= true 'affirm)
+                                       (list '= t-subj 'subj)
+                                       (list '= t-verb 'verb)
+                                       (list '= t-obj 'obj)]
+                         :fact-binding :?#thing})
+
+    :PRENEG-Q-TRIP-FACT-IND2 (fn [t-subj t-verb t-obj]
+                               {:type Triple
+                                :constraints [(list '= false 'affirm)
+                                              (list '= t-subj 'subj)
+                                              (list '= t-verb 'verb)
+                                              (list '= t-obj 'obj)]
+                                :fact-binding :?#thing})
+
+    :EMBNEG-Q-TRIP-FACT-IND2 (fn [t-subj t-verb-inf t-obj]
+                               (let [t-verb-pres3 (conjugate-pres3 t-verb-inf)]
+                                 {:type Triple
+                                  :constraints [(list '= false 'affirm)
+                                                (list '= t-subj 'subj)
+                                                (list '= t-verb-pres3 'verb)
+                                                (list '= t-obj 'obj)]
+                                  :fact-binding :?#thing}))
+    :Q-NOT-FACTS   negate
+    :Q-PREAFF-FACTS identity
+    :QUERY identity
+    :QUERY-notest  (fn [& facts]
+                        {:name "anon-query"
+                         :lhs facts
+                         :params #{}})
+    }))
+
+
+(def g-transforms-YNQUESTION  "YES/NO questions"
+  (conj
+   g-transforms-QUERY
+   {
+    :YNQUESTION identity
+    :YNQUESTION-notest  (fn [& facts]
+                          {:name "anon-query"
+                           :lhs facts
+                           :params #{}})
+    
+
+    }))
+
+(def g-transforms-NEG-YNQUESTION  "Negated YES/NO questions"
+  (conj
+   g-transforms-QUERY
+   {
+    :NEG-YNQUESTION identity
+    :NEG-YNQUESTION-notest   (fn [& facts]
+                                  {:name "anon-query"
+                                   :lhs (map negate facts)
+                                   :params #{}})
+
+    }))
+
+; (def g-transforms-WHATEVER  "WHATEVER"
+;   (conj
+;    g-transforms-base
+;    {
+
+;     }))
+
+(def g-transforms-T-DOES-QUESTION  "T-Does questions"
+  (conj
+   g-transforms-base
+   {:D-TRIP-FACT-IND2 (fn [t-subj t-verb-inf t-obj]
+                        (let [t-verb-pres3 (conjugate-pres3 t-verb-inf)]
+                          {:type Triple
+                           :constraints [(list '= true 'affirm)
+                                         (list '= t-subj 'subj)
+                                         (list '= t-verb-pres3 'verb)
+                                         (list '= t-obj 'obj)]
+                           :fact-binding :?#thing}))
+    :T-DOES-QUESTION   (fn [dfact]
+                         {:name "anon-query"
+                          :lhs [dfact]
+                          :params #{}})
+    }))
+
+(def g-transforms-NEG-T-DOES-QUESTION  "Negated T-DOES-questions"
+  (conj
+   g-transforms-base
+   {
+    :NEG-D-TRIP-FACT-IND2 (fn [t-subj t-verb-inf t-obj]
+                                (let [t-verb-pres3 (conjugate-pres3 t-verb-inf)]
+                                  {:type Triple
+                                   :constraints [(list '= false 'affirm)
+                                                 (list '= t-subj 'subj)
+                                                 (list '= t-verb-pres3 'verb)
+                                                 (list '= t-obj 'obj)]
+                                   :fact-binding :?#thing}))
+    :NEG-T-DOES-QUESTION (fn [dfact]
+                           {:name "anon-query"
+                            :lhs [dfact]
+                            :params #{}})
+    }))
+
+
+(def g-transforms-YNDQ "y/n q, neg y/n q, does-q, neg does-q"
+  (conj g-transforms-YNQUESTION
+        g-transforms-NEG-YNQUESTION
+        g-transforms-T-DOES-QUESTION
+        g-transforms-NEG-T-DOES-QUESTION
+        )
+  )
+
+
+(def g-transforms-T-WHO-QUESTION  "T-WHO questions"
+  (conj
+   g-transforms-base
+   {
+    :WHO-TRIP-FACT-IND2 (fn [t-verb t-obj]
+                             {:type Triple
+                              :constraints [(list '= true 'affirm)
+                                            (list '= '?x 'subj)
+                                            (list '= t-verb 'verb)
+                                            (list '= t-obj 'obj)]
+                              :fact-binding :?#thing})
+    :T-WHO-QUESTION   (fn [wfact]
+                        {:name "anon-query"
+                         :lhs [wfact]
+                         :params #{}})
+    }))
+
+(def g-transforms-T-WHOM-QUESTION  "WHOM-questions"
+  (conj
+   g-transforms-base
+   {
+    :WHOM-TRIP-FACT-IND2 (fn [t-subj t-verb-inf]
+                           (let [t-verb-pres3 (conjugate-pres3 t-verb-inf)]
+                             {:type Triple
+                              :constraints [(list '= true 'affirm)
+                                            (list '= t-subj 'subj)
+                                            (list '= t-verb-pres3 'verb)
+                                            (list '= '?x 'obj)]
+                              :fact-binding :?#thing}))
+    :T-WHOM-QUESTION (fn [wfact]
+                       {:name "anon-query"
+                        :lhs [wfact]
+                        :params #{}})
+    }))
+
+
+
+
+
+
+
+
+
+
+
+
+
+;(def g-transforms g-transforms-mkst)
 
 
 (def fact-file-p (str data-dir-prefix "store/g_fact_set.edn"))
@@ -514,7 +593,7 @@
 (defn get-g-rules-ptree []
   ((g-grammar) (get-g-rule-list) ))
 (defn get-g-rules-transformed []
-  (insta/transform g-transforms (get-g-rules-ptree)))
+  (insta/transform g-transforms-RULE (get-g-rules-ptree)))
 (def g-rules-tr-atom (atom (get-g-rules-transformed)))
 (defn reload-g-rules-tr [] (reset! g-rules-tr-atom (get-g-rules-transformed)) )
 (defn dump-to-path-rlr "dump to path and reload rules"
@@ -656,7 +735,7 @@ Dynamic rules is something I wouldn't mind adding to Clara, although that comes 
   [ptree]
   (try
     (do
-      (let [ptreetr (insta/transform g-transforms ptree)
+      (let [ptreetr (insta/transform g-transforms-YNDQ ptree)
             neg-ptreetr (negate ptreetr)
             query-ans (g-respond-sync-yes-dunno-ptreetr ptreetr)
             negquery-ans (g-respond-sync-yes-dunno-ptreetr neg-ptreetr)]
@@ -727,7 +806,7 @@ Dynamic rules is something I wouldn't mind adding to Clara, although that comes 
 (defn g-respond-sync-who-ptree "answer WHO-question, in ptree form (parsed)"
   [ptree]
   (try
-    (let [ptreetr (timbre/spy (insta/transform g-transforms ptree))
+    (let [ptreetr (timbre/spy (insta/transform g-transforms-T-WHO-QUESTION ptree))
           anon-query (timbre/spy (first ptreetr))
           new-tr-rules (timbre/spy (conj @g-rules-tr-atom anon-query))
           new-session   (-> (mk-session
@@ -752,7 +831,7 @@ Dynamic rules is something I wouldn't mind adding to Clara, although that comes 
 (defn g-respond-sync-whom-ptree "answer WHOM-question, in ptree form (parsed)"
   [ptree]
   (try
-    (let [ptreetr (timbre/spy (insta/transform g-transforms ptree))
+    (let [ptreetr (timbre/spy (insta/transform g-transforms-T-WHOM-QUESTION ptree))
           anon-query (timbre/spy  (first ptreetr))
           new-tr-rules (timbre/spy (conj @g-rules-tr-atom anon-query))
           new-session   (-> (mk-session
@@ -797,7 +876,7 @@ Dynamic rules is something I wouldn't mind adding to Clara, although that comes 
   (try
     (do
       (let [;parsetree  (timbre/spy ((g-grammar) qtext))
-            ptreetr (timbre/spy (insta/transform g-transforms ptree))
+            ptreetr (timbre/spy (insta/transform g-transforms-QUERY ptree))
             anon-query (timbre/spy  (first ptreetr))
             new-tr-rules (timbre/spy (conj @g-rules-tr-atom anon-query))
             new-session   (-> (mk-session (symbol this-ns) new-tr-rules)
