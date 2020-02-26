@@ -619,7 +619,7 @@
        ;;(g-load-user-rules   (get-g-rule-list))
        @g-rules-tr-atom
        )
-      ( #(apply insert %1 %2) (get-g-fact-set))
+      ( #(apply insert %1 %2) @g-fact-set-atom)
       (fire-rules)))
 
 (def g-curr-session (ref g-default-session))
@@ -665,7 +665,7 @@ Dynamic rules is something I wouldn't mind adding to Clara, although that comes 
                              (symbol this-ns)
                              new-tr-rules
                              )
-                            (#(apply insert %1 %2) (get-g-fact-set))
+                            (#(apply insert %1 %2) @g-fact-set-atom)
                             (fire-rules))
           raw-query-result  (timbre/spy (query new-session anon-query))
           raw-query-result-str (timbre/spy (apply str raw-query-result))]
@@ -742,7 +742,7 @@ Dynamic rules is something I wouldn't mind adding to Clara, although that comes 
           new-session   (-> (mk-session
                              (symbol this-ns)
                              new-tr-rules)
-                            (#(apply insert %1 %2) (get-g-fact-set))
+                            (#(apply insert %1 %2) @g-fact-set-atom)
                             (fire-rules))
           raw-query-result  (timbre/spy (query new-session anon-query))
           raw-query-result-set (timbre/spy (into #{} raw-query-result))
@@ -765,7 +765,7 @@ Dynamic rules is something I wouldn't mind adding to Clara, although that comes 
           new-session   (-> (mk-session
                              (symbol this-ns)
                              new-tr-rules)
-                            (#(apply insert %1 %2) (get-g-fact-set))
+                            (#(apply insert %1 %2) @g-fact-set-atom)
                             (fire-rules))
           raw-query-result  (timbre/spy (query new-session anon-query))
           raw-query-result-set (timbre/spy (into #{} raw-query-result))
@@ -787,7 +787,7 @@ Dynamic rules is something I wouldn't mind adding to Clara, although that comes 
           anon-query (timbre/spy  (first ptreetr))
           new-tr-rules (timbre/spy (conj @g-rules-tr-atom anon-query))
           new-session   (-> (mk-session (symbol this-ns) new-tr-rules)
-                            (#(apply insert %1 %2) (get-g-fact-set))
+                            (#(apply insert %1 %2) @g-fact-set-atom)
                             (fire-rules))
           raw-query-result  (query new-session anon-query)
           raw-query-result-set (timbre/spy (into #{} raw-query-result))
@@ -825,7 +825,7 @@ Dynamic rules is something I wouldn't mind adding to Clara, although that comes 
                             (set-g-rule-list))
                       (let [new-session
                             (-> (mk-session (symbol this-ns) @g-rules-tr-atom)
-                                (#(apply insert %1 %2) (get-g-fact-set))
+                                (#(apply insert %1 %2) @g-fact-set-atom)
                                 (fire-rules))]
                         (dosync (ref-set g-curr-session new-session)))
                       ans-ok-rule)) 
@@ -871,14 +871,14 @@ Dynamic rules is something I wouldn't mind adding to Clara, although that comes 
  (cond
     (= text "forget all facts") (do   (set-g-fact-set g-default-fact-set   )
                                       (let [new-session (-> @g-curr-session 
-                                                            (#(apply insert %1 %2) (get-g-fact-set))
+                                                            (#(apply insert %1 %2) @g-fact-set-atom)
                                                             (fire-rules))]
                                         (dosync (ref-set g-curr-session new-session)) )
                                       "OK, all facts forgotten.")
    (= text "forget all rules") (do (timbre/info "forgetting all rules..")
                                    (set-g-rule-list g-default-rule-list )
                                    (let [new-session (-> (mk-session (symbol this-ns) @g-rules-tr-atom )
-                                                         ( #(apply insert %1 %2) (get-g-fact-set))
+                                                         ( #(apply insert %1 %2) @g-fact-set-atom)
                                                           (fire-rules))]
                                        (dosync (ref-set g-curr-session new-session))  )
                                    "OK, all rules forgotten."  )
