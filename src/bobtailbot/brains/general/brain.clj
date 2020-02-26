@@ -177,10 +177,14 @@
 
 
 (defn raw-g-grammar-1 [] (slurp (str dir-prefix "g-grammar-1.ebnf")) )
+;(defn raw-g-grammar-1-2 "TESTING" [] (slurp (str dir-prefix "g-grammar-1-2.ebnf")))
+
 (defn raw-g-grammar-1-w-annex [] (str (raw-g-grammar-1) (g-grammar-1-annex)))
+;(defn raw-g-grammar-1-2-w-annex "TESTING" [] (str (raw-g-grammar-1-2) (g-grammar-1-annex)))
 
 (defn g-grammar-1 []
   (insta/parser (raw-g-grammar-1-w-annex)  :auto-whitespace :standard ))
+;(defn g-grammar-1-2 "TESTING" []  (insta/parser (raw-g-grammar-1-2-w-annex)  :auto-whitespace :standard ))
 
 
 (def g-grammar-1-atom (atom (g-grammar-1)))
@@ -338,32 +342,54 @@
     :PREAFF-FACTS identity
     }))
 
+
+
+
 (def g-transforms-RULE  "Rules"
   (conj
-   g-transforms-mkst
-   {
+   g-transforms-base
+   {:ANON-RULE identity
     :ANON-RULE-notest (fn [fact & facts]
-                        {:ns-name (symbol this-ns)
-                         :name (str ns-prefix (gensym "my-anon-rule"))
-                         :lhs facts
-                         :rhs `(insert! ~fact)})
-    :R-TRIP-FACT-IND2 (fn [t-subj t-verb t-obj]
-                        {:type Triple
-                         :constraints [(list '= true 'affirm)
-                                       (list '= t-subj 'subj)
-                                       (list '= t-verb 'verb)
-                                       (list '= t-obj 'obj)]})
-    :NEG-R-TRIP-FACT-IND2 (fn [t-subj t-verb t-obj]
-                            {:type Triple
-                             :constraints [(list '= false 'affirm)
-                                           (list '= t-subj 'subj)
-                                           (list '= t-verb 'verb)
-                                           (list '= t-obj 'obj)]})
-    :ANON-RULE identity
-    :R-NOT-FACTS  negate
-    :R-PREAFF-FACTS identity
+                        (let [;rhs-fact fact ;(:if-rhs fact)
+                              rhs-fact (fact :if-rhs)
+                              ;lhs-facts facts ;(map :if-lhs facts)
+                              lhs-facts (map #(% :if-lhs) facts)
+                              ]
+                          {:ns-name (symbol this-ns)
+                           :name (str ns-prefix (gensym "my-anon-rule"))
+                           :lhs lhs-facts
+                           :rhs `(insert! ~rhs-fact)}))
 
-    }))
+    :FACTS identity
+    :ANON-FACT identity
+    :TRIP-FACT-IND2 (fn [t-subj t-verb t-obj]
+                      (fn [key]
+                        (key {:if-lhs {:type Triple
+                                       :constraints [(list '= true 'affirm)
+                                                     (list '= t-subj 'subj)
+                                                     (list '= t-verb 'verb)
+                                                     (list '= t-obj 'obj)]}
+                              :if-rhs `(->Triple "my-fact" true ~t-subj ~t-verb ~t-obj)})))
+    :PRENEG-TRIP-FACT-IND2 (fn [t-subj t-verb t-obj]
+                             (fn [key]
+                               (key {:if-lhs {:type Triple
+                                              :constraints [(list '= false 'affirm)
+                                                            (list '= t-subj 'subj)
+                                                            (list '= t-verb 'verb)
+                                                            (list '= t-obj 'obj)]}
+                                     :if-rhs `(->Triple "my-fact" false ~t-subj ~t-verb ~t-obj)})))
+    :EMBNEG-TRIP-FACT-IND2 (fn [t-subj t-verb-inf t-obj]
+                             (let [t-verb-pres3 (conjugate-pres3 ~t-verb-inf)]
+                               (fn [key]
+                                 (key {:if-lhs {:type Triple
+                                                :constraints [(list '= false 'affirm)
+                                                              (list '= t-subj 'subj)
+                                                              (list '= t-verb-pres3 'verb)
+                                                              (list '= t-obj 'obj)]}
+                                       :if-rhs `(->Triple "my-fact" false ~t-subj ~t-verb-pres3 ~t-obj)}))))
+    :NOT-FACTS  negate
+    :AND-FACTS vector
+    :PREAFF-FACTS identity}))
 
 (def g-transforms-NQUERY  "Named queries"
   (conj

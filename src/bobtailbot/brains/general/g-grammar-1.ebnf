@@ -137,7 +137,12 @@ ANON-RULE-notest = RULE-BODY-notest;
 <RULE-BODY-wtest> = FACT <"when"> LHS-wtest  ;
 <RULE-BODY-notest> = FACT <"when"> LHS-notest  ;
 
-<LHS-wtest> = <"test"> TEST <','>* <"facts"> R-FACTS  ;
+
+<LHS-wtest> = <"test"> TEST <','>* <"facts"> FACTS  ;
+<LHS-notest> = FACTS ;
+
+
+(* <LHS-wtest> = <"test"> TEST <','>* <"facts"> R-FACTS  ;
 <LHS-notest> = R-FACTS ;
 
 <R-FACTS> = (R-FACT | R-AND-FACTS | R-OR-FACTS | R-NOT-FACTS | R-PREAFF-FACTS)  ;
@@ -155,7 +160,7 @@ R-AND-FACTS = R-FACT (<"and"> (R-FACT | <"("> R-FACTS <")">))+  ;
 R-OR-FACTS = R-FACT (<"or"> (R-FACT | <"("> R-FACTS <")">))+  ;
 
 R-NOT-FACTS = <NEG> R-FACTS;
-R-PREAFF-FACTS = <PREAFF> R-FACTS;
+R-PREAFF-FACTS = <PREAFF> R-FACTS; *)
 
 
 (*QUERY*)
