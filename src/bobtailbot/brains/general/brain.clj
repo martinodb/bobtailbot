@@ -350,9 +350,7 @@
    g-transforms-base
    {:ANON-RULE identity
     :ANON-RULE-notest (fn [fact & facts]
-                        (let [;rhs-fact fact ;(:if-rhs fact)
-                              rhs-fact (fact :if-rhs)
-                              ;lhs-facts facts ;(map :if-lhs facts)
+                        (let [rhs-fact (fact :if-rhs)
                               lhs-facts (map #(% :if-lhs) facts)
                               ]
                           {:ns-name (symbol this-ns)
