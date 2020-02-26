@@ -51,7 +51,13 @@ NONTRIP-FACT = "just testing nontrip fact" ;
 <NEG-TRIP-FACT> = (PRENEG-TRIP-FACT | EMBNEG-TRIP-FACT) ;
 
 
-TRIP-FACT-IND2 = T-SUBJECT T-VERB T-OBJECT ;
+TRIP-FACT-IND2 = T-SUBJECT T-VP ;
+<T-VP> = T-VERB T-OBJECT;
+
+(* TRIP-FACT-IND2 = T-SUBJECT T-VERB T-OBJECT ; *)
+
+
+
 
 <TRIP-FACT-IC> = TRIP-FACT-ISA ;
 TRIP-FACT-ISA = T-SUBJECT <T-ISA> T-OBJECT-CLASS ;
@@ -85,7 +91,7 @@ EMBNEG-T-VCOP-IC = (<"am not">|<"isn't">|<"is not">|<"aren't">|<"are not">)(<"a"
 <EMBNEG-T-Vvar> = DOESNT <"do">  VAR <"to">;
 
 <T-Vconj> = VtraPres3 ;
-<T-Vvar> = (VAR | <"does"> VAR <"to">) ;
+<T-Vvar> = (VAR | DO-Vt-pr3 VAR <"to">) ;
 
 <T-SUBJECT> = (T-NP | VAR);
 <T-VERB> = (T-Vconj | T-Vvar);
@@ -98,7 +104,7 @@ T-SUBJECT-CLASS = T-N ;
 T-OBJECT-CLASS = T-N;
 
 <T-Vconj> = VtraPres3 ;
-<T-Vvar> = (VAR | <"does"> VAR <"to">) ;
+<T-Vvar> = (VAR | DO-Vt-pr3 VAR <"to">) ;
 
 
 <T-NP> = (INDNAME | T-DET-P) ;
@@ -110,18 +116,11 @@ EXVAR = #"\![A-Za-z][A-Za-z0-9_-]*";
 UNVAR = #"\?[A-Za-z][A-Za-z0-9_-]*";
 
 
-
-
-
 AND-FACTS = FACT (<"and"> (FACT | <"("> FACTS <")">))+  ;
 OR-FACTS = FACT (<"or"> (FACT | <"("> FACTS <")">))+  ;
 
 NOT-FACTS = <NEG> FACTS;
 PREAFF-FACTS = <PREAFF> FACTS;
-
-
-
-
 
 
 
@@ -179,20 +178,32 @@ NEG-YNQUESTION-wtest = <Q-NEG> QLHS-wtest <"?">+ <';'>*;
 NEG-YNQUESTION-notest = <Q-NEG> QLHS-notest <"?">+ <';'>* ;
 
 (*T-DOES-QUESTION*)
-T-DOES-QUESTION = <"does"> D-TRIP-FACT-IND2 <"?">+ ;
-D-TRIP-FACT-IND2 = T-SUBJECT VtraInf T-OBJECT ;
+T-DOES-QUESTION = D-TRIP-FACT-IND2  ;
+D-TRIP-FACT-IND2 = T-DOES-SV T-OBJECT <"?">+;
+<T-DOES-SV> = DOES T-SUBJECT VtraInf;
+
+
+(* T-DOES-QUESTION = DO-aux-pr3 D-TRIP-FACT-IND2 <"?">+ ;
+D-TRIP-FACT-IND2 = T-SUBJECT VtraInf T-OBJECT ; *)
+
 
 (*NEG-T-DOES-QUESTION*)
-NEG-T-DOES-QUESTION = DOESNT NEG-D-TRIP-FACT-IND2 <"?">+ ;
-NEG-D-TRIP-FACT-IND2 = T-SUBJECT VtraInf T-OBJECT ;
+NEG-T-DOES-QUESTION = NEG-D-TRIP-FACT-IND2   ;
+NEG-D-TRIP-FACT-IND2 = T-DOESNT-SV T-OBJECT <"?">+;
+<T-DOESNT-SV> = DOESNT T-SUBJECT VtraInf;
+
+(* NEG-T-DOES-QUESTION = DOESNT NEG-D-TRIP-FACT-IND2 <"?">+ ;
+NEG-D-TRIP-FACT-IND2 = T-SUBJECT VtraInf T-OBJECT ; *)
+
 
 (*T-WHO-QUESTION*)
-T-WHO-QUESTION = <"who"> WHO-TRIP-FACT-IND2 <"?">+ ;
-WHO-TRIP-FACT-IND2 = VtraPres3 T-NP ;
+T-WHO-QUESTION =  WHO-TRIP-FACT-IND2  ;
+WHO-TRIP-FACT-IND2 = <"who"> T-VP <"?">+;
+
 
 (*T-WHOM-QUESTION*)
-T-WHOM-QUESTION = (<"who"> | <"whom">) <"does"> WHOM-TRIP-FACT-IND2 <"?">+ ;
-WHOM-TRIP-FACT-IND2 = T-NP VtraInf ;
+T-WHOM-QUESTION =  WHOM-TRIP-FACT-IND2 ;
+WHOM-TRIP-FACT-IND2 = (<"who"> | <"whom">) T-DOES-SV <"?">+;
 
 
 
@@ -296,9 +307,18 @@ NegVtraConj = (NegVtraPres) ;
 <NegVtraPresNon3> = DONT VtraInf ;
 
 
-<DOESNT> = (<"doesn't"> | <"does not">);
-<DONT> = (<"don't"> | <"do not">) ;
+<DO-Vt-pr3> = <"does">;
 
+
+<DOES> = DO-aux-pr3;
+<DO-aux-pr3> = <"does">;
+
+
+<DOESNT> = DO-aux-neg-pr3;
+<DO-aux-neg-pr3> = (<"doesn't"> | <"does not">);
+
+<DONT> = DO-aux-neg-prNon3 ;
+<DO-aux-neg-prNon3> = (<"doesn't"> | <"does not">);
 
 
 
