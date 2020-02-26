@@ -150,11 +150,10 @@ QUERY = (QUERY-wtest | QUERY-notest);
 
 QUERY-notest = Q-BODY-notest;
 <Q-BODY-notest> = <"match"> QLHS-notest <';'>* ;
-<QLHS-notest> = Q-FACTS ;
+
 
 QUERY-wtest = Q-BODY-wtest;
 <Q-BODY-wtest> = <"match"> QLHS-wtest <';'>* ;
-<QLHS-wtest> = <"test"> TEST <','>* <"facts"> Q-FACTS  ;
 
 TEST = (TSEXPR)+ ;
 TSEXPR = TS-OPERATOR (TS-ARG)+ ;
@@ -163,6 +162,14 @@ TSEXPR = TS-OPERATOR (TS-ARG)+ ;
 FUN-TSEXPR = TFUN-HEAD (TFUN-ARG)* ;
 <TFUN-HEAD> = STRING ; (* CAREFUL!! *)
 <TFUN-ARG> = TS-ARG ;
+
+<QLHS-notest> = FACTS ;
+<QLHS-wtest> = <"test"> TEST <','>* <"facts"> FACTS  ;
+
+
+
+(* <QLHS-notest> = Q-FACTS ;
+<QLHS-wtest> = <"test"> TEST <','>* <"facts"> Q-FACTS  ;
 
 <Q-FACTS> = (Q-FACT | Q-AND-FACTS | Q-OR-FACTS | Q-NOT-FACTS | Q-PREAFF-FACTS)  ;
 
@@ -184,7 +191,7 @@ Q-AND-FACTS = Q-FACT (<"and"> (Q-FACT | <"("> Q-FACTS <")">))+  ;
 Q-OR-FACTS = Q-FACT (<"or"> (Q-FACT | <"("> Q-FACTS <")">))+  ;
 
 Q-NOT-FACTS = <NEG> Q-FACTS;
-Q-PREAFF-FACTS = <PREAFF>+ Q-FACTS;
+Q-PREAFF-FACTS = <PREAFF>+ Q-FACTS; *)
 
 
 (*YNQUESTION*)

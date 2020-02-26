@@ -351,15 +351,13 @@
    {:ANON-RULE identity
     :ANON-RULE-notest (fn [fact & facts]
                         (let [rhs-fact (fact :if-rhs)
-                              lhs-facts (map #(% :if-lhs) facts)
-                              ]
+                              lhs-facts (map #(% :if-lhs) facts)]
                           {:ns-name (symbol this-ns)
                            :name (str ns-prefix (gensym "my-anon-rule"))
                            :lhs lhs-facts
                            :rhs `(insert! ~rhs-fact)}))
 
-    :FACTS identity
-    :ANON-FACT identity
+
     :TRIP-FACT-IND2 (fn [t-subj t-verb t-obj]
                       (fn [key]
                         (key {:if-lhs {:type Triple
@@ -385,6 +383,8 @@
                                                               (list '= t-verb-pres3 'verb)
                                                               (list '= t-obj 'obj)]}
                                        :if-rhs `(->Triple "my-fact" false ~t-subj ~t-verb-pres3 ~t-obj)}))))
+    :FACTS identity
+    :ANON-FACT identity
     :NOT-FACTS  negate
     :AND-FACTS vector
     :PREAFF-FACTS identity}))
@@ -404,38 +404,39 @@
 (def g-transforms-QUERY  "Queries"
   (conj
    g-transforms-base
-   {:Q-TRIP-FACT-IND2 (fn [t-subj t-verb t-obj]
-                        {:type Triple
-                         :constraints [(list '= true 'affirm)
-                                       (list '= t-subj 'subj)
-                                       (list '= t-verb 'verb)
-                                       (list '= t-obj 'obj)]
-                         :fact-binding :?#thing})
+   {:TRIP-FACT-IND2 (fn [t-subj t-verb t-obj]
+                      {:type Triple
+                       :constraints [(list '= true 'affirm)
+                                     (list '= t-subj 'subj)
+                                     (list '= t-verb 'verb)
+                                     (list '= t-obj 'obj)]
+                       :fact-binding :?#thing})
 
-    :PRENEG-Q-TRIP-FACT-IND2 (fn [t-subj t-verb t-obj]
+    :PRENEG-TRIP-FACT-IND2 (fn [t-subj t-verb t-obj]
+                             {:type Triple
+                              :constraints [(list '= false 'affirm)
+                                            (list '= t-subj 'subj)
+                                            (list '= t-verb 'verb)
+                                            (list '= t-obj 'obj)]
+                              :fact-binding :?#thing})
+
+    :EMBNEG-TRIP-FACT-IND2 (fn [t-subj t-verb-inf t-obj]
+                             (let [t-verb-pres3 (conjugate-pres3 t-verb-inf)]
                                {:type Triple
                                 :constraints [(list '= false 'affirm)
                                               (list '= t-subj 'subj)
-                                              (list '= t-verb 'verb)
+                                              (list '= t-verb-pres3 'verb)
                                               (list '= t-obj 'obj)]
-                                :fact-binding :?#thing})
-
-    :EMBNEG-Q-TRIP-FACT-IND2 (fn [t-subj t-verb-inf t-obj]
-                               (let [t-verb-pres3 (conjugate-pres3 t-verb-inf)]
-                                 {:type Triple
-                                  :constraints [(list '= false 'affirm)
-                                                (list '= t-subj 'subj)
-                                                (list '= t-verb-pres3 'verb)
-                                                (list '= t-obj 'obj)]
-                                  :fact-binding :?#thing}))
-    :Q-NOT-FACTS   negate
-    :Q-PREAFF-FACTS identity
+                                :fact-binding :?#thing}))
+    :FACTS identity
+    :ANON-FACT identity
+    :NOT-FACTS   negate
+    :PREAFF-FACTS identity
     :QUERY identity
     :QUERY-notest  (fn [& facts]
-                        {:name "anon-query"
-                         :lhs facts
-                         :params #{}})
-    }))
+                     {:name "anon-query"
+                      :lhs facts
+                      :params #{}})}))
 
 (def g-transforms-YNQUESTION  "YES/NO questions"
   (conj
