@@ -612,17 +612,33 @@
 ;bobtailbot.brains.general.brain=> symmetry-likes
 ; {:ns-name bobtailbot.brains.general.brain, :lhs [{:accumulator (clara.rules.accumulators/distinct), :from {:type bobtailbot.brains.general.brain.Triple, :constraints [(= true affirm) (= ?y subj) (= "likes" verb) (= ?x obj)]}, :result-binding :?thing}], :rhs (do (insert! (->Triple "my symmetric fact" true ?x "likes" ?y))), :name "bobtailbot.brains.general.brain/symmetry-likes"}
 
+(defn mk-session-ifa-fru "make session, insert facts, fire rules" [rules facts]
+  (-> (mk-session
+       (symbol this-ns)
+       rules)
+      (insert-all facts)
+      (fire-rules))
+  )
 
-(def g-default-session 
-  (-> (mk-session 
-       (symbol this-ns) 
-       ;;(g-load-user-rules   (get-g-rule-list))
-       @g-rules-tr-atom
-       )
-      ( insert-all @g-fact-set-atom)
-      (fire-rules)))
+(def g-default-session (mk-session-ifa-fru @g-rules-tr-atom @g-fact-set-atom))
 
-(def g-curr-session (ref g-default-session))
+
+
+(def g-curr-session-atom (atom g-default-session))
+
+
+
+(defn reload-curr-session "reload current session"
+  ([rules facts]
+   (let [new-session (mk-session-ifa-fru rules facts)]
+     (reset! g-curr-session-atom new-session)))
+  ([facts]
+   (let [new-session (-> @g-curr-session-atom
+                         (insert-all facts)
+                         (fire-rules))]
+     (reset! g-curr-session-atom new-session))))
+
+
 
 ;;https://groups.google.com/d/msg/clara-rules/CFvJQGwelo0/NYBMmV9hFAAJ
 #_("Will's answer is correct. You'll find the related API documentation here: http://www.clara-rules.org/apidocs/0.12.0/clojure/clara.rules.html#var-retract
@@ -655,18 +671,23 @@ Dynamic rules is something I wouldn't mind adding to Clara, although that comes 
 
 (def ans-nobody "Nobody.")
 
+
+
+
+
+
+
+
+
+
+
 ;; using (timbre/spy) for debugging
 (defn g-respond-sync-yes-dunno-ptreetr "respond to yes/no question, negated yes/no question, does-question or negated does-question, with either 'yes' or 'dunno'. Question must be in ptreetr form (parsed and transformed)"
   [ptreetr]
   (try
     (let [anon-query (timbre/spy (first ptreetr))
           new-tr-rules (timbre/spy (conj @g-rules-tr-atom anon-query))
-          new-session   (-> (mk-session
-                             (symbol this-ns)
-                             new-tr-rules
-                             )
-                            (insert-all @g-fact-set-atom)
-                            (fire-rules))
+          new-session   (mk-session-ifa-fru new-tr-rules @g-fact-set-atom)
           raw-query-result  (timbre/spy (query new-session anon-query))
           raw-query-result-str (timbre/spy (apply str raw-query-result))]
 
@@ -723,14 +744,10 @@ Dynamic rules is something I wouldn't mind adding to Clara, although that comes 
           new-fact-set (timbre/spy (reduce conj @g-fact-set-atom ev-ptreetr))
           ]
       (timbre/spy (set-g-fact-set new-fact-set))
+      (reload-curr-session @g-fact-set-atom)
+      ans-okgotit
       
-      )
-      (let [new-session  (timbre/spy (-> @g-curr-session
-                                         (insert-all @g-fact-set-atom)
-                                         (fire-rules))) ]
-        (timbre/spy  (dosync (ref-set g-curr-session new-session) ans-okgotit)
-                      )
-        )        
+      )        
     (catch Exception e  (timbre/info (.getMessage e)) ans-invalid-fact)))
 
 (defn g-respond-sync-who-ptree "answer WHO-question, in ptree form (parsed)"
@@ -739,11 +756,7 @@ Dynamic rules is something I wouldn't mind adding to Clara, although that comes 
     (let [ptreetr (timbre/spy (insta/transform g-transforms-T-WHO-QUESTION ptree))
           anon-query (timbre/spy (first ptreetr))
           new-tr-rules (timbre/spy (conj @g-rules-tr-atom anon-query))
-          new-session   (-> (mk-session
-                             (symbol this-ns)
-                             new-tr-rules)
-                            (insert-all @g-fact-set-atom)
-                            (fire-rules))
+          new-session   (mk-session-ifa-fru new-tr-rules @g-fact-set-atom)
           raw-query-result  (timbre/spy (query new-session anon-query))
           raw-query-result-set (timbre/spy (into #{} raw-query-result))
           who (timbre/spy (get-who raw-query-result-set) )
@@ -762,11 +775,7 @@ Dynamic rules is something I wouldn't mind adding to Clara, although that comes 
     (let [ptreetr (timbre/spy (insta/transform g-transforms-T-WHOM-QUESTION ptree))
           anon-query (timbre/spy  (first ptreetr))
           new-tr-rules (timbre/spy (conj @g-rules-tr-atom anon-query))
-          new-session   (-> (mk-session
-                             (symbol this-ns)
-                             new-tr-rules)
-                            (insert-all @g-fact-set-atom)
-                            (fire-rules))
+          new-session   (mk-session-ifa-fru new-tr-rules @g-fact-set-atom)
           raw-query-result  (timbre/spy (query new-session anon-query))
           raw-query-result-set (timbre/spy (into #{} raw-query-result))
           whom  (timbre/spy (get-who  raw-query-result-set))
@@ -786,9 +795,7 @@ Dynamic rules is something I wouldn't mind adding to Clara, although that comes 
           ptreetr (timbre/spy (insta/transform g-transforms-QUERY ptree))
           anon-query (timbre/spy  (first ptreetr))
           new-tr-rules (timbre/spy (conj @g-rules-tr-atom anon-query))
-          new-session   (-> (mk-session (symbol this-ns) new-tr-rules)
-                            (insert-all @g-fact-set-atom)
-                            (fire-rules))
+          new-session   (mk-session-ifa-fru new-tr-rules @g-fact-set-atom)
           raw-query-result  (query new-session anon-query)
           raw-query-result-set (timbre/spy (into #{} raw-query-result))
 
@@ -803,8 +810,7 @@ Dynamic rules is something I wouldn't mind adding to Clara, although that comes 
          intype (first (first parsetree))]
     (cond
       (= intype :FACTS)
-      (let [ckst-ptree-r (g-respond-sync-ckst-ptree parsetree)
-            ]
+      (let [ckst-ptree-r (g-respond-sync-ckst-ptree parsetree)]
         (cond
           (= ckst-ptree-r ans-yes) ans-ikr
           (= ckst-ptree-r ans-no)  ans-imp
@@ -823,11 +829,7 @@ Dynamic rules is something I wouldn't mind adding to Clara, although that comes 
       (= intype :ANON-RULE)
       (timbre/spy (do (->>  (str (get-g-rule-list) text ";")
                             (set-g-rule-list))
-                      (let [new-session
-                            (-> (mk-session (symbol this-ns) @g-rules-tr-atom)
-                                (insert-all @g-fact-set-atom)
-                                (fire-rules))]
-                        (dosync (ref-set g-curr-session new-session)))
+                      (reload-curr-session @g-rules-tr-atom @g-fact-set-atom)
                       ans-ok-rule)) 
 
       :else (do
@@ -870,17 +872,11 @@ Dynamic rules is something I wouldn't mind adding to Clara, although that comes 
  (timbre/info "text: " text)
  (cond
     (= text "forget all facts") (do   (set-g-fact-set g-default-fact-set   )
-                                      (let [new-session (-> @g-curr-session 
-                                                            (insert-all @g-fact-set-atom)
-                                                            (fire-rules))]
-                                        (dosync (ref-set g-curr-session new-session)) )
+                                      (reload-curr-session @g-fact-set-atom)
                                       "OK, all facts forgotten.")
    (= text "forget all rules") (do (timbre/info "forgetting all rules..")
                                    (set-g-rule-list g-default-rule-list )
-                                   (let [new-session (-> (mk-session (symbol this-ns) @g-rules-tr-atom )
-                                                         ( insert-all @g-fact-set-atom)
-                                                          (fire-rules))]
-                                       (dosync (ref-set g-curr-session new-session))  )
+                                   (reload-curr-session @g-rules-tr-atom @g-fact-set-atom)
                                    "OK, all rules forgotten."  )
    
    (re-find (re-pattern "(?i)&caught") text) (str "There was a problem: " text)
