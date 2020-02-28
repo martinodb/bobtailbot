@@ -11,7 +11,7 @@
    [clara.rules :refer :all]
    
             ;; just for development
-   [clara.tools.inspect :as cti :refer [inspect]]
+   [clara.tools.inspect :as cti :refer [inspect explain-activations]]
             ;; /just for development
    
    
