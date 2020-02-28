@@ -670,6 +670,7 @@ Dynamic rules is something I wouldn't mind adding to Clara, although that comes 
 (def ans-contradiction "There's a contradiction! The answer to that question is both yes and no.")
 
 (def ans-nobody "Nobody.")
+(def ans-no-explanation "There's nothing to explain.")
 
 
 
@@ -871,9 +872,9 @@ Dynamic rules is something I wouldn't mind adding to Clara, although that comes 
           ]
  (timbre/info "text: " text)
  (cond
-    (= text "forget all facts") (do   (set-g-fact-set g-default-fact-set   )
-                                      (reload-curr-session @g-fact-set-atom)
-                                      "OK, all facts forgotten.")
+   (= text "forget all facts") (do   (set-g-fact-set g-default-fact-set   )
+                                     (reload-curr-session @g-fact-set-atom)
+                                     "OK, all facts forgotten.")
    (= text "forget all rules") (do (timbre/info "forgetting all rules..")
                                    (set-g-rule-list g-default-rule-list )
                                    (reload-curr-session @g-rules-tr-atom @g-fact-set-atom)
@@ -881,11 +882,14 @@ Dynamic rules is something I wouldn't mind adding to Clara, although that comes 
    
    (re-find (re-pattern "(?i)&caught") text) (str "There was a problem: " text)
    (re-find (re-pattern "(?i)^\\s*(:?hello|hi|hey|howdy|what's\\s+up|how\\s+are\\s+you)") text) "Hello! I understand simple sentences of the form SVO, such as 'Anna likes Bob Smith', and rules like '?x likes ?y when ?y likes ?x'. Give it a try!"
+   (re-find (re-pattern "(?i)^\\s*(:?why(\\s|\\?))") text)  (if-let [expl (-> @g-curr-session-atom (explain-activations) (with-out-str) (string/replace (re-pattern "(?i)\\r\\n|\\n|\\r") " " )  (not-empty))] expl ans-no-explanation) 
    (:add-voc-type (edn/read-string text))  (add-voc  text)
    (empty? ukw) (g-respond-sync text)
    :else (str "I don't know these words: " (string/join ", " ukw))
    )
 ))
+
+
 
 ;;; example, typing this on irc:  {:add-voc-type :verb , :content {:inf \"admire\", :past \"admired\", :pp \"admired\", :er \"admirer\", :ing \"admiring\", :pres3 \"admires\"} }
 ;;; Becomes this in verb_set.edn: {:inf "admire", :past "admired", :pp "admired", :er "admirer", :ing "admiring", :pres3 "admires"}
