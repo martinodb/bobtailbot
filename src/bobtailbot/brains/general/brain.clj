@@ -284,16 +284,21 @@
    :TS-OPERATOR g-ts-operators
 
 
-   ; :NOT-FACTS  negate
-   ; :PREAFF-FACTS identity
-   ;:AND-FACTS vector
-
+   ; :NOT-FACT  negate
+   ; :PREAFF-FACT identity
+   ;:AND-FACT vector
+   
+   
+   :ATFACT identity
+   :MOLFACT identity
+   :ATFACT2 identity
+   
    })
 
-(def g-transforms-mkst  "treats :FACTS normally, as a statement"
+(def g-transforms-mkst  "treats :FACT normally, as a statement"
   (conj
    g-transforms-base
-   {:FACTS identity
+   {:FACT identity
     :ANON-FACT identity
     :TRIP-FACT-IND2 (fn [t-subj t-verb t-obj]
                       `(->Triple "my-fact" true ~t-subj ~t-verb ~t-obj))
@@ -302,18 +307,26 @@
     :EMBNEG-TRIP-FACT-IND2 (fn [t-subj t-verb-inf t-obj]
                              (let [t-verb-pres3 (conjugate-pres3 t-verb-inf)]
                                `(->Triple "my-fact" false ~t-subj ~t-verb-pres3 ~t-obj)))
-    :NOT-FACTS  negate
-    :AND-FACTS vector
-    :PREAFF-FACTS identity}
+    :NOT-FACT  negate
+    :AND-FACT vector
+    :PREAFF-FACT identity
+    
+    
+    :ATFACT vector ;; OVERRIDE! But now remember the extra nesting.
+
+    
+    
+    
+    }
    ))
 
-(def g-transforms-ckst "treats :FACTS as a yn-question, to check statements"
+(def g-transforms-ckst "treats :FACT as a yn-question, to check statements"
   (conj
    g-transforms-base
-   {:FACTS identity
-    :ANON-FACT (fn [& facts]
+   {:FACT identity
+    :ANON-FACT (fn [ fact-vec]
                  {:name "anon-query"
-                  :lhs facts
+                  :lhs fact-vec
                   :params #{}})
     :TRIP-FACT-IND2 (fn [t-subj t-verb t-obj]
                       {:type Triple
@@ -337,9 +350,13 @@
                                               (list '= t-verb-pres3 'verb)
                                               (list '= t-obj 'obj)]
                                 :fact-binding :?#thing}))
-    :NOT-FACTS  negate
-    :AND-FACTS vector
-    :PREAFF-FACTS identity
+    :NOT-FACT  negate
+    :AND-FACT vector
+    :PREAFF-FACT identity
+    
+    :ATFACT vector ;; OVERRIDE!
+    
+    
     }))
 
 
@@ -349,9 +366,9 @@
   (conj
    g-transforms-base
    {:ANON-RULE identity
-    :ANON-RULE-notest (fn [fact & facts]
-                        (let [rhs-fact (fact :if-rhs)
-                              lhs-facts (map #(% :if-lhs) facts)]
+    :ANON-RULE-notest (fn [result-fact-vec  cond-fact-vec]
+                        (let [rhs-fact (:if-rhs (first result-fact-vec))
+                              lhs-facts (map :if-lhs cond-fact-vec)]
                           {:ns-name (symbol this-ns)
                            :name (str ns-prefix (gensym "my-anon-rule"))
                            :lhs lhs-facts
@@ -359,35 +376,36 @@
 
 
     :TRIP-FACT-IND2 (fn [t-subj t-verb t-obj]
-                      (fn [key]
-                        (key {:if-lhs {:type Triple
-                                       :constraints [(list '= true 'affirm)
+                      {:if-lhs {:type Triple
+                                :constraints [(list '= true 'affirm)
+                                              (list '= t-subj 'subj)
+                                              (list '= t-verb 'verb)
+                                              (list '= t-obj 'obj)]}
+                       :if-rhs `(->Triple "my-fact" true ~t-subj ~t-verb ~t-obj)})
+    :PRENEG-TRIP-FACT-IND2 (fn [t-subj t-verb t-obj]
+                             {:if-lhs {:type Triple
+                                       :constraints [(list '= false 'affirm)
                                                      (list '= t-subj 'subj)
                                                      (list '= t-verb 'verb)
                                                      (list '= t-obj 'obj)]}
-                              :if-rhs `(->Triple "my-fact" true ~t-subj ~t-verb ~t-obj)})))
-    :PRENEG-TRIP-FACT-IND2 (fn [t-subj t-verb t-obj]
-                             (fn [key]
-                               (key {:if-lhs {:type Triple
-                                              :constraints [(list '= false 'affirm)
-                                                            (list '= t-subj 'subj)
-                                                            (list '= t-verb 'verb)
-                                                            (list '= t-obj 'obj)]}
-                                     :if-rhs `(->Triple "my-fact" false ~t-subj ~t-verb ~t-obj)})))
+                              :if-rhs `(->Triple "my-fact" false ~t-subj ~t-verb ~t-obj)})
     :EMBNEG-TRIP-FACT-IND2 (fn [t-subj t-verb-inf t-obj]
                              (let [t-verb-pres3 (conjugate-pres3 ~t-verb-inf)]
-                               (fn [key]
-                                 (key {:if-lhs {:type Triple
-                                                :constraints [(list '= false 'affirm)
-                                                              (list '= t-subj 'subj)
-                                                              (list '= t-verb-pres3 'verb)
-                                                              (list '= t-obj 'obj)]}
-                                       :if-rhs `(->Triple "my-fact" false ~t-subj ~t-verb-pres3 ~t-obj)}))))
-    :FACTS identity
+                               {:if-lhs {:type Triple
+                                         :constraints [(list '= false 'affirm)
+                                                       (list '= t-subj 'subj)
+                                                       (list '= t-verb-pres3 'verb)
+                                                       (list '= t-obj 'obj)]}
+                                :if-rhs `(->Triple "my-fact" false ~t-subj ~t-verb-pres3 ~t-obj)}))
+    :FACT identity
     :ANON-FACT identity
-    :NOT-FACTS  negate
-    :AND-FACTS vector
-    :PREAFF-FACTS identity}))
+    :NOT-FACT  negate
+    ;:AND-FACT (fn [& facts] (into [] (conj  facts :and)))
+    :AND-FACT (fn [& facts] (into [] facts ))
+    :ATFACT vector ;; OVERRIDE!
+    :ATFACT2 identity
+    
+    :PREAFF-FACT identity}))
 
 (def g-transforms-NQUERY  "Named queries"
   (conj
@@ -428,14 +446,22 @@
                                               (list '= t-verb-pres3 'verb)
                                               (list '= t-obj 'obj)]
                                 :fact-binding :?#thing}))
-    :FACTS identity
+    :FACT identity
     :ANON-FACT identity
-    :NOT-FACTS   negate
-    :PREAFF-FACTS identity
+    :NOT-FACT   negate
+    :PREAFF-FACT identity
+
+    
+    :AND-FACT (fn [& facts] (into [] facts))
+    :ATFACT vector ;; OVERRIDE!
+    :ATFACT2 identity
+    
+    
+    
     :QUERY identity
-    :QUERY-notest  (fn [& facts]
+    :QUERY-notest  (fn [fact-vec]
                      {:name "anon-query"
-                      :lhs facts
+                      :lhs fact-vec
                       :params #{}})}))
 
 (def g-transforms-YNQUESTION  "YES/NO questions"
@@ -620,7 +646,9 @@
       (fire-rules))
   )
 
-(def g-default-session (mk-session-ifa-fru @g-rules-tr-atom @g-fact-set-atom))
+(timbre/info "about to define g-default-session ... @g-rules-tr-atom: " (pr-str @g-rules-tr-atom) " , " "@g-fact-set-atom: " @g-fact-set-atom (def g-default-session (mk-session-ifa-fru @g-rules-tr-atom @g-fact-set-atom)))
+
+
 
 
 
@@ -690,9 +718,11 @@ Dynamic rules is something I wouldn't mind adding to Clara, although that comes 
           new-tr-rules (timbre/spy (conj @g-rules-tr-atom anon-query))
           new-session   (mk-session-ifa-fru new-tr-rules @g-fact-set-atom)
           raw-query-result  (timbre/spy (query new-session anon-query))
-          raw-query-result-str (timbre/spy (apply str raw-query-result))]
+          ;raw-query-result-str (timbre/spy (apply str raw-query-result))
+          ]
 
-      (if (= raw-query-result-str "")
+      (timbre/info "calling g-respond-sync-yes-dunno-ptreetr " "raw-query-result: " (pr-str raw-query-result) )
+      (if (empty? (first raw-query-result) )
         ans-dunno
         ans-yes))
     (catch Exception e  (timbre/info (.getMessage e)) ans-invalid-query)))
@@ -740,12 +770,12 @@ Dynamic rules is something I wouldn't mind adding to Clara, although that comes 
   [ptree]
   (try
     
-    (let [ptreetr (insta/transform g-transforms-mkst ptree)
+    (let [ptreetr (first (insta/transform g-transforms-mkst ptree))
           ev-ptreetr (timbre/spy (map eval ptreetr))
           new-fact-set (timbre/spy (reduce conj @g-fact-set-atom ev-ptreetr))
           ]
       (timbre/spy (set-g-fact-set new-fact-set))
-      (reload-curr-session @g-fact-set-atom)
+      (timbre/spy (reload-curr-session @g-fact-set-atom))
       ans-okgotit
       
       )        
@@ -810,7 +840,7 @@ Dynamic rules is something I wouldn't mind adding to Clara, although that comes 
   (let  [parsetree  ((g-grammar) text)
          intype (first (first parsetree))]
     (cond
-      (= intype :FACTS)
+      (= intype :FACT)
       (let [ckst-ptree-r (g-respond-sync-ckst-ptree parsetree)]
         (cond
           (= ckst-ptree-r ans-yes) ans-ikr

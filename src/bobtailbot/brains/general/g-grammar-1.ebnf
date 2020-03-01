@@ -2,16 +2,16 @@
 
 (* Careful with the angle brackets. On the left, the node type is omitted from the ptree. On the right, the pattern is omitted.
 If you prefer not to omit the node type, instead of using the angle brackets on the left you can simply equate the node type to identity in the transforms map.
-For instance, for the node type "FACTS", instead of doing:
-<FACTS> = (FACT | AND-FACTS | ...)  ;
+For instance, for the node type "FACT", instead of doing:
+<FACT> = (.. | ...)  ;
 here, do:
-FACTS = (FACT | AND-FACTS | ...)  ; 
+FACT = (..| ...)  ; 
 here, and then in the maps g-transforms-mkst and g-transforms-ckst in brain.clj, do:
-:FACTS identity
+:FACT identity
 
 *)
 
-<SENTENCE> =   (ADD-VOCAB | PROD-LIST | NQUERY | FACTS) <";">* ;
+<SENTENCE> =   (ADD-VOCAB | PROD-LIST | NQUERY | FACT | DEF) <";">* ;
 <PROD-LIST> = PROD (<';'>+ PROD)* ;
 <PROD> = (RULE | QUERY | QUESTION) <';'>* ;
 <QUESTION> = ( YNQUESTION | NEG-YNQUESTION | T-DOES-QUESTION | NEG-T-DOES-QUESTION |T-WHO-QUESTION | T-WHOM-QUESTION);
@@ -27,22 +27,47 @@ VOC-MAP = "{" <whitespace>*  (VMkey <whitespace>+ VMval (<whitespace> | <",">)*)
 <VMval> = #"[\"\']?[A-Za-z0-9\-_]+[\"\']?" ;
 
 
+(*DEF*)
+<DEF> = (DEF-FACT | DEF-QUERY);
+DEF-FACT = <"define"> (<"asserted">|<"unasserted">)? <"fact"> NAME <":"> FACT-BODY ;
+DEF-QUERY = <"define">  <"query"> NAME <":"> QUERY ;
+
 (*NQUERY*)
 NQUERY = <"query"> NAME ;
 
 
-(* FACTS *)
+(* FACT *)
 NEG = (<"it's"> | <"it is">) (<"false"> | (<"not"> (<"the case">)?)) <"that">  ;
 PREAFF = (<"it's"> | <"it is">) (<"true"> | <"the case">) <"that">  ;
 
-FACTS = (FACT | AND-FACTS | OR-FACTS | NOT-FACTS | PREAFF-FACTS)  ;
 
-<FACT> = (ANON-FACT | NAMED-FACT) ;
+
+FACT = (ATFACT | MOLFACT);
+
+ATFACT = (ANON-FACT | INLDEF-FACT | NFACT) ;
+ATFACT2 = (ANON-FACT | INLDEF-FACT | NFACT) ;
+
 
 ANON-FACT = FACT-BODY ;
-NAMED-FACT = <"fact"> NAME <":">? FACT-BODY ;
+INLDEF-FACT = <"inline define">  (<"asserted">|<"unasserted">)? <"fact"> NAME <":">? FACT-BODY ;
+NFACT = <"fact"> NAME ;
 
-<FACT-BODY> = (TRIP-FACT | NONTRIP-FACT) ;
+<FACT-BODY> = (TRIP-FACT | NONTRIP-FACT);
+
+
+MOLFACT = ( AND-FACT | OR-FACT | NOT-FACT | PREAFF-FACT)  ;
+
+AND-FACT = ATFACT2 (<","> <ATFACT2>)* <"and"> ATFACT2  ;
+OR-FACT = ATFACT2 (<","> <ATFACT2>)* <"or"> ATFACT2  ;
+
+NOT-FACT = <NEG> ATFACT2;
+PREAFF-FACT = <PREAFF> ATFACT2;
+
+
+
+
+
+
 
 <TRIP-FACT> = (AFF-TRIP-FACT | NEG-TRIP-FACT) ;
 NONTRIP-FACT = "just testing nontrip fact" ;
@@ -66,7 +91,7 @@ TRIP-FACT-EVERYISA = <"every"> T-SUBJECT-CLASS <T-ISA> T-OBJECT-CLASS ;
 <EMBNEG-TRIP-FACT> = (EMBNEG-TRIP-FACT-IND2 | EMBNEG-TRIP-FACT-IC); (* CLASS2 would be confusing*)
 
 
-PRENEG-TRIP-FACT-IND2 = <NEG> T-SUBJECT T-VERB T-OBJECT ;
+PRENEG-TRIP-FACT-IND2 = <NEG> T-SUBJECT T-VP ;
 
 <PRENEG-TRIP-FACT-IC> = PRENEG-TRIP-FACT-ISA ;
 PRENEG-TRIP-FACT-ISA = <NEG> T-SUBJECT <T-ISA> T-OBJECT-CLASS ;
@@ -75,7 +100,8 @@ PRENEG-TRIP-FACT-ISA = <NEG> T-SUBJECT <T-ISA> T-OBJECT-CLASS ;
 PRENEG-TRIP-FACT-EVERYISA = <NEG> <"every"> T-SUBJECT-CLASS <T-ISA> T-OBJECT-CLASS ;
 
 
-EMBNEG-TRIP-FACT-IND2 = T-SUBJECT EMBNEG-T-VERB T-OBJECT ;
+EMBNEG-TRIP-FACT-IND2 = T-SUBJECT EMBNEG-T-VP ;
+<EMBNEG-T-VP> = EMBNEG-T-VERB T-OBJECT;
 
 <EMBNEG-TRIP-FACT-IC> = EMBNEG-TRIP-FACT-ISA ;
 EMBNEG-TRIP-FACT-ISA = T-SUBJECT <EMBNEG-T-VCOP-IC> T-OBJECT-CLASS ;
@@ -112,11 +138,6 @@ EXVAR = #"\![A-Za-z][A-Za-z0-9_-]*";
 UNVAR = #"\?[A-Za-z][A-Za-z0-9_-]*";
 
 
-AND-FACTS = FACT (<"and"> (FACT | <"("> FACTS <")">))+  ;
-OR-FACTS = FACT (<"or"> (FACT | <"("> FACTS <")">))+  ;
-
-NOT-FACTS = <NEG> FACTS;
-PREAFF-FACTS = <PREAFF> FACTS;
 
 
 
@@ -133,8 +154,8 @@ ANON-RULE-notest = RULE-BODY-notest;
 <RULE-BODY-notest> = FACT <"when"> LHS-notest  ;
 
 
-<LHS-wtest> = <"test"> TEST <','>* <"facts"> FACTS  ;
-<LHS-notest> = FACTS ;
+<LHS-wtest> = <"test"> TEST <','>* <"facts"> FACT  ;
+<LHS-notest> = FACT ;
 
 
 (*QUERY*)
@@ -158,8 +179,8 @@ FUN-TSEXPR = TFUN-HEAD (TFUN-ARG)* ;
 <TFUN-HEAD> = STRING ; (* CAREFUL!! *)
 <TFUN-ARG> = TS-ARG ;
 
-<QLHS-notest> = FACTS ;
-<QLHS-wtest> = <"test"> TEST <','>* <"facts"> FACTS  ;
+<QLHS-notest> = FACT ;
+<QLHS-wtest> = <"test"> TEST <','>* <"facts"> FACT  ;
 
 
 (*YNQUESTION*)
@@ -192,6 +213,10 @@ NEG-D-TRIP-FACT-IND2 = T-DOESNT-SV T-OBJECT <"?">+;
 (*T-WHO-QUESTION*)
 T-WHO-QUESTION =  WHO-TRIP-FACT-IND2  ;
 WHO-TRIP-FACT-IND2 = <"who"> T-VP <"?">+;
+
+(*EMBNEG-T-WHO-QUESTION*) (*NOT YET IMPLEMENTED*)
+EMBNEG-T-WHO-QUESTION =  WHO-EMBNEG-TRIP-FACT-IND2  ;
+WHO-EMBNEG-TRIP-FACT-IND2 = <"who"> EMBNEG-T-VP <"?">+;
 
 
 (*T-WHOM-QUESTION*)
