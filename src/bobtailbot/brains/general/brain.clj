@@ -699,7 +699,7 @@ Dynamic rules is something I wouldn't mind adding to Clara, although that comes 
 
 (def ans-nobody "Nobody.")
 (def ans-no-explanation "There's nothing to explain.")
-
+(def ans-no-molfact-st "Sorry, for now I only understand molecular propositions (those using AND, etc) in the antecedent of a rule, not in a statement. Please state each proposition separately.")
 
 
 
@@ -834,6 +834,17 @@ Dynamic rules is something I wouldn't mind adding to Clara, although that comes 
       ans-vars-txt)
     (catch Exception e  (timbre/info (.getMessage e)) ans-invalid-query)))
 
+
+(defn g-respond-sync-fact-ptree [ptree]
+  (let [ckst-ptree-r (g-respond-sync-ckst-ptree ptree)]
+    (cond
+      (= ckst-ptree-r ans-yes) ans-ikr
+      (= ckst-ptree-r ans-no)  ans-imp
+      (= ckst-ptree-r ans-dunno) (g-respond-sync-mkst-ptree  ptree)
+      :else (ans-oops "g-respond-sync-fact-ptree")))
+  )
+
+
 (defn g-respond-sync
 
   [text]
@@ -841,11 +852,10 @@ Dynamic rules is something I wouldn't mind adding to Clara, although that comes 
          intype (first (first parsetree))]
     (cond
       (= intype :FACT)
-      (let [ckst-ptree-r (g-respond-sync-ckst-ptree parsetree)]
+      (let [fact-type (timbre/spy (first (second (first  parsetree)))) ]
         (cond
-          (= ckst-ptree-r ans-yes) ans-ikr
-          (= ckst-ptree-r ans-no)  ans-imp
-          (= ckst-ptree-r ans-dunno) (g-respond-sync-mkst-ptree  parsetree)
+          (= fact-type :ATFACT) (g-respond-sync-fact-ptree parsetree)
+          (= fact-type :MOLFACT)  ans-no-molfact-st
           :else (ans-oops "g-respond-sync")))
       (= intype :QUERY)  (g-respond-sync-query-ptree parsetree)
       
