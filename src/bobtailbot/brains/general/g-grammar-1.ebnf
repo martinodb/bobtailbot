@@ -41,7 +41,6 @@ NEG = (<"it's"> | <"it is">) (<"false"> | (<"not"> (<"the case">)?)) <"that">  ;
 PREAFF = (<"it's"> | <"it is">) (<"true"> | <"the case">) <"that">  ;
 
 
-
 FACT = (ATFACT | MOLFACT);
 
 ATFACT = (ANON-FACT | INLDEF-FACT | NFACT) ;
