@@ -324,9 +324,9 @@
   (conj
    g-transforms-base
    {:FACT identity
-    :ANON-FACT (fn [ fact-vec]
+    :ANON-FACT (fn [ & facts]
                  {:name "anon-query"
-                  :lhs fact-vec
+                  :lhs facts
                   :params #{}})
     :TRIP-FACT-IND2 (fn [t-subj t-verb t-obj]
                       {:type Triple
@@ -354,7 +354,7 @@
     :AND-FACT vector
     :PREAFF-FACT identity
     
-    :ATFACT vector ;; OVERRIDE!
+    ; :ATFACT vector ;; OVERRIDE!
     
     
     }))
@@ -452,8 +452,8 @@
     :PREAFF-FACT identity
 
     
-    :AND-FACT (fn [& facts] (into [] facts))
-    :ATFACT vector ;; OVERRIDE!
+    :AND-FACT (fn [& facts] (into [] facts)) ;; vector (same thing, I think)
+    ; :ATFACT vector ;; OVERRIDE!
     :ATFACT2 identity
     
     
@@ -461,7 +461,7 @@
     :QUERY identity
     :QUERY-notest  (fn [fact-vec]
                      {:name "anon-query"
-                      :lhs fact-vec
+                      :lhs [fact-vec]
                       :params #{}})}))
 
 (def g-transforms-YNQUESTION  "YES/NO questions"
@@ -469,9 +469,9 @@
    g-transforms-QUERY
    {
     :YNQUESTION identity
-    :YNQUESTION-notest  (fn [& facts]
+    :YNQUESTION-notest  (fn [fact-vec]
                           {:name "anon-query"
-                           :lhs facts
+                           :lhs [fact-vec]
                            :params #{}})
     
 
@@ -482,16 +482,16 @@
    g-transforms-QUERY
    {
     :NEG-YNQUESTION identity
-    :NEG-YNQUESTION-notest   (fn [& facts]
+    :NEG-YNQUESTION-notest   (fn [fact-vec]
                                   {:name "anon-query"
-                                   :lhs (map negate facts)
+                                   :lhs (map negate [fact-vec])
                                    :params #{}})
 
     }))
 
 (def g-transforms-T-DOES-QUESTION  "T-Does questions"
   (conj
-   g-transforms-base
+   g-transforms-QUERY
    {:D-TRIP-FACT-IND2 (fn [t-subj t-verb-inf t-obj]
                         (let [t-verb-pres3 (conjugate-pres3 t-verb-inf)]
                           {:type Triple
@@ -508,7 +508,7 @@
 
 (def g-transforms-NEG-T-DOES-QUESTION  "Negated T-DOES-questions"
   (conj
-   g-transforms-base
+   g-transforms-QUERY
    {
     :NEG-D-TRIP-FACT-IND2 (fn [t-subj t-verb-inf t-obj]
                                 (let [t-verb-pres3 (conjugate-pres3 t-verb-inf)]
@@ -534,7 +534,7 @@
 
 (def g-transforms-T-WHO-QUESTION  "T-WHO questions"
   (conj
-   g-transforms-base
+   g-transforms-QUERY
    {
     :WHO-TRIP-FACT-IND2 (fn [t-verb t-obj]
                              {:type Triple
@@ -551,7 +551,7 @@
 
 (def g-transforms-T-WHOM-QUESTION  "WHOM-questions"
   (conj
-   g-transforms-base
+   g-transforms-QUERY
    {
     :WHOM-TRIP-FACT-IND2 (fn [t-subj t-verb-inf]
                            (let [t-verb-pres3 (conjugate-pres3 t-verb-inf)]
