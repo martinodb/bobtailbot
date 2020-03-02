@@ -990,6 +990,6 @@ Dynamic rules is something I wouldn't mind adding to Clara, although that comes 
   
   )
 
-(defn gram-voc [] (set/union #{"it" "case"}  (into #{} (map #(if (second %) (second %) (nth % 2)) (re-seq (re-pattern "\\\"([a-z'\\s]+)\\\"|'([a-z\\s]+)'")  (raw-g-grammar-1-w-annex)))))   )
+(defn gram-voc [] (set/union #{"it" "case"}  (into #{} (map #(if (second %) (second %) (nth % 2)) (re-seq (re-pattern "\\\"([a-z0-9'_\\-\\s]+)\\\"|'([a-z0-9_\\-\\s]+)'")  (raw-g-grammar-1-w-annex)))))   )
 ;;; #"\:\?x\s+\:(\S+)"  ---> (re-pattern "\\:\\?x\\s+\\:(\\S+)")
 ;;; #"\"([a-z\']+)\"|\'([a-z]+)\'"  --> (re-pattern "\\\"([a-z\\']+)\\\"|\\'([a-z]+)\\'")  ;;;; we also need spaces! --> (re-pattern "\\\"([a-z\\'\\s]+)\\\"|\\'([a-z\\s]+)\\'")

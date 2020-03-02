@@ -46,6 +46,12 @@
    :er "talker",
    :ing "talking",
    :pres3 "talks"}
+  {:inf "really_like",
+   :past "really_liked",
+   :pp "really_liked",
+   :er "real_liker",
+   :ing "really_liking",
+   :pres3 "really_likes"}
   {:inf "slap",
    :past "slapped",
    :pp "slapped",
@@ -64,6 +70,12 @@
    :er "hater",
    :ing "hating",
    :pres3 "hates"}
+  {:inf "actually-like",
+   :past "actually-liked",
+   :pp "actually-liked",
+   :er "actual-liker",
+   :ing "actually-liking",
+   :pres3 "actually-likes"}
   {:inf "mutually like",
    :past "mutually liked",
    :pp "mutually liked",
