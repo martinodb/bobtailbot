@@ -139,10 +139,17 @@
 (defn get-adj-set [] (load-from-path-or-create (str data-dir-prefix "store/adj_set.edn") default-adj-set adj-set-edn-readers ))
 (defn set-adj-set [adj-set] (dump-to-path-rlg (str data-dir-prefix "store/adj_set.edn") adj-set  ))
 
-
 (defn Adj [] (set (map :a (get-adj-set))))
 
 
+
+
+(def default-lyadv-set (set [{:la "xxexamplily"}  ]))
+(def lyadv-set-edn-readers {})
+(defn get-lyadv-set [] (load-from-path-or-create (str data-dir-prefix "store/lyadv_set.edn") default-lyadv-set lyadv-set-edn-readers))
+(defn set-lyadv-set [lyadv-set] (dump-to-path-rlg (str data-dir-prefix "store/lyadv_set.edn") lyadv-set))
+
+(defn Lyadv [] (set (map :la (get-lyadv-set))))
 
 
 
@@ -155,24 +162,26 @@
 
 
 (defn g-grammar-1-annex [] (str
-" <VtraInfOrPresNon3> = "  "( " (ebnify-notail (Vinf))  " ); "
+                            " <VtraInfOrPresNon3> = "  "( " (ebnify-notail (Vinf))  " ); "
 
 
 ;"\n VtraPast = "  "(" (ebnify-notail Vpast)  "); \n"
 ;"\n VtraPP = "  "(" (ebnify-notail Vpp)  "); \n"
 ;"\n VtraER = "  "(" (ebnify-notail Ver)  "); \n"
+                            
+                            " GERUNDtra = "  "( " (ebnify-notail (Ving))  " ); "
+                            " VtraPres3 = "  "( " (ebnify-notail (Vpres3))  " ); "
 
-" GERUNDtra = "  "( " (ebnify-notail (Ving))  " ); "
-" VtraPres3 = "  "( " (ebnify-notail (Vpres3))  " ); "
+                            " <Nsimp-sg> = "  "( " (ebnify-notail (Nsimp-sg))  " ); "
 
-" <Nsimp-sg> = "  "( " (ebnify-notail (Nsimp-sg))  " ); "
+                            " <Adj> = "  "( " (ebnify-notail (Adj))  " ); "
+                            
+                            " <Lyadv> = "  "( " (ebnify-notail (Lyadv))  " ); "
+                            
 
-" <Adj> = "  "( " (ebnify-notail (Adj))  " ); "
+                            "\n"
 
-
-"\n"
-
-))
+                            ))
 
 
 
@@ -775,7 +784,8 @@ Dynamic rules is something I wouldn't mind adding to Clara, although that comes 
           new-fact-set (timbre/spy (reduce conj @g-fact-set-atom ev-ptreetr))
           ]
       (timbre/spy (set-g-fact-set new-fact-set))
-      (timbre/spy (reload-curr-session @g-fact-set-atom))
+      ;(timbre/spy (reload-curr-session @g-fact-set-atom)) ;this would duplicate insertions!
+      (timbre/spy (reload-curr-session ev-ptreetr))
       ans-okgotit
       
       )        
@@ -980,6 +990,6 @@ Dynamic rules is something I wouldn't mind adding to Clara, although that comes 
   
   )
 
-(defn gram-voc [] (set/union #{"it" "case"}  (into #{} (map #(if (second %) (second %) (nth % 2)) (re-seq (re-pattern "\\\"([a-z']+)\\\"|'([a-z]+)'")  (raw-g-grammar-1-w-annex)))))   )
+(defn gram-voc [] (set/union #{"it" "case"}  (into #{} (map #(if (second %) (second %) (nth % 2)) (re-seq (re-pattern "\\\"([a-z'\\s]+)\\\"|'([a-z\\s]+)'")  (raw-g-grammar-1-w-annex)))))   )
 ;;; #"\:\?x\s+\:(\S+)"  ---> (re-pattern "\\:\\?x\\s+\\:(\\S+)")
 ;;; #"\"([a-z\']+)\"|\'([a-z]+)\'"  --> (re-pattern "\\\"([a-z\\']+)\\\"|\\'([a-z]+)\\'")  ;;;; we also need spaces! --> (re-pattern "\\\"([a-z\\'\\s]+)\\\"|\\'([a-z\\s]+)\\'")

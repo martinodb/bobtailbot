@@ -64,6 +64,12 @@
    :er "hater",
    :ing "hating",
    :pres3 "hates"}
+  {:inf "mutually like",
+   :past "mutually liked",
+   :pp "mutually liked",
+   :er "mutual liker",
+   :ing "mutually liking",
+   :pres3 "mutually likes"}
   {:inf "kiss",
    :past "kissed",
    :pp "kissed",
