@@ -14,7 +14,7 @@ here, and then in the maps g-transforms-mkst and g-transforms-ckst in brain.clj,
 <SENTENCE> =   (ADD-VOCAB | PROD-LIST | NQUERY | FACT | DEF | UNSUPPORTED) <";">* ;
 
 (*For now, ly-adverbs can only be entered as part of a multi-word verb. But I need them in the grammar so that they are seen as known words*)
-<UNSUPPORTED> = Lyadv;
+UNSUPPORTED = Lyadv;
 
 
 <PROD-LIST> = PROD (<';'>+ PROD)* ;
