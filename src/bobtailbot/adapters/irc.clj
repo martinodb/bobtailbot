@@ -80,7 +80,7 @@
 
 (defn handle-line [socket line irc-channel hear-fn]
  (let [e-line (string/replace line (re-pattern "\\\"")  #(str "\\" %)  )] ; escape user double-quotes
-  (try (do ;(timbre/info "line: " line "\n" "e-line: " e-line) ; debugging.
+  (try (do (timbre/info "line: " line "\n" "e-line: " e-line) ; debugging.
            (cond
              (re-find #"^ERROR :Closing Link:" e-line)
                (close-socket-client socket)
