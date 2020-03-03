@@ -10,7 +10,7 @@
    [clojure.string :as string]
    [clojure.tools.cli :as cli]
    [clojure.core.async :as async]
-   [com.gearswithingears.async-sockets :refer :all]))
+   [com.gearswithingears.async-sockets :as ga :refer [socket-client  close-socket-client]]))
 
 
 
@@ -83,7 +83,7 @@
   (try (do (timbre/info "line: " line "\n" "e-line: " e-line) ; debugging.
            (cond
              (re-find #"^ERROR :Closing Link:" e-line)
-               (close-socket-client socket)
+               (ga/close-socket-client socket)
              (re-find #"^PING" e-line)
                (write socket (str "PONG " (re-find #":.*" e-line)) :print)
              (re-find (re-pattern @ready-server-msg) e-line)
@@ -127,7 +127,7 @@
   (timbre/info "Connecting...")
   (swap! curr-host (constantly host))
   (try
-    (let [socket (socket-client port host)
+    (let [socket (ga/socket-client port host)
           irc-channel (str "#" group-or-chan)
            ]
       (timbre/info (str "Connected to " host ":" port))
