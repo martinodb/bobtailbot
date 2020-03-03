@@ -37,7 +37,7 @@
 (def ready-server-msg 
  (delay 
   (case @curr-host
-  "127.0.0.1" ":Current Global Users:"
+   "127.0.0.1" ":End of message of the day"
   "chat.freenode.net" "End of /MOTD command.")))
 
 
