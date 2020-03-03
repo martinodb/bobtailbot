@@ -9,7 +9,7 @@
 
    ;[csneps.core.snuser :as s]
    
-   [zinc.core.snuser :as s :refer [adopt-rule adopt-rules allTerms  ask askif askifnot askwh assert assert! assertAll clearkb defineCaseframe defineSlot defineTerm defineType describe-terms exit find-term goaltrace  krnovice list-focused-inference-tasks list-variables list-terms listkb load  nogoaltrace quit unassert] ]
+   [zinc.core.snuser :as s :refer [adopt-rule adopt-rules allTerms  ask askif askifnot askwh assert assert! assertAll clearkb defineCaseframe defineSlot defineTerm defineType describe-terms exit find-term goaltrace  krnovice list-focused-inference-tasks list-variables list-terms listkb   nogoaltrace quit unassert] ]
    [zinc.MOD-logging :as Mlogg :refer [wdm wtim wlog wdm2 wtim2 wlog2]] ;; added by martinodb.
    
    
@@ -53,7 +53,7 @@
         [zinc.core.build :only (find *PRECISION* defrule rewrite-propositional-expr)] ; remove 'unassert'.
         
         [zinc.core :only (showTypes list-types semantic-type-of)]
-        [zinc.core.printer :only (writeKBToTextFile)]
+        [zinc.core.printer :as zcp :only (writeKBToTextFile)]
         [zinc.snip :only (definePath pathsfrom cancel-infer-of cancel-infer-from cancel-focused-infer adopt unadopt attach-primaction ig-debug-all)]
         [zinc.core.arithmetic]
         [zinc.util]
@@ -85,11 +85,12 @@
 
 (def unsup-repl "Sorry, this option is not supported in syncronous UIs like repl, only in asyncronous ones like IRC")
 
-(def default-kb-file (str data-dir-prefix "store/dkbf.sneps")) ; default kb file.
+(def default-kb-file (str data-dir-prefix "store/dkbf.sneps")) ; default kb file (factory settings).
+(def curr-kb-file (str data-dir-prefix "store/ckbf.sneps")) ; current kb file (changes saved here by default).
 
 (defn load-from-store "load <filename> from zinc brain store"
 [filename]
-(load (str data-dir-prefix "store/" filename))
+(s/load (str data-dir-prefix "store/" filename))
 )
 
 
@@ -134,7 +135,7 @@
 
 
 
-(defn respond-raw [text] "evaluate commands in this ns"
+(defn respond-raw "evaluate commands in this ns" [text] 
 (->> text (#(str "(do (in-ns '" this-ns ")" % ")"))
           (#(try (load-string %) (catch Exception e (str "caught exception: " (.getMessage e))) ) ) 
           (#(or % "OK")) ))
@@ -144,15 +145,15 @@
 (defn respond-top "top-level respond function"
 [text]
 (cond
-   (contains? #{"bot listen" "bot standby" "bot deaf" "bot mute"} text) (do unsup-repl) ; in async UIs these options are managed in hear-top. In sync UIs like repl they are not supported.
+  (contains? #{"bot listen" "bot standby" "bot deaf" "bot mute"} text) (do unsup-repl) ; in async UIs these options are managed in hear-top. In sync UIs like repl they are not supported.
   (= text "bot resp-mode raw") (do (swap! mode assoc :resp-mode :raw) "OK, raw resp-mode. Say 'bot resp-mode <mode-name>' to switch"   )
   (= text "bot resp-mode stub") (do (swap! mode assoc :resp-mode :stub) "OK, stub resp-mode. Say 'bot resp-mode <mode-name>' to switch"  )
   
-  (= text "bot save") (do (respond-raw "(writeKBToTextFile default-kb-file )") )
-  (= text "bot load") (do (respond-raw "(load default-kb-file )") )
-  (= text "bot clearkb") (do (respond-raw "(clearkb true)") )
+  (= text "bot save") (do (respond-raw "(zcp/writeKBToTextFile curr-kb-file )") )
+  (= text "bot load default") (do (respond-raw "(s/load default-kb-file )"))
+  (= text "bot clearkb") (do (respond-raw "(s/clearkb true)") )
+  (= text "bot load") (do (respond-raw "(s/load curr-kb-file )"))
   
- 
   
   (= (:resp-mode @mode) :raw) (respond-raw text)
   (= (:resp-mode @mode) :stub) (respond-stub text)

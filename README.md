@@ -64,6 +64,14 @@ If you are using `lein repl`, then after editing `config.edn` or any other file,
 ![Example interaction with default brain: introducing vocabulary](https://raw.githubusercontent.com/martinodb/bobtailbot/master/doc/screepcap-2019-02-09%2023-38-34.png "Example interaction with default brain: introducing vocabulary")
 *You can edit this example:`{:add-voc-type :verb , :content {:inf "admire",:past "admired", :pp "admired",:er "admirer", :ing "admiring", :pres3 "admires"}}`*
 
+## _Other brains_
+
+The development status of other brains is very rudimentary at this point.
+
+The "template" brain is a minimalistic example, and it should stay that way.
+
+The "zinc" brain is, right now, basically a repl that uses the Zinc library as a backend. [Zinc](https://github.com/martinodb/Zinc) is just a trivial fork I made of [CSNePS](https://github.com/SNePS/CSNePS) that can be used as a library (CSNePS is only available standalone, AFAIK). Zinc is now a bit outdated compared to upstream CSNePS. You can look at [this gist](https://gist.github.com/martinodb/0a2982705d5df9993abc910b3e7a1597) for a small example of basic interaction. For more information see the [zinc brain source file](https://github.com/martinodb/bobtailbot/blob/master/src/bobtailbot/brains/zinc/brain.clj) and CSNePS documentation.
+
 # _Development_
 
 To write a new brain, you can start by looking at the [available brains](https://github.com/martinodb/bobtailbot/tree/master/src/bobtailbot/brains) , pick one, save it with a new name, then rename its namespaces accordingly.
