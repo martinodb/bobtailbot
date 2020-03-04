@@ -17,12 +17,22 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;; Adapter-specific chat config options. They override global options if "use-global?" is set to false. CLI options override all.
 ;;;;;;;;; All configs can be set in the file "config.edn"
+;;;;;;;;; 
+;;;Some irc hosts. Can't use defconfig for this.  In the config file, use the IP address directly.;;
+(def irc--localhost "127.0.0.1")
+(def irc--freenode "149.56.134.238") ;; nslookup chat.freenode.net
+;;;;;;;
+;;;;;;;
 (defconfig use-global? false) ; true: use global configs. false: override global configs.
 (defconfig nick "bobtailbot")
-(defconfig host "127.0.0.1")
+(defconfig host irc--localhost)
 (defconfig port 6667)
 (defconfig group-or-chan nick) ; eg: "bobtailbot" ; if a prefix such as "#" is needed, the adapter must add it.
 (defconfig greeting "Hello.  Let's chat.")
+
+
+
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 
@@ -32,13 +42,16 @@
 
 
 (def connected (atom false))
-(def curr-host (atom "127.0.0.1"))
+(def curr-host (atom irc--localhost))
+(def default-ready-server-msg "\\s+001\\s+\\S+\\s+:Welcome")
 
 (def ready-server-msg 
  (delay 
-  (case @curr-host
-   "127.0.0.1" ":End of message of the day"
-  "chat.freenode.net" "End of /MOTD command.")))
+  (condp = @curr-host ;; don't use 'case' here, it only works with literal values.
+    irc--localhost default-ready-server-msg
+    irc--freenode default-ready-server-msg
+    default-ready-server-msg 
+    )))
 
 
 (defn write
@@ -80,31 +93,37 @@
 
 (defn handle-line [socket line irc-channel hear-fn]
  (let [e-line (string/replace line (re-pattern "\\\"")  #(str "\\" %)  )] ; escape user double-quotes
-  (try (do (timbre/info "line: " line "\n" "e-line: " e-line) ; debugging.
-           (cond
-             (re-find #"^ERROR :Closing Link:" e-line)
-               (ga/close-socket-client socket)
-             (re-find #"^PING" e-line)
-               (write socket (str "PONG " (re-find #":.*" e-line)) :print)
-             (re-find (re-pattern @ready-server-msg) e-line)
-               (swap! connected (constantly true))
-             (re-find #"PRIVMSG" e-line)
-                (let [
-                      msg-user (second (re-find #"^\:(\S+)\!" e-line))
-                      msg-content (second (re-find (re-pattern ":[^:]+:(.*)") e-line)) ; 
+  (try  (timbre/info "line: " line "\n" "e-line: " e-line) ; debugging.
+        (cond
+          (re-find #"^ERROR :Closing Link:" e-line)
+          (ga/close-socket-client socket)
+          
+          (re-find #"^PING" e-line)
+          (write socket (str "PONG " (re-find #":.*" e-line)) :print)
+          
+          (re-find (re-pattern @ready-server-msg) e-line)
+          (do (Thread/sleep 1000) (swap! connected (constantly true)))
+          
+          (re-find #"PRIVMSG" e-line)
+          (let [
+                msg-user (second (re-find #"^\:(\S+)\!" e-line))
+                msg-content (second (re-find (re-pattern ":[^:]+:(.*)") e-line)) ; 
                       ;;Scintilla can't handle the Clojure regex reader macro , so I use "re-pattern" instead.
-                       ]
-                      (cond 
-                        (re-find #"^quit" msg-content) (swap! connected (constantly false))
-                         :else (do
+                ]
+            (cond 
+              (re-find #"^quit" msg-content) (swap! connected (constantly false))
+              :else (do
                                   ;(timbre/info "msg-user: " msg-user "\n" "msg-content: " msg-content) ; debugging
-                                 (hear-fn msg-content)
-                                 )))))
+                      (hear-fn msg-content)
+                      )))
+          :else
+          (timbre/info (str "handle-line: no matching clause in cond. Some other message kind."))
+          )
         (catch Exception e
-           (do (timbre/info "stacktrace: " (timbre/info e))
-               (hear-fn 
-                 (str "&caught exception: " (or (.getMessage e) "(no message)")
-                    )  )   )   ) ) ) )
+          (do (timbre/info "stacktrace: " (timbre/info e))
+              (hear-fn 
+               (str "handle-line: &caught exception: " (or (.getMessage e) "(no message)")
+                    ))))) ) )
 
 (defn message-listener [socket irc-channel hear-fn]
   (async/go-loop []

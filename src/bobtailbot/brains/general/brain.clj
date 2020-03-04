@@ -411,6 +411,8 @@
     :NOT-FACT  negate
     ;:AND-FACT (fn [& facts] (into [] (conj  facts :and)))
     :AND-FACT (fn [& facts] (into [] facts ))
+    ;:OR-FACT ;;needs some thought. lhs-facts will be tricky. the rule lhs should look like ':lhs [[:or {:type bobtai... ' Maybe using postwalk to apply an if-let to every subexp
+    
     :ATFACT vector ;; OVERRIDE!
     :ATFACT2 identity
     
@@ -625,11 +627,18 @@
 
 (def last-utterance (atom {}))
 
+;;; some examples of defrule, just for reference.
 ;(defrule Joe-Smith-loves-back
   ;[Triple (= ?x subj)(= "loves" verb)(= "Joe Smith" obj)]
   ;=>
   ;(do (insert! (->Triple "my-Joe-fact" true "Joe Smith" "loves" ?x))
       ;(timbre/info "Joe is loved by, and loves back: " ?x)))
+
+(defrule love-or-hate-kiss
+  [:or [Triple (= ?x subj) (= "loves" verb) (= ?y obj)] [Triple (= ?x subj) (= "hates" verb) (= ?y obj)]] 
+  =>
+  (do (insert! (->Triple "my-love-or-hate-kiss-fact" true ?x "kisses" ?y))
+      (timbre/info ?x " kisses " ?y)))
 
 
 ; https://groups.google.com/forum/?hl=en#!topic/clara-rules/3R6fEXn9ETA
@@ -952,7 +961,7 @@ Dynamic rules is something I wouldn't mind adding to Clara, although that comes 
 
 ;; Only use for repl and similar, single-user interfaces. It's syncronous (blocking). 
 ;(def g-respond g-respond-sync-top)
-(defn g-respond [text] (try (g-respond-sync-top text) (catch Exception e (str "caught exception: " (.getMessage e))) ) )
+(defn g-respond [text] (try (g-respond-sync-top text) (catch Exception e (str "g-respond caught exception: " (.getMessage e))) ) )
 
 
 (defn g-hear [text] (future 

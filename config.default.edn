@@ -1,0 +1,42 @@
+{
+
+;; CONFIG ENTRIES (remove the '#_' at the start of the line to activate entry, then either remove the second one to activate default value, or provide another value):
+
+#_bobtailbot.adapters.irc/greeting #_"Hello.  Let's chat."
+
+#_bobtailbot.adapters.irc/group-or-chan #_"bobtailbot"
+
+bobtailbot.adapters.irc/host #_"149.56.134.238" "127.0.0.1"
+
+#_bobtailbot.adapters.irc/nick #_"bobtailbot"
+
+#_bobtailbot.adapters.irc/port #_6667
+
+#_bobtailbot.adapters.irc/use-global? #_false
+
+#_bobtailbot.adapters.repl/greeting #_"Hello.  Let's chat."
+
+#_bobtailbot.adapters.repl/group-or-chan #_"bobtailbot"
+
+#_bobtailbot.adapters.repl/host #_"127.0.0.1"
+
+#_bobtailbot.adapters.repl/nick #_"bobtailbot"
+
+#_bobtailbot.adapters.repl/port #_6667
+
+#_bobtailbot.adapters.repl/use-global? #_false
+
+bobtailbot.core/adapter :irc #_:irc
+
+#_bobtailbot.core/brain #_:general
+
+#_bobtailbot.core/greeting #_"Hello.  Let's chat."
+
+#_bobtailbot.core/group-or-chan #_"bobtailbot"
+
+#_bobtailbot.core/host #_"127.0.0.1"
+
+#_bobtailbot.core/nick #_"bobtailbot"
+
+#_bobtailbot.core/port #_6667
+}

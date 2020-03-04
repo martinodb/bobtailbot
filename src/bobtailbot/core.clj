@@ -107,8 +107,13 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;; Default chat config options. They can be overriden by each adapter's options. CLI options override all.
 ;;;;;;;;; All configs can be set in the file "config.edn"
+;;;;;;;;; 
+;;;;;;;;; Can't use defconfig for this. In the config file, use the IP address directly.
+(def localhost "127.0.0.1")
+;;;;;;;;; 
+;;;;;;;;; 
 (defconfig nick "bobtailbot")
-(defconfig host "127.0.0.1")
+(defconfig host localhost)
 (defconfig port 6667)
 (defconfig group-or-chan nick) ; eg: "bobtailbot" ; if a prefix such as "#" is needed, the adapter must add it.
 (defconfig greeting "Hello.  Let's chat.")
