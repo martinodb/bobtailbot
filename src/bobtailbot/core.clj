@@ -216,7 +216,10 @@
    ["-H" "--host HOST" "Remote host"
     :default (get-default "host" adapter) ;; configured default host is localhost.
     :default-desc "localhost"
-    :parse-fn #(InetAddress/getByName %)]
+    ;:parse-fn #(InetAddress/getByName %)
+    :parse-fn #(.getHostAddress (InetAddress/getByName (str %) ))
+    
+    ]
     
    ["-p" "--port PORT" "Port number"
     :default (get-default "port" adapter)
@@ -289,15 +292,6 @@
 
 
 
-
-
-
-
-
-
-
-
-
 (defn dev-main [& args] ; to try it in lein repl
   (let [{:keys [action options exit-message ok?] :as value-map} (validate-args args)
          {:keys [brain adapter nick host port group-or-chan greeting ] :as opts-ab} options
@@ -318,7 +312,7 @@
               ;; DEBUGGING (timbre/info "value-map: " value-map) ;; for debugging
               ;; DEBUGGING (timbre/info "brain : " brain)
               ;; DEBUGGING (timbre/info "adapter: " adapter)
-              ;; DEBUGGING (timbre/info "opts-ab: " opts-ab)
+              (timbre/info "opts-ab: " opts-ab) ;; DEBUGGING 
             (if exit-message  (dev-exit (if ok? 0 1) exit-message) (do))
             (case action
               "start"  (connect-ab opts-ab )

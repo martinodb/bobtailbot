@@ -664,9 +664,9 @@
       (fire-rules))
   )
 
-(timbre/info "about to define g-default-session ... @g-rules-tr-atom: " (pr-str @g-rules-tr-atom) " , " "@g-fact-set-atom: " @g-fact-set-atom (def g-default-session (mk-session-ifa-fru @g-rules-tr-atom @g-fact-set-atom)))
+;(timbre/info "about to define g-default-session ... @g-rules-tr-atom: " (pr-str @g-rules-tr-atom) " , " "@g-fact-set-atom: " @g-fact-set-atom )
 
-
+(def g-default-session (mk-session-ifa-fru @g-rules-tr-atom @g-fact-set-atom))
 
 
 
