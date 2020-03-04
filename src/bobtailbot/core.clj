@@ -186,23 +186,6 @@
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 ;; Adapted from:
 ;; https://github.com/clojure/tools.cli#example-usage
 
@@ -216,8 +199,8 @@
    ["-H" "--host HOST" "Remote host"
     :default (get-default "host" adapter) ;; configured default host is localhost.
     :default-desc "localhost"
-    ;:parse-fn #(InetAddress/getByName %)
-    :parse-fn #(.getHostAddress (InetAddress/getByName (str %) ))
+    :parse-fn #(.getHostAddress (InetAddress/getByName (string/trim %) ))
+
     
     ]
     
@@ -263,16 +246,16 @@
   (let [{:keys [options arguments errors summary]} (parse-opts args cli-options)]
     (cond
       (:help options) ; help => exit OK with usage summary
-          {:exit-message (usage summary) :ok? true :options options}
+      {:exit-message (usage summary) :ok? true :options options}
       errors ; errors => exit with description of errors
-          {:exit-message (error-msg errors)}
+      {:exit-message (error-msg errors)}
       ;; custom validation on arguments
       (and (= 1 (count arguments)) (#{"start" "stop" "status"} (first arguments)))
-          {:action (first arguments) :options options}
+      {:action (first arguments) :options options}
       (= 0 (count arguments))
-          {:action "start" :options options}
+      {:action "start" :options options}
       :else ; failed custom validation => exit with usage summary
-          {:exit-message (usage summary)})))
+      {:exit-message (usage summary)})))
 
 
 (defn dev-exit [status msg]
@@ -294,10 +277,10 @@
 
 (defn dev-main [& args] ; to try it in lein repl
   (let [{:keys [action options exit-message ok?] :as value-map} (validate-args args)
-         {:keys [brain adapter nick host port group-or-chan greeting ] :as opts-ab} options
-         
- 
-                            ] 
+        {:keys [brain adapter nick host port group-or-chan greeting ] :as opts-ab} options
+        
+        
+        ] 
           
           (do ;; (clean-log) ;;(NO! Make it optional) delete previous log entries. This is useful for testing.
             (setup-tlog) ; use Timbre for clojure.tools.logging
@@ -312,6 +295,7 @@
               ;; DEBUGGING (timbre/info "value-map: " value-map) ;; for debugging
               ;; DEBUGGING (timbre/info "brain : " brain)
               ;; DEBUGGING (timbre/info "adapter: " adapter)
+              (timbre/spy (validate-args args))
               (timbre/info "opts-ab: " opts-ab) ;; DEBUGGING 
             (if exit-message  (dev-exit (if ok? 0 1) exit-message) (do))
             (case action
