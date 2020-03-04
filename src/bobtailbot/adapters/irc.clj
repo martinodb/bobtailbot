@@ -102,7 +102,7 @@
           (write socket (str "PONG " (re-find #":.*" e-line)) :print)
           
           (re-find (re-pattern @ready-server-msg) e-line)
-          (do (Thread/sleep 1000) (swap! connected (constantly true)))
+          (do (Thread/sleep 50) (swap! connected (constantly true)))
           
           (re-find #"PRIVMSG" e-line)
           (let [
@@ -153,16 +153,16 @@
        
       
        (message-listener socket irc-channel hear)
-       (Thread/sleep 1000)
+       (Thread/sleep 50)
        (login-as-guest socket nick)
        (timbre/info (str "connected? :" @connected))
        (while (= @connected false) (Thread/sleep 100))
        (timbre/info (str "connected? :" @connected))
-       (Thread/sleep 500)
+       (Thread/sleep 50)
        (write socket (str "JOIN " irc-channel) true)
-       (Thread/sleep 1000)
+       (Thread/sleep 50)
        (write socket (str "PRIVMSG " irc-channel " :" greeting) true)
-       (Thread/sleep 500)
+       (Thread/sleep 50)
        (speaker-up socket irc-channel speakup)
        (while (= @connected true) (Thread/sleep 100))
        (timbre/info "disconnecting now")
