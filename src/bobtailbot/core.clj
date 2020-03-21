@@ -206,10 +206,14 @@
     
    ["-p" "--port PORT" "Port number"
     :default (get-default "port" adapter)
-    :parse-fn #(Integer/parseInt %)
+    :parse-fn #(Integer/parseInt (string/trim %))
+    ;:parse-fn #(string/trim %)
     :validate [#(< 0 % 0x10000) "Must be a number between 0 and 65536"]]
     
-    ["-c" "--group-or-chan GROUP-OR-CHAN" "Group or channel" :default (get-default "group-or-chan" adapter)]
+    ["-c" "--group-or-chan GROUP-OR-CHAN" "Group or channel" 
+     :default (get-default "group-or-chan" adapter)
+     :parse-fn #(string/trim %)
+     ]
 
    ["-h" "--help" "Help" :default false]])
 

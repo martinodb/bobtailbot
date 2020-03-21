@@ -37,13 +37,20 @@
 
 
 
-
+(defn ip->hostname [ip]
+  (condp = ip
+    irc--freenode "chat.freenode.net"
+    "localhost"
+    )
+  )
 
 
 
 (def connected (atom false))
 (def curr-host (atom irc--localhost))
 (def default-ready-server-msg "\\s+001\\s+\\S+\\s+:Welcome")
+
+
 
 (def ready-server-msg 
  (delay 
@@ -52,6 +59,10 @@
     irc--freenode default-ready-server-msg
     default-ready-server-msg 
     )))
+
+
+(def sasl-succ-msg "^:\\S+\\s+903\\s+\\S+\\s+:SASL")
+
 
 
 (defn write
@@ -80,6 +91,27 @@
   (timbre/info "done logging in")
   )
 
+(defn login-as-user [socket nick]
+  (let [nick-vec (string/split nick #"\\0")
+        act-nick (first nick-vec)
+        username (second nick-vec)
+        ;password (nth nick-vec 2)
+        ]
+    
+    (timbre/info (str "Logging in as user " act-nick))
+    (write socket (str "NICK " act-nick))
+    (write socket (str "USER " act-nick " " username " " (ip->hostname @curr-host) " :" act-nick))
+    (write socket "AUTHENTICATE PLAIN"))
+  )
+
+
+(defn login [socket nick]
+  (cond
+    (re-find #"\\0" nick) (login-as-user socket nick)
+    :else (login-as-guest socket nick) 
+    )
+  )
+
 (defn input-listener [socket]
   (loop []
     (let [input (read-line)]
@@ -91,7 +123,7 @@
 
 
 
-(defn handle-line [socket line irc-channel hear-fn]
+(defn handle-line [socket line irc-channel hear-fn nick]
  (let [e-line (string/replace line (re-pattern "\\\"")  #(str "\\" %)  )] ; escape user double-quotes
   (try  (timbre/info "line: " line "\n" "e-line: " e-line) ; debugging.
         (cond
@@ -100,6 +132,12 @@
           
           (re-find #"^PING" e-line)
           (write socket (str "PONG " (re-find #":.*" e-line)) :print)
+          
+          (re-find #"^AUTHENTICATE +" e-line) ; nick must be "Bobtailbot\\0Bobtailbot\\0yourpasswordgoeshere"
+          (write socket (str "AUTHENTICATE " (String. (.encode (java.util.Base64/getEncoder) (.getBytes nick "UTF-8")) "UTF-8")) :print)
+          
+          (re-find (re-pattern sasl-succ-msg) e-line)
+          (timbre/info "done logging in as user")
           
           (re-find (re-pattern @ready-server-msg) e-line)
           (do (Thread/sleep 50) (swap! connected (constantly true)))
@@ -125,10 +163,10 @@
                (str "handle-line: &caught exception: " (or (.getMessage e) "(no message)")
                     ))))) ) )
 
-(defn message-listener [socket irc-channel hear-fn]
+(defn message-listener [socket irc-channel hear-fn nick]
   (async/go-loop []
     (when-let [line (async/<! (:in socket))]
-      (handle-line socket line irc-channel hear-fn)
+      (handle-line socket line irc-channel hear-fn nick)
       (recur))))
 
 (defn speaker-up [socket irc-channel speakup-fn]
@@ -152,9 +190,9 @@
       (timbre/info (str "Connected to " host ":" port))
        
       
-       (message-listener socket irc-channel hear)
+       (message-listener socket irc-channel hear nick)
        (Thread/sleep 50)
-       (login-as-guest socket nick)
+       (login socket nick)
        (timbre/info (str "connected? :" @connected))
        (while (= @connected false) (Thread/sleep 100))
        (timbre/info (str "connected? :" @connected))
