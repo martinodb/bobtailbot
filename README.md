@@ -58,21 +58,21 @@ If you are using `lein repl`, then after editing `config.edn` or any other file,
  
  You will want to connect to Freenode as a regular user to talk to your bot. Configure Hexchat so that you connect to `chat.freenode.net/+6697` , that is, using port `6697` rather than `6667`, so that you are not using the same port for your bot  and your regular user, which may cause disconnection problems (the bot should always use port `6667`). Traffic through port `6697` is encrypted using SSL, while traffic through `6667` is plainly visible, using, for instance, the command:
 
-    ```
-    sudo tcpflow -i any -C -g port 6667
-    ```
+```
+sudo tcpflow -i any -C -g port 6667
+```
 
  For instance, to pass all these options through the CLI, it would be:
 
-     ```
+```
      lein run -a irc -b general -H chat.freenode.net -p 6667 -n mybot\\0mybot\\0mypasswd -c mychannel
-     ```
+```
  
  You can instead use `lein repl` and then:
  
-     ```
+```
      (dev-main "-a irc" "-b general" "-H chat.freenode.net" "-p 6667" "-n mybot\\0mybot\\0mypasswd" "-c mychannel" )
-     ```
+```
 
  Where `mychannel` will connect the bot to the IRC channel `#mychannel`.
 
