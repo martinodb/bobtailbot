@@ -57,12 +57,12 @@ If you are using `lein repl`, then after editing `config.edn` or any other file,
  Follow the [nickname registration instructions. ](https://freenode.net/kb/answer/registration) You will need a valid email to make a separate account for your bot, which should be different from the one you use as a regular user (assuming you are a registered Freenode user). So let's say your bot's name is `mybot` and and your password is `mypasswd` , then in the Bobtailbot configuration you shold set as `nick` the string `"mybot\\0mybot\\0mypasswd"`. If at some point you want to login as guest, use another nick, like `mybot-guest`.
  
  You will want to connect to Freenode as a regular user to talk to your bot. Configure Hexchat so that you connect to `chat.freenode.net/+6697` , that is, using port `6697` rather than `6667`, so that you are not using the same port for your bot  and your regular user, which may cause disconnection problems (the bot should always use port `6667`). Traffic through port `6697` is encrypted using SSL, while traffic through `6667` is plainly visible, using, for instance, the command:
-  ` sudo tcpflow -i any -C -g port 6667`.
+    ` sudo tcpflow -i any -C -g port 6667`.
 
  For instance, to pass all these options through the CLI, it would be:
- `lein run -a irc -b general -H chat.freenode.net -p 6667 -n mybot\\0mybot\\0mypasswd -c mychannel` 
+     `lein run -a irc -b general -H chat.freenode.net -p 6667 -n mybot\\0mybot\\0mypasswd -c mychannel` 
  You can instead use `lein repl` and then:
- `(dev-main "-a irc" "-b general" "-H chat.freenode.net" "-p 6667" "-n mybot\\0mybot\\0mypasswd" "-c mychannel" )`
+     `(dev-main "-a irc" "-b general" "-H chat.freenode.net" "-p 6667" "-n mybot\\0mybot\\0mypasswd" "-c mychannel" )`
  Where `mychannel` will connect the bot to the IRC channel `#mychannel`.
 
  Of course, only test your bot in a channel made by you or one where you have permission.
