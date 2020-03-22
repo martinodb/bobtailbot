@@ -195,7 +195,7 @@
    ["-b" "--brain BRAIN" "Brain" :default brain]
    
    ["-g" "--greeting GREETING" "Greeting" :default (get-default "greeting" adapter)]
-   ["-n" "--nick NICK" "Nick" :default (get-default "nick" adapter)]
+   ["-n" "--nick NICK" "Nick" :default (get-default "nick" adapter) :parse-fn #(string/replace (string/trim %) #":" "\\\\0" )]
    ["-H" "--host HOST" "Remote host"
     :default (get-default "host" adapter) ;; configured default host is localhost.
     :default-desc "localhost"
